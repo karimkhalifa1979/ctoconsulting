@@ -23,7 +23,8 @@ export function executiveSummary(e) {
   const labels = yearLabels(e.settings);
   const sev = e.findings.reduce((m, f) => ({ ...m, [f.severity]: (m[f.severity] || 0) + 1 }), {});
 
-  const headline = `${client}'s operating model scores ${fmtScore(o.current)} out of 5 (${maturityName(o.current)}) against a target of ${fmtScore(o.target)}, an average gap of ${fmtScore(o.gap)} (${o.rag}). ${red.length ? `${red.length} of 17 dimensions are rated Red.` : 'No dimension is rated Red.'}`;
+  const poss = /s$/i.test(client) ? `${client}'` : `${client}'s`;
+  const headline = `${poss} operating model scores ${fmtScore(o.current)} out of 5 (${maturityName(o.current)}) against a target of ${fmtScore(o.target)}, an average gap of ${fmtScore(o.gap)} (${o.rag}). ${red.length ? `${red.length} of 17 dimensions are rated Red.` : 'No dimension is rated Red.'}`;
   const paragraphs = [
     `The strongest dimensions are ${list(strong.map((d) => `${d.name} (${fmtScore(d.current)})`))}. The largest importance-weighted gaps are in ${list(weak.map((d) => `${d.name} (gap ${fmtScore(d.gap)})`))}, which should anchor the target operating model design.`,
     `${e.findings.length} findings were logged (${sev.Critical || 0} critical, ${sev.High || 0} high, ${sev.Medium || 0} medium, ${sev.Low || 0} low), ${o.openCritHigh} of them critical or high and still open. ${e.recommendations.length} recommendations have been prioritised by value and ease.`,

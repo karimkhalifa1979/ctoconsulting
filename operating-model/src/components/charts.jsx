@@ -216,7 +216,8 @@ export function Bubble({ points, xLabel, yLabel, xMax = 5, yMax = 5, xMin = 0, y
   const pw = w - pad.l - pad.r, ph = h - pad.t - pad.b;
   const x = (v) => pad.l + ((v - xMin) / (xMax - xMin)) * pw;
   const y = (v) => pad.t + ((yMax - v) / (yMax - yMin)) * ph;
-  const tx = x(threshold - 0.5 < xMin ? threshold : threshold - 0.5), ty = y(threshold - 0.5 < yMin ? threshold : threshold - 0.5);
+  const th = threshold ?? xMin;
+  const tx = x(th - 0.5 < xMin ? th : th - 0.5), ty = y(th - 0.5 < yMin ? th : th - 0.5);
   // Jitter points that share a cell so they stay visible.
   const seen = {};
   const pts = points.map((p) => {
@@ -227,10 +228,14 @@ export function Bubble({ points, xLabel, yLabel, xMax = 5, yMax = 5, xMin = 0, y
   });
   return (
     <Svg w={w} h={h} label={label}>
-      <rect x={tx} y={pad.t} width={x(xMax) - tx} height={ty - pad.t} fill="#e9f7ef" />
-      <rect x={pad.l} y={pad.t} width={tx - pad.l} height={ty - pad.t} fill="#eef4fc" />
-      <rect x={tx} y={ty} width={x(xMax) - tx} height={y(yMin) - ty} fill="#fdf6e6" />
-      <rect x={pad.l} y={ty} width={tx - pad.l} height={y(yMin) - ty} fill="#f4f5f7" />
+      {threshold === null ? <rect x={pad.l} y={pad.t} width={pw} height={ph} fill="#f7f9fb" /> : (
+        <g>
+          <rect x={tx} y={pad.t} width={x(xMax) - tx} height={ty - pad.t} fill="#e9f7ef" />
+          <rect x={pad.l} y={pad.t} width={tx - pad.l} height={ty - pad.t} fill="#eef4fc" />
+          <rect x={tx} y={ty} width={x(xMax) - tx} height={y(yMin) - ty} fill="#fdf6e6" />
+          <rect x={pad.l} y={ty} width={tx - pad.l} height={y(yMin) - ty} fill="#f4f5f7" />
+        </g>
+      )}
       {quadrants && (
         <g fontSize="10.5" fontWeight="700" fill={C.ink3}>
           <text x={x(xMax) - 6} y={pad.t + 14} textAnchor="end">{quadrants[1]}</text>
