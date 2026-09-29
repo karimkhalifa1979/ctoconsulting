@@ -3,6 +3,7 @@
 // data from row 6), so a completed toolkit workbook can be imported and an exported
 // workbook can be re-imported. One column specification per sheet drives both directions.
 import ExcelJS from 'exceljs';
+import JSZip from 'jszip';
 import { blankEngagement, normalise, DIMENSIONS, DIM, DIM_BY_NAME, TK, engagementTitle, blankQuestion } from './model.js';
 import {
   questionCalc, dimensionStats, overallStats, engagementApproach, daysOutstanding, capabilityCalc, processCalc, orgCalc, orgTargetCalc,
@@ -486,9 +487,30 @@ function readTable(ws, spec, existing = []) {
   return out;
 }
 
+async function stripDrawings(buf) {
+  const zip = await JSZip.loadAsync(buf);
+  for (const name of Object.keys(zip.files)) {
+    if (/^xl\/(drawings|charts|comments|threadedComments|persons)\//.test(name) || /^xl\/worksheets\/_rels\//.test(name)) zip.remove(name);
+    else if (/^xl\/worksheets\/[^/]+\.xml$/.test(name)) {
+      const xml = await zip.file(name).async('string');
+      zip.file(name, xml.replace(/<(drawing|legacyDrawing|legacyDrawingHF|picture|tableParts)\b[^>]*\/>/g, '').replace(/<hyperlinks>[\s\S]*?<\/hyperlinks>/g, '').replace(/<tableParts\b[\s\S]*?<\/tableParts>/g, ''));
+    } else if (name === '[Content_Types].xml') {
+      const xml = await zip.file(name).async('string');
+      zip.file(name, xml.replace(/<Override\b[^>]*\/xl\/(drawings|charts|comments|threadedComments|persons)\/[^>]*\/>/g, ''));
+    }
+  }
+  return zip.generateAsync({ type: 'arraybuffer' });
+}
+
 export async function importWorkbook(arrayBuffer) {
-  const wb = new ExcelJS.Workbook();
-  await wb.xlsx.load(arrayBuffer);
+  let wb = new ExcelJS.Workbook();
+  try {
+    await wb.xlsx.load(arrayBuffer);
+  } catch {
+    // Some workbooks carry charts or drawings the parser cannot read; strip them and retry.
+    wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(await stripDrawings(arrayBuffer));
+  }
   const has = (n) => !!wb.getWorksheet(n);
   if (!has('Assessment') && !has('_data')) throw new Error('This does not look like an Operating Model Assessment Toolkit workbook (no Assessment tab).');
 
@@ -568,7 +590,7 @@ export async function importWorkbook(arrayBuffer) {
       setIf('sub', 'Sub-component'); setIf('question', 'Assessment question'); setIf('good', 'What good looks like');
       setIf('importance', 'Importance (1–3)', (v) => (isNum(v) ? Number(v) : v));
       setIf('current', 'Current maturity (1–5 / N/A)', (v) => (isNum(v) ? Number(v) : String(v).toUpperCase() === 'N/A' ? 'N/A' : ''));
-      setIf('target', 'Target maturity (1–5)', (v) => (isNum(v) ? Number(v) : ''));
+      setIf('target', 'Target maturity (1–5)', (v) => (isNum(v) ? Number(v) : q.current === 'N/A' ? '' : e.settings.defaultTarget));
       setIf('confidence', 'Evidence confidence'); setIf('evidence', 'Evidence reviewed / source'); setIf('observations', 'Observations & findings');
       setIf('findingIds', 'Linked finding ID(s)'); setIf('evidenceToRequest', 'Evidence to request'); setIf('stakeholders', 'Key stakeholders');
       q.dim = dim;
@@ -681,6 +703,7 @@ export async function importWorkbook(arrayBuffer) {
   }
 
   e.kind = 'client';
+  if (!e.details.client && !e.details.name) e.details.name = `Imported toolkit workbook (${isoDate(new Date())})`;
   const summary = `${e.details.client || 'client'} — ${imported.length} tabs read, ${e.questions.filter((q) => q.current !== '').length} questions scored.`;
   return { engagement: normalise(e), summary };
 }

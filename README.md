@@ -1,3 +1,10 @@
+# CTO Consulting tools
+
+This repository holds two CTO Consulting web tools:
+
+- **Operating Model Assessment Tool** — in [`operating-model/`](operating-model/README.md). Assess any organisation's operating model (157-question maturity diagnostic, current-state inventories, AI readiness), design the target operating model, track benefits and costs, compare current and target, and download a branded PDF report. Open `operating-model/release/CTO_Operating_Model_Assessment_Tool.html` to use it without installing anything.
+- **Regulatory & Standards Assessment Tool** — described below (repository root).
+
 # CTO Consulting — Regulatory & Standards Assessment Tool
 
 A web application for discovering, registering, assessing and reporting an organisation's regulatory obligations and industry standards, branded for **CTO Consulting**.

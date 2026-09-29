@@ -10,7 +10,8 @@
     "build": "vite build",
     "build:single": "vite build --mode single",
     "preview": "vite preview",
-    "check": "node scripts/check.mjs"
+    "check": "node scripts/check.mjs",
+    "release": "vite build --mode single && cp dist-single/index.html release/CTO_Operating_Model_Assessment_Tool.html"
   },
   "dependencies": {
     "exceljs": "^4.4.0",
