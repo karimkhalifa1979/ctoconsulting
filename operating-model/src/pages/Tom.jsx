@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useStore } from '../lib/store.jsx';
-import { Card, PageHead, Tabs, useTab, Field, TextArea, Select, Badge, mClass, RagDot, CompareStat, NumberInput } from '../components/ui.jsx';
+import { Card, PageHead, Stat, Tabs, useTab, Field, TextArea, Select, Badge, mClass, RagDot, CompareStat, NumberInput } from '../components/ui.jsx';
 import DataGrid from '../components/DataGrid.jsx';
 import { HBar, C, PALETTE } from '../components/charts.jsx';
 import { CANVAS_ELEMENTS, ARCHETYPES, TOM_PATTERNS } from '../data/tomLibrary.js';
@@ -40,7 +40,7 @@ export default function Tom() {
         <CompareStat label="FTE" from={fmtNum(cur.total)} to={fmtNum(tgt.total)} fromRaw={cur.total} toRaw={tgt.total} better="lower" />
         <CompareStat label="Layers / span" from={`${cur.maxLayers} / ${fmtNum(cur.span, 1)}`} to={`${tgt.maxLayers} / ${fmtNum(tgt.span, 1)}`} />
         <CompareStat label="Run cost" from={fmtMoney(cc.total, { compact: true })} to={fmtMoney(tc.total, { compact: true })} fromRaw={cc.total} toRaw={tc.total} better="lower" fmtDelta={(d) => fmtMoney(d, { compact: true })} />
-        <CompareStat label="Target states described" from="" to={`${completion} / 17`} />
+        <Stat label="Target states described" value={`${completion} / 17`} sub="dimensions" />
       </div>
       <Tabs value={tab} onChange={setTab} tabs={[
         { id: 'vision', label: 'Vision & archetype' }, { id: 'canvas', label: 'Operating Model Canvas' }, { id: 'target', label: 'Target state by dimension', count: `${completion}/17` },
