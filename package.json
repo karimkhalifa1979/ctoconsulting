@@ -10,13 +10,22 @@
     "build": "vite build",
     "preview": "vite preview",
     "start": "node server/index.mjs",
-    "check": "node scripts/check.mjs"
+    "check": "node scripts/check.mjs",
+    "check:proposals": "node scripts/check-proposals.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.129.0",
+    "@tiptap/core": "^3.31.3",
+    "@tiptap/extension-table": "^3.31.3",
+    "@tiptap/extensions": "^3.31.3",
+    "@tiptap/pm": "^3.31.3",
+    "@tiptap/react": "^3.31.3",
+    "@tiptap/starter-kit": "^3.31.3",
     "exceljs": "^4.4.0",
     "idb-keyval": "^6.3.0",
     "jszip": "^3.10.2",
+    "pdfjs-dist": "^6.3.289",
+    "pptxgenjs": "^4.0.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "react-router-dom": "^7.18.4"
