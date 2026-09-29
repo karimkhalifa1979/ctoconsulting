@@ -39,7 +39,7 @@ export default function Obligations() {
 
   return (
     <div>
-      <PageHead eyebrow="Obligations register" title={`Obligations — ${org.shortName}`} actions={<button className="btn" onClick={exportCsv}>Export CSV</button>}>
+      <PageHead eyebrow="Obligations register" title={`Obligations — ${org.shortName}`} actions={<button className="btn dl" onClick={exportCsv}>Export CSV</button>}>
         Every obligation applicable to {org.name}, populated in the format of the register’s Obligations tab and mapped to the policy requirement and target policy that gives effect to it.
       </PageHead>
       <div className="filters">

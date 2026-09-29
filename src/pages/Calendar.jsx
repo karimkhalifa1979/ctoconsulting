@@ -37,7 +37,7 @@ export default function CalendarPage() {
   return (
     <div>
       <PageHead eyebrow="Regulatory calendar" title={`Upcoming obligations — ${org.shortName}`}
-        actions={<button className="btn" onClick={() => downloadBlob(toICS(events, org.name), `${safeName(org.shortName)}_regulatory_calendar.ics`, 'text/calendar')}>Export to Outlook / Google (.ics)</button>}>
+        actions={<button className="btn dl" onClick={() => downloadBlob(toICS(events, org.name), `${safeName(org.shortName)}_regulatory_calendar.ics`, 'text/calendar')}>Export to Outlook / Google (.ics)</button>}>
         Statutory reporting and commencement dates for the organisation’s applicable sources, plus requirement reviews, control audits, exemption expiries and remediation due dates from the register and assessment.
       </PageHead>
 

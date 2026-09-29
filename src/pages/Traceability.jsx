@@ -126,7 +126,7 @@ function Matrix({ org, data, assessments }) {
       <div className="filters">
         <input type="search" placeholder="Search obligations, requirements, ISM controls…" value={q} onChange={(e) => setQ(e.target.value)} />
         <select value={policy} onChange={(e) => setPolicy(e.target.value)}><option value="">All target policies</option>{Object.values(data.policies).map((p) => <option key={p.code} value={p.code}>{p.title}</option>)}</select>
-        <button className="btn" onClick={exportCsv}>Export full matrix (CSV)</button>
+        <button className="btn dl" onClick={exportCsv}>Export full matrix (CSV)</button>
       </div>
       <div className="card">
         <div className="table-wrap"><table className="table">

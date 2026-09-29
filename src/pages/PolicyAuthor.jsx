@@ -69,8 +69,8 @@ export default function PolicyAuthor() {
   return (
     <div>
       <PageHead eyebrow="Policy author" title="Author policy documents" actions={doc && <>
-        <button className="btn btn-primary" onClick={() => downloadWord(policyToHtmlDocument(doc, org, { forWord: true }), `${fileBase}.doc`)}>Download Word</button>
-        <button className="btn" onClick={() => printHtml(policyToHtmlDocument(doc, org)) || setToast('Allow pop-ups to print')}>Print / PDF</button>
+        <button className="btn btn-primary dl" onClick={() => downloadWord(policyToHtmlDocument(doc, org, { forWord: true }), `${fileBase}.doc`)}>Download Word</button>
+        <button className="btn dl" onClick={() => printHtml(policyToHtmlDocument(doc, org)) || setToast('Allow pop-ups to print')}>Print / PDF</button>
       </>}>
         Automatically drafts a complete policy from the organisation’s policy requirements, obligations, RACI, evidence and review attributes, following your policy template. Edit any section in place.
       </PageHead>

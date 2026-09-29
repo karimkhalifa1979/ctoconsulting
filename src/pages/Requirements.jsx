@@ -63,7 +63,7 @@ export default function Requirements() {
 
   return (
     <div>
-      <PageHead eyebrow="Policy requirements" title={`Policy requirements — ${org.shortName}`} actions={<button className="btn" onClick={exportCsv}>Export CSV</button>}>
+      <PageHead eyebrow="Policy requirements" title={`Policy requirements — ${org.shortName}`} actions={<button className="btn dl" onClick={exportCsv}>Export CSV</button>}>
         Requirements consolidate the obligations into enforceable policy statements, each with a suggested target policy and the full set of register attributes.
       </PageHead>
 

@@ -82,13 +82,14 @@ export default function Organisations() {
           {org.kind === 'seed' && <p className="small muted">Loaded from <strong>{library.meta.source}</strong>: {library.meta.counts.requirements} requirements, {library.meta.counts.obligations.toLocaleString()} obligations, {library.meta.counts.exemptions} exemptions, {library.meta.counts.pspf} PSPF requirements and all {library.meta.counts.sheets} worksheets (see Register explorer).</p>}
         </Card>
         <Card title="Export & backup" subtitle={org.name}>
-          <div className="stack">
+          <p className="small muted hosted-note">File downloads are not available in this hosted preview. Install the tool to export to Excel or download a backup.</p>
+          <div className="stack dl">
             <div>
-              <button className="btn btn-primary" onClick={() => exportRegisterXlsx(org, data, assessments)}>Export register to Excel</button>
+              <button className="btn btn-primary dl" onClick={() => exportRegisterXlsx(org, data, assessments)}>Export register to Excel</button>
               <p className="small muted" style={{ margin: '6px 0 0' }}>Requirements (41 attributes), Obligations, Exemptions, Applicable Sources and Control Assessment sheets, in the same layout as the source register.</p>
             </div>
             <div>
-              <button className="btn" onClick={backup}>Download backup (.json)</button>
+              <button className="btn dl" onClick={backup}>Download backup (.json)</button>
               <p className="small muted" style={{ margin: '6px 0 0' }}>Profile, register, assessments and authored policies — restore on another device with “Restore backup”.</p>
             </div>
           </div>

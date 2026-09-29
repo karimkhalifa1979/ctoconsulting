@@ -61,10 +61,10 @@ body{font-family:Calibri,Arial,sans-serif;color:#16212f;font-size:10.5pt}h1,h2,h
       <PageHead eyebrow="Assessment report" title="Control assessment report" actions={<>
         <select value={scope} onChange={(e) => setScope(e.target.value)}><option value="">All target policies</option>{Object.values(data.policies).map((p) => <option key={p.code} value={p.code}>{p.title}</option>)}</select>
         <label className="check small"><input type="checkbox" checked={detail} onChange={(e) => setDetail(e.target.checked)} />Detailed results</label>
-        <button className="btn btn-primary" onClick={() => window.print()}>Print / PDF</button>
-        <button className="btn" onClick={exportWord}>Word</button>
-        <button className="btn" onClick={() => exportRegisterXlsx(org, data, assessments)}>Excel</button>
-        <button className="btn" onClick={exportCsv}>CSV</button>
+        <button className="btn btn-primary dl" onClick={() => window.print()}>Print / PDF</button>
+        <button className="btn dl" onClick={exportWord}>Word</button>
+        <button className="btn dl" onClick={() => exportRegisterXlsx(org, data, assessments)}>Excel</button>
+        <button className="btn dl" onClick={exportCsv}>CSV</button>
       </>}>
         A formal report of the assessment results, suitable for executives, audit committees and regulators.
       </PageHead>

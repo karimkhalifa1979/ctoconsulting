@@ -34,7 +34,7 @@ export default function RegisterExplorer() {
   return (
     <div>
       <PageHead eyebrow="Register explorer" title={library.meta.source}
-        actions={sheet && <button className="btn" onClick={() => downloadCSV(rows, cols, `${safeName(sheet.name)}.csv`)}>Export sheet (CSV)</button>}>
+        actions={sheet && <button className="btn dl" onClick={() => downloadCSV(rows, cols, `${safeName(sheet.name)}.csv`)}>Export sheet (CSV)</button>}>
         Every worksheet of the uploaded policy requirements register, loaded verbatim against the National Insurance Disability Agency ({index.length} worksheets).
         {org.kind !== 'seed' && ' You are viewing the reference register; the selected organisation’s own register is under Obligations and Policy requirements.'}
       </PageHead>

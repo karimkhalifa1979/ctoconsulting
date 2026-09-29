@@ -341,3 +341,8 @@ table.table { width: 100%; border-collapse: collapse; font-size: 13px; }
   [data-layout] { grid-template-columns: minmax(0, 1fr) !important; }
   .author-grid { grid-template-columns: 1fr; }
 }
+
+/* Hosted preview (Claude artifact): downloads and printing are unavailable there. */
+.hosted-note { display: none; }
+[data-hosted='artifact'] .dl { display: none !important; }
+[data-hosted='artifact'] .hosted-note { display: block; }
