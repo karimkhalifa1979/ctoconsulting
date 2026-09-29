@@ -18,7 +18,7 @@ npm run check          # formula and business-case sanity checks
 npm run seed           # re-extract reference content from the toolkit workbook
 ```
 
-A sample output is in `docs/Sample_Operating_Model_Assessment_Report.pdf`.
+A sample output is in `docs/Sample_Operating_Model_Assessment_Report.pdf`, and a screen tour of every part of the tool is in `docs/CTO_Operating_Model_Assessment_Tool_Screen_Tour.pdf`.
 
 ## Features
 
