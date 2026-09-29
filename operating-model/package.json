@@ -1,0 +1,31 @@
+{
+  "name": "cto-operating-model-assessment",
+  "private": true,
+  "version": "1.0.0",
+  "description": "CTO Consulting Operating Model Assessment Tool",
+  "type": "module",
+  "scripts": {
+    "seed": "node scripts/build-seed.mjs",
+    "dev": "vite",
+    "build": "vite build",
+    "build:single": "vite build --mode single",
+    "preview": "vite preview",
+    "check": "node scripts/check.mjs"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "idb-keyval": "^6.3.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router-dom": "^7.18.4"
+  },
+  "devDependencies": {
+    "@expo-google-fonts/inter": "^0.4.2",
+    "@expo-google-fonts/montserrat": "^0.4.2",
+    "@vitejs/plugin-react": "^6.1.1",
+    "vite": "^8.3.1",
+    "vite-plugin-singlefile": "^2.3.3"
+  }
+}

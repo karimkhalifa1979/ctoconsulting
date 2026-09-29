@@ -1,0 +1,4833 @@
+{
+ "meta": {
+  "source": "CTO_Consulting_Operating_Model_Assessment_Toolkit.xlsx",
+  "generated": "2026-09-29",
+  "questions": 157
+ },
+ "cover": {
+  "title": "Operating Model Assessment Toolkit",
+  "subtitle": "CTO Consulting  |  Business Analysis Practice",
+  "purpose": "A structured toolkit for an exhaustive assessment of how an organisation delivers value: its strategy, customers, services, processes, capabilities, structure, governance, people, culture, performance management, technology, data, suppliers, locations, risk and compliance, finances and change capability. It combines a 157-question maturity diagnostic across 17 dimensions with the planning tools, current-state inventories, analysis and outputs needed to move from evidence to a prioritised set of recommendations.",
+  "steps": [
+   {
+    "step": "1. Mobilise",
+    "text": "Complete the Engagement tab: client details, objectives, scope, hypotheses, design principles and assessment settings."
+   },
+   {
+    "step": "2. Plan",
+    "text": "Register stakeholders, tailor the Interview Guides and issue the Document Requests list."
+   },
+   {
+    "step": "3. Discover",
+    "text": "Run interviews and workshops, review documents and populate the current-state inventories (Capabilities, Processes, Org Structure, Decision Rights, Applications, Suppliers, Locations, Cost Baseline)."
+   },
+   {
+    "step": "4. Assess",
+    "text": "Score each question on the Assessment tab (current and target maturity, 1–5 or N/A) against the Maturity Model and 'What good looks like'. Record the evidence reviewed and your confidence in it."
+   },
+   {
+    "step": "5. Analyse",
+    "text": "Log findings and root causes on the Findings tab, validate them with stakeholders and review the Dashboard."
+   },
+   {
+    "step": "6. Recommend",
+    "text": "Describe the current and target state and key shifts on Current vs Target; log, score and sequence recommendations."
+   },
+   {
+    "step": "7. Tailor",
+    "text": "Add questions by inserting rows inside a dimension block and copying the formulas down. Dropdown values and span benchmarks are maintained on the Lists tab."
+   }
+  ],
+  "workbookMap": [
+   {
+    "phase": "Set up",
+    "tab": "Engagement",
+    "purpose": "Client details, objectives, scope, hypotheses, design principles and assessment settings."
+   },
+   {
+    "phase": "Reference",
+    "tab": "Framework",
+    "purpose": "The 17 dimensions, definitions and mapping to recognised frameworks, plus the assessment approach."
+   },
+   {
+    "phase": "Reference",
+    "tab": "Maturity Model",
+    "purpose": "Five-level maturity descriptors for each dimension."
+   },
+   {
+    "phase": "Plan",
+    "tab": "Stakeholders",
+    "purpose": "Stakeholder register, influence and interest, and interview schedule."
+   },
+   {
+    "phase": "Plan",
+    "tab": "Interview Guides",
+    "purpose": "Interview questions for ten stakeholder groups, mapped to dimensions."
+   },
+   {
+    "phase": "Plan",
+    "tab": "Document Requests",
+    "purpose": "69 pre-populated document and data requests with tracking."
+   },
+   {
+    "phase": "Discover & assess",
+    "tab": "Assessment",
+    "purpose": "157-question maturity diagnostic with evidence, confidence, gap and RAG."
+   },
+   {
+    "phase": "Discover & assess",
+    "tab": "Capabilities",
+    "purpose": "Level 1 / Level 2 business capability map with importance, maturity and priority heat map."
+   },
+   {
+    "phase": "Discover & assess",
+    "tab": "Processes",
+    "purpose": "Value streams and processes with documentation, automation and performance data."
+   },
+   {
+    "phase": "Discover & assess",
+    "tab": "Org Structure",
+    "purpose": "Workforce mix, spans of control, layers and cost by business unit."
+   },
+   {
+    "phase": "Discover & assess",
+    "tab": "Decision Rights",
+    "purpose": "RAPID matrix for key decisions with checks for missing or multiple deciders."
+   },
+   {
+    "phase": "Discover & assess",
+    "tab": "Applications",
+    "purpose": "Application portfolio with TIME classification and support expiry."
+   },
+   {
+    "phase": "Discover & assess",
+    "tab": "Suppliers",
+    "purpose": "Supplier register with segmentation, expiry and dependency risk."
+   },
+   {
+    "phase": "Discover & assess",
+    "tab": "Locations",
+    "purpose": "Site footprint, utilisation, leases and property cost."
+   },
+   {
+    "phase": "Discover & assess",
+    "tab": "Cost Baseline",
+    "purpose": "Operating cost by business unit and cost type, cost per FTE and change spend."
+   },
+   {
+    "phase": "Analyse",
+    "tab": "Findings",
+    "purpose": "Findings log with evidence, root cause, impact and severity."
+   },
+   {
+    "phase": "Analyse",
+    "tab": "Dashboard",
+    "purpose": "Maturity profile, gaps, RAG, findings, recommendation profile and charts."
+   },
+   {
+    "phase": "Recommend",
+    "tab": "Current vs Target",
+    "purpose": "Current state, target state and key shifts for each dimension."
+   },
+   {
+    "phase": "Recommend",
+    "tab": "Recommendations",
+    "purpose": "Recommendations scored by value and ease, categorised and sequenced by horizon."
+   },
+   {
+    "phase": "Reference",
+    "tab": "Lists",
+    "purpose": "Dropdown values, span-of-control benchmarks and importance weights."
+   }
+  ],
+  "ragNote": "RAG ratings compare target and current maturity using the thresholds on the Engagement tab (defaults: Red when the gap is 1.5 or more, Amber from 0.75, otherwise Green)."
+ },
+ "maturityScale": [
+  {
+   "level": 1,
+   "name": "Initial",
+   "label": "1 – Initial",
+   "description": "Ad hoc, undocumented and person-dependent. Outcomes are unpredictable and largely reactive."
+  },
+  {
+   "level": 2,
+   "name": "Developing",
+   "label": "2 – Developing",
+   "description": "Some practices are defined but applied inconsistently. Limited measurement; still largely reactive."
+  },
+  {
+   "level": 3,
+   "name": "Defined",
+   "label": "3 – Defined",
+   "description": "Practices are documented, standardised and applied consistently across the organisation."
+  },
+  {
+   "level": 4,
+   "name": "Managed",
+   "label": "4 – Managed",
+   "description": "Practices are measured and actively managed against targets. Decisions are data-driven."
+  },
+  {
+   "level": 5,
+   "name": "Optimised",
+   "label": "5 – Optimised",
+   "description": "Continuous improvement is embedded. Leading practice that adapts quickly to change."
+  },
+  {
+   "level": "N/A",
+   "name": "Not applicable",
+   "label": "N/A – Not applicable",
+   "description": "Not relevant to this organisation or outside the agreed scope. Excluded from averages."
+  }
+ ],
+ "settings": {
+  "defaultTarget": 3,
+  "ragRed": 1.5,
+  "ragAmber": 0.75,
+  "priorityThreshold": 3,
+  "maxLayers": 6,
+  "expiryWarningDays": 180,
+  "timeFitThreshold": 3
+ },
+ "settingsHelp": [
+  {
+   "label": "Default target maturity (1–5)",
+   "help": "Pre-fills the Target Maturity column on the Assessment tab. Overwrite individual questions where the target differs."
+  },
+  {
+   "label": "RAG: Red when maturity gap is at least",
+   "help": "Gap = target minus current. Applied to questions and dimension averages."
+  },
+  {
+   "label": "RAG: Amber when maturity gap is at least",
+   "help": "Gaps below this threshold are Green."
+  },
+  {
+   "label": "Prioritisation threshold (Value and Ease, 1–5)",
+   "help": "Recommendations with Value and Ease at or above this score are Quick wins; high Value / low Ease are Strategic initiatives."
+  },
+  {
+   "label": "Maximum management layers (CEO = layer 1)",
+   "help": "Org Structure flags business units whose deepest reporting line exceeds this."
+  },
+  {
+   "label": "Contract / lease / support expiry warning (days)",
+   "help": "Flags suppliers, leases and applications approaching expiry."
+  },
+  {
+   "label": "Application TIME fit threshold (1–5)",
+   "help": "Business and technical fit at or above this are 'high' when classifying applications as Tolerate, Invest, Migrate or Eliminate."
+  }
+ ],
+ "principleExample": {
+  "principle": "Standardise unless differentiating",
+  "rationale": "Variation adds cost, risk and complexity without adding customer value.",
+  "implications": "Common processes and systems across business units; local variation requires a documented case.",
+  "status": "Proposed"
+ },
+ "frameworkIntro": "17 dimensions synthesised from the Operating Model Canvas (POLISM), McKinsey 7S, the Galbraith Star Model and TOGAF / BIZBOK business architecture.",
+ "dimensions": [
+  {
+   "code": "D01",
+   "name": "Strategy & Direction",
+   "definition": "The organisation's purpose, strategic objectives and the explicit choices the operating model must enable.",
+   "subComponents": "Purpose and vision; strategic objectives; strategic choices; external environment; design principles; strategy-to-execution alignment; ESG",
+   "keyQuestion": "Is it clear what the operating model must deliver, and are the strategic choices explicit?",
+   "canvas": "Value proposition (context for all elements)",
+   "sevenS": "Strategy; Shared values",
+   "galbraith": "Strategy",
+   "togaf": "Business motivation (drivers, goals, objectives)",
+   "standards": "Balanced Scorecard; PESTLE / SWOT; Playing to Win; ASX Corporate Governance Principles",
+   "short": "Strategy"
+  },
+  {
+   "code": "D02",
+   "name": "Customers, Channels & Value Proposition",
+   "definition": "Who the organisation serves, what value it offers each segment, and how customers access and experience its services.",
+   "subComponents": "Segments; value proposition; customer journeys; channel strategy; omnichannel consistency; voice of customer; service standards; accessibility",
+   "keyQuestion": "Does the organisation understand and consistently deliver what its customers value, through the right channels?",
+   "canvas": "Value delivery chain (beneficiaries)",
+   "sevenS": "Strategy",
+   "galbraith": "Strategy",
+   "togaf": "Business architecture (actors, stakeholders, business services)",
+   "standards": "Service design; NPS / CSAT / CES; WCAG 2.2; BIZBOK stakeholder mapping",
+   "short": "Customers & Channels"
+  },
+  {
+   "code": "D03",
+   "name": "Products & Services",
+   "definition": "The portfolio of products and services the organisation delivers, and how that portfolio is owned, managed and evolved.",
+   "subComponents": "Service catalogue; portfolio performance; ownership; lifecycle; complexity; innovation pipeline; pricing and funding; product obligations",
+   "keyQuestion": "Is the portfolio of products and services clear, owned and actively managed for value?",
+   "canvas": "Value delivery chain",
+   "sevenS": "Strategy",
+   "galbraith": "Strategy",
+   "togaf": "Business services / products",
+   "standards": "Product lifecycle management; ITIL 4 service catalogue; ASIC design and distribution obligations (where applicable)",
+   "short": "Products & Services"
+  },
+  {
+   "code": "D04",
+   "name": "Value Streams & Processes",
+   "definition": "The end-to-end value streams and business processes through which work flows to deliver outcomes.",
+   "subComponents": "Value streams; process architecture; ownership; documentation; standardisation; efficiency; automation; performance; hand-offs; embedded controls",
+   "keyQuestion": "Does work flow efficiently, consistently and under control from trigger to outcome?",
+   "canvas": "Processes (value delivery chain)",
+   "sevenS": "Systems",
+   "galbraith": "Processes",
+   "togaf": "Business process; BIZBOK value streams",
+   "standards": "APQC Process Classification Framework; BPMN 2.0; Lean; Six Sigma; process mining",
+   "short": "Processes"
+  },
+  {
+   "code": "D05",
+   "name": "Business Capabilities",
+   "definition": "What the organisation must be able to do (independent of how), and the maturity of those abilities across people, process, technology and information.",
+   "subComponents": "Capability map; strategic importance; maturity; ownership; investment alignment; gaps; duplication; sourcing",
+   "keyQuestion": "Does the organisation have the capabilities its strategy needs, and is investment focused on the right ones?",
+   "canvas": "Processes; Organisation",
+   "sevenS": "Skills; Systems",
+   "galbraith": "Processes",
+   "togaf": "BIZBOK capability map; TOGAF capability-based planning",
+   "standards": "BIZBOK Guide; TOGAF Standard 10th Edition",
+   "short": "Capabilities"
+  },
+  {
+   "code": "D06",
+   "name": "Organisation Structure & Roles",
+   "definition": "How people and work are grouped, the reporting lines, spans and layers, and the clarity of roles and accountabilities.",
+   "subComponents": "Structural archetype; spans of control; layers; centralisation vs devolution; shared services and CoEs; role clarity; duplication; interfaces; agility",
+   "keyQuestion": "Is the structure aligned to strategy, lean, and clear about who is accountable for what?",
+   "canvas": "Organisation",
+   "sevenS": "Structure",
+   "galbraith": "Structure",
+   "togaf": "Organisation units; roles and actors",
+   "standards": "Spans and layers analysis; organisation design archetypes",
+   "short": "Structure"
+  },
+  {
+   "code": "D07",
+   "name": "Governance & Decision Rights",
+   "definition": "The bodies, delegations, policies and decision rights that direct and control the organisation.",
+   "subComponents": "Governance framework; committee effectiveness; delegations; decision rights; decision speed; policy framework; oversight; three lines; transparency",
+   "keyQuestion": "Are decisions made by the right people, at the right level, in a timely and accountable way?",
+   "canvas": "Management system",
+   "sevenS": "Systems; Structure",
+   "galbraith": "Structure; Processes",
+   "togaf": "Governance (architecture and enterprise)",
+   "standards": "ASX Corporate Governance Principles; PGPA Act 2013 (Commonwealth entities); COBIT 2019; IIA Three Lines Model; RAPID / RACI",
+   "short": "Governance"
+  },
+  {
+   "code": "D08",
+   "name": "People, Workforce & Skills",
+   "definition": "The size, mix, skills, capacity and management of the workforce needed to deliver the operating model.",
+   "subComponents": "Workforce planning; workforce mix; capacity; skills; critical roles and succession; attraction and retention; performance; reward; WHS; engagement",
+   "keyQuestion": "Does the organisation have the right people, with the right skills, in the right numbers, at the right cost?",
+   "canvas": "Organisation",
+   "sevenS": "Staff; Skills",
+   "galbraith": "People; Rewards",
+   "togaf": "Roles and actors",
+   "standards": "Strategic workforce planning; SFIA (digital skills); Work Health and Safety Act 2011 and psychosocial hazard regulations",
+   "short": "People"
+  },
+  {
+   "code": "D09",
+   "name": "Culture, Leadership & Behaviours",
+   "definition": "The shared values, leadership style and everyday behaviours that determine how work actually gets done.",
+   "subComponents": "Values and behaviours; culture diagnosis; leadership; accountability; collaboration; customer centricity; psychological safety; risk culture; change readiness",
+   "keyQuestion": "Do culture and leadership enable, or undermine, the intended operating model?",
+   "canvas": "Organisation; Management system",
+   "sevenS": "Style; Shared values",
+   "galbraith": "People; Rewards",
+   "togaf": "Not explicitly covered",
+   "standards": "Culture diagnostics; 360-degree feedback; risk culture assessments",
+   "short": "Culture"
+  },
+  {
+   "code": "D10",
+   "name": "Performance Management & Planning",
+   "definition": "How the organisation plans, sets targets, measures performance and uses information to steer.",
+   "subComponents": "Planning cycle; KPI framework; cascade; management reporting; performance forums; target setting; incentive alignment; data for performance; external reporting",
+   "keyQuestion": "Does the organisation know how it is performing and act on that information?",
+   "canvas": "Management system",
+   "sevenS": "Systems",
+   "galbraith": "Processes; Rewards",
+   "togaf": "Business motivation (measures)",
+   "standards": "Balanced Scorecard; OKRs; integrated planning",
+   "short": "Performance"
+  },
+  {
+   "code": "D11",
+   "name": "Technology & Applications",
+   "definition": "The applications, infrastructure, architecture and technology operating model that enable the business.",
+   "subComponents": "Technology strategy; enterprise architecture; application portfolio; technical debt; infrastructure and cloud; integration; IT operating model; ITSM; digital, automation and AI; tech investment; end-user tools",
+   "keyQuestion": "Is technology fit for purpose today, and an enabler rather than a constraint for the future?",
+   "canvas": "Information (systems)",
+   "sevenS": "Systems",
+   "galbraith": "Processes",
+   "togaf": "Application and technology architecture",
+   "standards": "TOGAF; ITIL 4; COBIT 2019; Gartner TIME model; FinOps; Technology Business Management (TBM)",
+   "short": "Technology"
+  },
+  {
+   "code": "D12",
+   "name": "Data, Information & Analytics",
+   "definition": "How data and information are governed, managed, protected and used to generate insight.",
+   "subComponents": "Data strategy; data governance; data quality; master data; analytics; records management; privacy; classification; AI readiness",
+   "keyQuestion": "Is data trusted, protected and used as an asset for decision making?",
+   "canvas": "Information",
+   "sevenS": "Systems",
+   "galbraith": "Processes",
+   "togaf": "Data architecture",
+   "standards": "DAMA-DMBOK; Privacy Act 1988 and Australian Privacy Principles; ISO 15489 records management; ISO/IEC 42001 (AI management)",
+   "short": "Data"
+  },
+  {
+   "code": "D13",
+   "name": "Suppliers, Partners & Sourcing",
+   "definition": "The external organisations the operating model relies on, and how they are selected, contracted, managed and governed.",
+   "subComponents": "Sourcing strategy; supplier register; contract management; performance; concentration and dependency risk; procurement process; partnerships; third-party risk",
+   "keyQuestion": "Are external dependencies deliberate, well managed and resilient?",
+   "canvas": "Suppliers",
+   "sevenS": "Structure; Systems",
+   "galbraith": "Structure",
+   "togaf": "External actors and services",
+   "standards": "Kraljic matrix; ISO 44001 collaborative relationships; APRA CPS 230 (material service providers); Commonwealth Procurement Rules",
+   "short": "Suppliers"
+  },
+  {
+   "code": "D14",
+   "name": "Locations & Physical Assets",
+   "definition": "Where work is performed, the property and physical assets used, and the workplace model.",
+   "subComponents": "Location footprint; workplace model; utilisation; property costs and leases; site resilience; physical assets; physical security; environmental footprint",
+   "keyQuestion": "Is the physical footprint aligned to customers, talent, cost and resilience needs?",
+   "canvas": "Locations",
+   "sevenS": "Structure",
+   "galbraith": "Structure",
+   "togaf": "Location",
+   "standards": "ISO 55001 asset management; NABERS; hybrid work frameworks",
+   "short": "Locations"
+  },
+  {
+   "code": "D15",
+   "name": "Risk, Compliance, Security & Resilience",
+   "definition": "How the organisation identifies and manages risk, meets its obligations, protects information and remains resilient.",
+   "subComponents": "ERM framework; risk appetite; risk registers; obligations register; compliance management; controls; cyber security; business continuity; incidents; audit; fraud; ESG and climate risk",
+   "keyQuestion": "Is the organisation operating within its risk appetite and meeting its obligations, and can it withstand disruption?",
+   "canvas": "Management system",
+   "sevenS": "Systems",
+   "galbraith": "Processes",
+   "togaf": "Security and governance",
+   "standards": "ISO 31000; ISO 37301; ISO/IEC 27001; ISO 22301; ASD Essential Eight; APRA CPS 230 / CPS 234; PSPF; AASB S2",
+   "short": "Risk & Compliance"
+  },
+  {
+   "code": "D16",
+   "name": "Finance, Funding & Cost Model",
+   "definition": "The cost base, funding model, budgeting and financial controls that resource the operating model.",
+   "subComponents": "Cost baseline; cost-to-serve; cost structure; budgeting and forecasting; funding model; cost allocation; investment governance; financial controls; value for money",
+   "keyQuestion": "Is the cost of the operating model understood, affordable and directed at the highest-value activity?",
+   "canvas": "Management system",
+   "sevenS": "Systems",
+   "galbraith": "Processes; Rewards",
+   "togaf": "Not explicitly covered (cost of capabilities and portfolio)",
+   "standards": "Activity-based costing; Technology Business Management (TBM); zero-based budgeting",
+   "short": "Finance"
+  },
+  {
+   "code": "D17",
+   "name": "Change, Transformation & Continuous Improvement",
+   "definition": "The organisation's ability to prioritise, deliver and embed change and to improve continuously.",
+   "subComponents": "Portfolio management; delivery methodology; delivery performance; change capacity; change management; benefits realisation; business analysis; continuous improvement; innovation; lessons learned",
+   "keyQuestion": "Can the organisation move from its current to its target operating model and sustain the change?",
+   "canvas": "Management system",
+   "sevenS": "Systems; Skills; Style",
+   "galbraith": "Processes; People",
+   "togaf": "Implementation and migration (ADM phases E–G)",
+   "standards": "PRINCE2; MSP; P3O; Agile / SAFe; Prosci ADKAR; BABOK v3; Lean",
+   "short": "Change"
+  }
+ ],
+ "approach": [
+  {
+   "phase": "1. Mobilise",
+   "activities": "Confirm objectives, scope, sponsor and success criteria. Identify stakeholders, issue the document request and schedule interviews. Agree design principles and assessment settings.",
+   "tabs": "Engagement; Stakeholders; Document Requests",
+   "outputs": "Engagement charter; stakeholder map; document request"
+  },
+  {
+   "phase": "2. Discover",
+   "activities": "Review documents and data; run interviews, workshops and site visits; build the capability, process, organisation, decision rights, application, supplier, location and cost baselines.",
+   "tabs": "Interview Guides; Capabilities; Processes; Org Structure; Decision Rights; Applications; Suppliers; Locations; Cost Baseline",
+   "outputs": "Evidence base; current-state inventories and baselines"
+  },
+  {
+   "phase": "3. Assess & analyse",
+   "activities": "Score current and target maturity for every question with evidence and confidence ratings. Identify findings and root causes and validate them with stakeholders.",
+   "tabs": "Assessment; Findings; Dashboard",
+   "outputs": "Maturity profile; validated findings; heat maps"
+  },
+  {
+   "phase": "4. Design & recommend",
+   "activities": "Describe the target state and key shifts for each dimension against the design principles. Develop and prioritise recommendations by value and ease.",
+   "tabs": "Current vs Target; Recommendations",
+   "outputs": "Target operating model directions; prioritised recommendations"
+  },
+  {
+   "phase": "5. Roadmap & mobilise",
+   "activities": "Sequence recommendations into horizons, confirm dependencies, owners and indicative costs, and present to the sponsor and executive.",
+   "tabs": "Recommendations; Dashboard",
+   "outputs": "Implementation roadmap; executive presentation"
+  }
+ ],
+ "maturityModel": {
+  "All": [
+   "Ad hoc, undocumented and person-dependent. Outcomes are unpredictable and largely reactive.",
+   "Some practices are defined but applied inconsistently. Limited measurement; still largely reactive.",
+   "Practices are documented, standardised and applied consistently across the organisation.",
+   "Practices are measured and actively managed against targets. Decisions are data-driven.",
+   "Continuous improvement is embedded. Leading practice that adapts quickly to change."
+  ],
+  "D01": [
+   "No articulated strategy, or it exists only in the heads of a few leaders. Priorities shift frequently.",
+   "Strategy documented but high level. Objectives are unclear or unprioritised; awareness is limited beyond the executive.",
+   "Clear strategy with measurable objectives and agreed design principles, cascaded into business plans.",
+   "Strategy drives portfolio, budget and operating model decisions. Progress reviewed quarterly and adjusted.",
+   "Adaptive, evidence-led strategy informed by continuous scanning. The whole organisation understands and contributes to it."
+  ],
+  "D02": [
+   "Limited understanding of customers. Services are designed around internal structures.",
+   "Basic segmentation. Feedback is collected but rarely acted upon; channels are managed in silos.",
+   "Defined segments, value propositions and key journeys. Channel strategy and voice-of-customer program in place.",
+   "Journeys owned and measured end to end. Consistent omnichannel experience; insight drives service change.",
+   "Customer-centric by design. Predictive insight personalises services and customers co-design improvements."
+  ],
+  "D03": [
+   "No complete view of products and services. Ownership is unclear.",
+   "Catalogue exists but is incomplete. Performance data is partial and launches are ad hoc.",
+   "Complete catalogue with owners, a defined lifecycle process and tracked performance.",
+   "Portfolio actively managed on value and cost, with regular rationalisation and a strategy-linked pipeline.",
+   "Portfolio continuously optimised using customer and financial insight; rapid test-and-learn development."
+  ],
+  "D04": [
+   "Processes are undocumented and person-dependent, with high variation and rework.",
+   "Some processes documented. Ownership is functional and measurement is limited.",
+   "Process architecture defined. Key processes documented, owned and measured with KPIs.",
+   "End-to-end process owners manage performance. Processes are standardised and automation is applied systematically.",
+   "Processes continuously optimised using data (e.g. process mining), with intelligent automation at scale."
+  ],
+  "D05": [
+   "No capability view. Investment is decided project by project.",
+   "A capability map has been drafted but is not used in decision making.",
+   "Endorsed capability map with named owners and a maturity assessment.",
+   "Capability-based planning drives investment, architecture and sourcing decisions.",
+   "The capability model is the common language for strategy, architecture, investment and performance."
+  ],
+  "D06": [
+   "Structure has evolved organically. Roles are unclear and duplication is significant.",
+   "Structure documented with some role clarity. Spans and layers have not been analysed.",
+   "Structure aligned to strategy with a documented rationale. Roles defined; spans and layers within broad norms.",
+   "Structure optimised (spans, layers, shared services) and reviewed regularly, with strong cross-unit interfaces.",
+   "Adaptive structure that reconfigures around priorities with minimal disruption."
+  ],
+  "D07": [
+   "Governance is informal. Decisions are escalated or made inconsistently; delegations are out of date.",
+   "Committees exist but overlap. Decision rights are unclear and delegations are poorly understood.",
+   "Governance framework and delegations defined. Committees have terms of reference; key decision rights are defined.",
+   "Governance is effective and efficient. Decisions are timely and made at the right level; the three lines operate well.",
+   "Governance is continuously reviewed. Decision making is agile, transparent and data-driven."
+  ],
+  "D08": [
+   "Workforce management is reactive, with limited workforce data.",
+   "Basic workforce reporting. Skills gaps are known anecdotally and development is ad hoc.",
+   "Workforce plan and skills framework in place. Performance and development processes are consistent.",
+   "Strategic workforce planning is integrated with business planning. Talent is actively managed; engagement is high.",
+   "Predictive workforce analytics and agile deployment of talent. Recognised employer of choice."
+  ],
+  "D09": [
+   "Values are not defined or not lived. Trust is low and behaviours are siloed.",
+   "Values are defined but inconsistently demonstrated. Culture is not measured.",
+   "Culture is measured and the desired shifts are defined. Leadership development is in place.",
+   "Leaders role-model desired behaviours. Culture is reinforced through hiring, reward and recognition.",
+   "Culture is a source of advantage, with high psychological safety and continuous learning."
+  ],
+  "D10": [
+   "Few or no KPIs. Reporting is ad hoc and manual.",
+   "KPIs exist but are mainly financial or activity-based. Reporting is lagging and manual.",
+   "Balanced KPI framework cascaded through the organisation. Integrated planning cycle and regular performance forums.",
+   "Automated, trusted reporting. Performance information drives decisions and resource allocation.",
+   "Real-time, predictive performance insight. Continuous planning and adaptive targets."
+  ],
+  "D11": [
+   "Fragmented, ageing technology with no strategy. IT is reactive.",
+   "Technology strategy exists. Application inventory is partial, technical debt is significant and architecture governance is limited.",
+   "Enterprise architecture practice and standards in place. Application portfolio managed; ITSM processes defined.",
+   "Technology aligned to capabilities. Technical debt actively reduced; mature cloud and integration platforms; strong business–IT partnership.",
+   "Technology is a strategic enabler. Product-based delivery, embedded automation and AI, and continuous modernisation."
+  ],
+  "D12": [
+   "Data is siloed and of poor quality, with no ownership.",
+   "Some data governance. Quality issues are known; reporting relies on manual extraction.",
+   "Data governance framework with named owners and stewards. Quality measured for critical data elements.",
+   "Trusted single sources of truth and self-service analytics. Privacy and records are well managed.",
+   "Data is a strategic asset. Advanced analytics and AI drive decisions; the data culture is pervasive."
+  ],
+  "D13": [
+   "No supplier register. Contracts are unmanaged and relationships transactional.",
+   "Supplier register exists. Basic contract management; limited performance measurement.",
+   "Sourcing strategy defined and suppliers segmented. Performance reviewed for key suppliers.",
+   "Strategic supplier relationships managed. Third-party risk, including exit plans, is actively managed and value tracked.",
+   "Ecosystem partnerships co-create value. Sourcing is continuously optimised."
+  ],
+  "D14": [
+   "Footprint is historical and not aligned to strategy. Property costs are not visible.",
+   "Site and lease data captured. Limited utilisation analysis.",
+   "Footprint strategy and workplace model defined. Utilisation is measured.",
+   "Footprint optimised to customers, talent and cost. Site resilience is tested.",
+   "Flexible, data-driven footprint. Workplace continuously adapted; environmental footprint minimised."
+  ],
+  "D15": [
+   "Risk and compliance managed reactively. Obligations not mapped; cyber security immature.",
+   "Risk framework documented but registers maintained inconsistently. Obligations partially mapped.",
+   "ERM framework operating. Obligations register and control library in place; cyber and BCM programs established.",
+   "Integrated risk, compliance and assurance. Controls tested, appetite drives decisions, resilience tested.",
+   "Risk intelligence informs strategy. Proactive regulatory engagement and continuous control monitoring."
+  ],
+  "D16": [
+   "Costs visible only at general ledger level. Budgeting is incremental.",
+   "Cost-centre reporting and basic budgeting. Limited understanding of cost-to-serve.",
+   "Cost baseline by business unit and capability. Driver-based budgeting and consistent business cases.",
+   "Cost-to-serve informs decisions. Funding aligned to the operating model; benefits tracked.",
+   "Dynamic resource allocation, value-based funding and continuous efficiency."
+  ],
+  "D17": [
+   "Change managed project by project with no portfolio view. Delivery track record is poor.",
+   "PMO established. Methods defined but inconsistently applied; benefits rarely tracked.",
+   "Portfolio prioritised against strategy. Standard delivery and change methods; benefits registers maintained.",
+   "Portfolio managed dynamically. Change capacity managed and benefits consistently realised.",
+   "Continuous transformation capability. Improvement and innovation embedded; the organisation learns and adapts rapidly."
+  ]
+ },
+ "questions": [
+  {
+   "id": "D01.01",
+   "dimension": "Strategy & Direction",
+   "sub": "Purpose & vision",
+   "question": "Is there a clearly articulated purpose, vision and mission that is understood across the organisation?",
+   "good": "Purpose and vision are documented and current. Staff at all levels can explain them and how their work contributes.",
+   "importance": 2,
+   "evidenceToRequest": "Strategic plan; vision and mission statements; staff engagement survey results",
+   "stakeholders": "CEO; Executive team; Frontline staff",
+   "dim": "D01"
+  },
+  {
+   "id": "D01.02",
+   "dimension": "Strategy & Direction",
+   "sub": "Strategic objectives",
+   "question": "Are strategic objectives specific, measurable and time-bound, with clear priorities and trade-offs?",
+   "good": "A small number of prioritised objectives with measures, targets and owners, plus explicit statements of what the organisation will not do.",
+   "importance": 2,
+   "evidenceToRequest": "Strategic or corporate plan; board papers",
+   "stakeholders": "CEO; Executive team; Board",
+   "dim": "D01"
+  },
+  {
+   "id": "D01.03",
+   "dimension": "Strategy & Direction",
+   "sub": "Strategic choices",
+   "question": "Has the organisation made explicit choices about where it operates, whom it serves and how it creates value?",
+   "good": "Documented choices on target segments, services, channels and sources of advantage that directly inform operating model design.",
+   "importance": 2,
+   "evidenceToRequest": "Strategy documents; market analysis; business cases",
+   "stakeholders": "CEO; Strategy lead",
+   "dim": "D01"
+  },
+  {
+   "id": "D01.04",
+   "dimension": "Strategy & Direction",
+   "sub": "External environment",
+   "question": "Does the strategy reflect a current understanding of the external environment (market, regulatory, technology, economic, social)?",
+   "good": "Regular environmental scanning (e.g. PESTLE) feeds strategy refresh. Emerging regulatory and technology changes are anticipated.",
+   "importance": 2,
+   "evidenceToRequest": "PESTLE / SWOT analyses; horizon-scanning reports; regulatory change updates",
+   "stakeholders": "Strategy lead; Risk & Compliance",
+   "dim": "D01"
+  },
+  {
+   "id": "D01.05",
+   "dimension": "Strategy & Direction",
+   "sub": "Design principles",
+   "question": "Are there agreed operating model design principles that guide how the organisation is structured and operates?",
+   "good": "Six to ten principles (e.g. 'customer first', 'standardise unless differentiating', 'digital by default') endorsed by the executive and used to test design decisions.",
+   "importance": 2,
+   "evidenceToRequest": "Operating model documentation; design principles; executive decisions",
+   "stakeholders": "Executive team; COO",
+   "dim": "D01"
+  },
+  {
+   "id": "D01.06",
+   "dimension": "Strategy & Direction",
+   "sub": "Strategy to execution",
+   "question": "Is there a clear line of sight from strategy to portfolios, business plans, budgets and individual objectives?",
+   "good": "Strategy cascades into business unit plans, the investment portfolio, budgets and individual performance plans with traceable links.",
+   "importance": 2,
+   "evidenceToRequest": "Business unit plans; portfolio register; budget; performance agreements",
+   "stakeholders": "Executive team; PMO; Finance",
+   "dim": "D01"
+  },
+  {
+   "id": "D01.07",
+   "dimension": "Strategy & Direction",
+   "sub": "Strategy communication",
+   "question": "How effectively is the strategy communicated to, and understood by, staff, partners and other stakeholders?",
+   "good": "Structured communication plan. Staff can articulate strategic priorities; progress is discussed through regular two-way engagement.",
+   "importance": 2,
+   "evidenceToRequest": "Internal communication plans; intranet content; engagement survey",
+   "stakeholders": "Communications; Frontline staff",
+   "dim": "D01"
+  },
+  {
+   "id": "D01.08",
+   "dimension": "Strategy & Direction",
+   "sub": "Strategy review",
+   "question": "Is progress against the strategy reviewed regularly and the strategy adjusted in response to performance and change?",
+   "good": "Quarterly strategy reviews by the executive and board, with documented adjustments and re-prioritisation.",
+   "importance": 2,
+   "evidenceToRequest": "Board and executive minutes; strategy performance reports",
+   "stakeholders": "CEO; Board; Strategy lead",
+   "dim": "D01"
+  },
+  {
+   "id": "D01.09",
+   "dimension": "Strategy & Direction",
+   "sub": "Sustainability & ESG",
+   "question": "Are sustainability, ESG and social-licence considerations embedded in the strategy?",
+   "good": "ESG objectives integrated into the strategy with measures. Climate-related risks and opportunities identified and disclosed where required.",
+   "importance": 2,
+   "evidenceToRequest": "ESG / sustainability strategy; climate risk assessment; annual report",
+   "stakeholders": "CEO; CFO; Sustainability lead",
+   "dim": "D01"
+  },
+  {
+   "id": "D02.01",
+   "dimension": "Customers, Channels & Value Proposition",
+   "sub": "Customer segments",
+   "question": "Are customer or stakeholder segments clearly defined, with an understanding of their needs and value?",
+   "good": "Evidence-based segmentation describing the needs, behaviours, value and cost to serve of each segment.",
+   "importance": 2,
+   "evidenceToRequest": "Segmentation studies; customer research; CRM analysis",
+   "stakeholders": "Customer / Marketing lead; Product owners",
+   "dim": "D02"
+  },
+  {
+   "id": "D02.02",
+   "dimension": "Customers, Channels & Value Proposition",
+   "sub": "Value proposition",
+   "question": "Is the value proposition for each segment clearly articulated and differentiated?",
+   "good": "Documented value propositions per segment, tested with customers and reflected in services and channels.",
+   "importance": 2,
+   "evidenceToRequest": "Value proposition documents; brand strategy; customer research",
+   "stakeholders": "Executive team; Marketing",
+   "dim": "D02"
+  },
+  {
+   "id": "D02.03",
+   "dimension": "Customers, Channels & Value Proposition",
+   "sub": "Customer journeys",
+   "question": "Have the key end-to-end customer journeys been mapped, including pain points and moments that matter?",
+   "good": "Priority journeys mapped from the customer's perspective, with pain points quantified and owners assigned.",
+   "importance": 2,
+   "evidenceToRequest": "Journey maps; service blueprints; complaints analysis",
+   "stakeholders": "CX lead; Operations managers",
+   "dim": "D02"
+  },
+  {
+   "id": "D02.04",
+   "dimension": "Customers, Channels & Value Proposition",
+   "sub": "Channel strategy",
+   "question": "Is there a deliberate channel strategy (digital, phone, face-to-face, partner) aligned to customer needs and cost to serve?",
+   "good": "Channel roles defined by segment and interaction type; digital first where appropriate; consistent experience across channels.",
+   "importance": 2,
+   "evidenceToRequest": "Channel strategy; channel volume and cost data; digital analytics",
+   "stakeholders": "CX lead; Digital lead; Contact centre manager",
+   "dim": "D02"
+  },
+  {
+   "id": "D02.05",
+   "dimension": "Customers, Channels & Value Proposition",
+   "sub": "Omnichannel consistency",
+   "question": "Do customers receive a consistent experience and consistent information across channels?",
+   "good": "Single view of the customer and a shared knowledge base across channels. Customers do not need to repeat themselves.",
+   "importance": 2,
+   "evidenceToRequest": "CRM architecture; knowledge management system; mystery shopping results",
+   "stakeholders": "Contact centre; Digital; IT",
+   "dim": "D02"
+  },
+  {
+   "id": "D02.06",
+   "dimension": "Customers, Channels & Value Proposition",
+   "sub": "Voice of customer",
+   "question": "Are customer feedback, complaints and satisfaction systematically captured, analysed and acted upon?",
+   "good": "Closed-loop voice-of-customer program (NPS / CSAT / CES) with root-cause analysis and evidence of changes made.",
+   "importance": 2,
+   "evidenceToRequest": "VoC reports; complaints register; NPS / CSAT trends",
+   "stakeholders": "CX lead; Complaints manager",
+   "dim": "D02"
+  },
+  {
+   "id": "D02.07",
+   "dimension": "Customers, Channels & Value Proposition",
+   "sub": "Service standards",
+   "question": "Are customer service standards and commitments defined, published and measured?",
+   "good": "Published service charter or SLAs, with performance reported and remediation when targets are missed.",
+   "importance": 2,
+   "evidenceToRequest": "Service charter; SLA performance reports",
+   "stakeholders": "Operations managers; CX lead",
+   "dim": "D02"
+  },
+  {
+   "id": "D02.08",
+   "dimension": "Customers, Channels & Value Proposition",
+   "sub": "Customer insight",
+   "question": "Does the organisation use customer data and insight to design and improve services?",
+   "good": "Customer analytics informs product, service and channel decisions; insights are shared across teams.",
+   "importance": 2,
+   "evidenceToRequest": "Analytics reports; insight packs",
+   "stakeholders": "Data & Analytics; Marketing",
+   "dim": "D02"
+  },
+  {
+   "id": "D02.09",
+   "dimension": "Customers, Channels & Value Proposition",
+   "sub": "Accessibility & inclusion",
+   "question": "Are services accessible and inclusive for all customer groups, including customers experiencing vulnerability?",
+   "good": "Accessibility standards (e.g. WCAG 2.2 AA) met; vulnerable customer policy in place; inclusive design practised.",
+   "importance": 2,
+   "evidenceToRequest": "Accessibility audits; vulnerable customer policy",
+   "stakeholders": "CX lead; Digital; Legal",
+   "dim": "D02"
+  },
+  {
+   "id": "D03.01",
+   "dimension": "Products & Services",
+   "sub": "Service catalogue",
+   "question": "Is there a complete, current catalogue of the products and services the organisation delivers (external and internal)?",
+   "good": "A single authoritative catalogue with owners, descriptions, customers, channels and service levels.",
+   "importance": 2,
+   "evidenceToRequest": "Product / service catalogue; internal service catalogue",
+   "stakeholders": "Product owners; Operations",
+   "dim": "D03"
+  },
+  {
+   "id": "D03.02",
+   "dimension": "Products & Services",
+   "sub": "Portfolio performance",
+   "question": "Is the performance, value or profitability of each product or service known?",
+   "good": "Revenue or value, cost, volumes and customer outcomes tracked for each product or service.",
+   "importance": 2,
+   "evidenceToRequest": "Product P&Ls; product performance reports",
+   "stakeholders": "CFO; Product owners",
+   "dim": "D03"
+  },
+  {
+   "id": "D03.03",
+   "dimension": "Products & Services",
+   "sub": "Product ownership",
+   "question": "Does every product or service have an accountable owner with end-to-end responsibility?",
+   "good": "Named owners accountable for outcomes, lifecycle and performance.",
+   "importance": 2,
+   "evidenceToRequest": "Role descriptions; product governance documents",
+   "stakeholders": "Product owners; Executive team",
+   "dim": "D03"
+  },
+  {
+   "id": "D03.04",
+   "dimension": "Products & Services",
+   "sub": "Lifecycle management",
+   "question": "Is there a defined lifecycle process for designing, launching, changing and retiring products and services?",
+   "good": "Stage-gated lifecycle with criteria for launch, review and retirement, applied consistently.",
+   "importance": 2,
+   "evidenceToRequest": "Product lifecycle process; product committee minutes",
+   "stakeholders": "Product owners; Risk",
+   "dim": "D03"
+  },
+  {
+   "id": "D03.05",
+   "dimension": "Products & Services",
+   "sub": "Portfolio complexity",
+   "question": "Is portfolio complexity actively managed (e.g. overlapping, legacy or low-value products rationalised)?",
+   "good": "Periodic rationalisation reviews. The cost of complexity is understood; legacy products are migrated or retired.",
+   "importance": 2,
+   "evidenceToRequest": "Rationalisation reviews; product counts over time",
+   "stakeholders": "Product owners; Finance",
+   "dim": "D03"
+  },
+  {
+   "id": "D03.06",
+   "dimension": "Products & Services",
+   "sub": "Innovation pipeline",
+   "question": "Is there a pipeline of new or improved products and services linked to strategy and customer insight?",
+   "good": "Managed pipeline with prioritisation criteria, a test-and-learn approach and clear funding.",
+   "importance": 2,
+   "evidenceToRequest": "Innovation pipeline; business cases",
+   "stakeholders": "Strategy; Product",
+   "dim": "D03"
+  },
+  {
+   "id": "D03.07",
+   "dimension": "Products & Services",
+   "sub": "Pricing & funding",
+   "question": "Are pricing, fees or funding arrangements for services understood, justified and reviewed?",
+   "good": "Pricing and funding models linked to cost-to-serve and value, and reviewed at least annually.",
+   "importance": 2,
+   "evidenceToRequest": "Pricing policy; funding agreements",
+   "stakeholders": "CFO; Product owners",
+   "dim": "D03"
+  },
+  {
+   "id": "D03.08",
+   "dimension": "Products & Services",
+   "sub": "Product obligations",
+   "question": "Are product-related regulatory obligations (e.g. consumer law, design and distribution) identified and met?",
+   "good": "Obligations mapped to each product with controls and monitoring (e.g. target market determinations where applicable).",
+   "importance": 2,
+   "evidenceToRequest": "Obligations register; product compliance reviews",
+   "stakeholders": "Risk & Compliance; Legal",
+   "dim": "D03"
+  },
+  {
+   "id": "D04.01",
+   "dimension": "Value Streams & Processes",
+   "sub": "Value streams",
+   "question": "Have the organisation's end-to-end value streams been identified (e.g. request-to-resolve, procure-to-pay, hire-to-retire)?",
+   "good": "Value streams defined from trigger to outcome, with stages, stakeholders and value items.",
+   "importance": 2,
+   "evidenceToRequest": "Value stream maps; business architecture artefacts",
+   "stakeholders": "COO; Business architect",
+   "dim": "D04"
+  },
+  {
+   "id": "D04.02",
+   "dimension": "Value Streams & Processes",
+   "sub": "Process architecture",
+   "question": "Is there a structured process architecture (Level 0 to Level 3) covering core and supporting processes?",
+   "good": "Documented process hierarchy aligned to a reference model (e.g. APQC PCF) and actively maintained.",
+   "importance": 2,
+   "evidenceToRequest": "Process architecture; process repository",
+   "stakeholders": "Process owners; BA / process team",
+   "dim": "D04"
+  },
+  {
+   "id": "D04.03",
+   "dimension": "Value Streams & Processes",
+   "sub": "Process ownership",
+   "question": "Do end-to-end processes have accountable owners with authority across organisational boundaries?",
+   "good": "Named end-to-end process owners with a mandate, performance measures and improvement responsibility.",
+   "importance": 2,
+   "evidenceToRequest": "RACI; role descriptions",
+   "stakeholders": "COO; Process owners",
+   "dim": "D04"
+  },
+  {
+   "id": "D04.04",
+   "dimension": "Value Streams & Processes",
+   "sub": "Documentation",
+   "question": "Are key processes documented, current and accessible to the people who perform them?",
+   "good": "Processes documented in a common notation (e.g. BPMN 2.0) in a central repository with version control and review dates.",
+   "importance": 2,
+   "evidenceToRequest": "Process maps; standard operating procedures; work instructions",
+   "stakeholders": "Process owners; Frontline staff",
+   "dim": "D04"
+  },
+  {
+   "id": "D04.05",
+   "dimension": "Value Streams & Processes",
+   "sub": "Standardisation",
+   "question": "Are processes standardised across business units and locations where there is no reason for variation?",
+   "good": "Common processes adopted by default. Variations are deliberate, justified and documented.",
+   "importance": 2,
+   "evidenceToRequest": "Process comparisons across units; audit findings",
+   "stakeholders": "Operations managers",
+   "dim": "D04"
+  },
+  {
+   "id": "D04.06",
+   "dimension": "Value Streams & Processes",
+   "sub": "Efficiency & waste",
+   "question": "Are processes efficient, with minimal rework, hand-offs, delays and manual workarounds?",
+   "good": "Process performance analysed (cycle time, rework, touchpoints) and waste systematically removed using Lean methods.",
+   "importance": 2,
+   "evidenceToRequest": "Process metrics; time-and-motion studies; workaround inventory",
+   "stakeholders": "Operations managers; Frontline staff",
+   "dim": "D04"
+  },
+  {
+   "id": "D04.07",
+   "dimension": "Value Streams & Processes",
+   "sub": "Automation",
+   "question": "What level of automation is applied, and are automation opportunities (including RPA and AI) identified and prioritised?",
+   "good": "Automation pipeline with business cases. High-volume, rules-based work is automated, with controls over bots and AI.",
+   "importance": 2,
+   "evidenceToRequest": "Automation register; RPA / AI use-case inventory",
+   "stakeholders": "IT; Operations; Digital",
+   "dim": "D04"
+  },
+  {
+   "id": "D04.08",
+   "dimension": "Value Streams & Processes",
+   "sub": "Process performance",
+   "question": "Are process KPIs (volume, cycle time, cost, quality, compliance) defined and monitored?",
+   "good": "Process dashboards reviewed regularly by owners, with targets and corrective action.",
+   "importance": 2,
+   "evidenceToRequest": "Process dashboards; operational reports",
+   "stakeholders": "Process owners; Operations managers",
+   "dim": "D04"
+  },
+  {
+   "id": "D04.09",
+   "dimension": "Value Streams & Processes",
+   "sub": "Hand-offs & interfaces",
+   "question": "Are hand-offs between teams, functions and third parties clearly defined and managed?",
+   "good": "Clear hand-off points, internal service agreements (OLAs) between teams, and minimal queues between steps.",
+   "importance": 2,
+   "evidenceToRequest": "Swimlane maps; internal SLAs / OLAs",
+   "stakeholders": "Operations managers; Team leaders",
+   "dim": "D04"
+  },
+  {
+   "id": "D04.10",
+   "dimension": "Value Streams & Processes",
+   "sub": "Embedded controls",
+   "question": "Are key risk and compliance controls embedded in processes rather than applied after the fact?",
+   "good": "Controls designed into processes, mapped to risks and obligations, and tested.",
+   "importance": 2,
+   "evidenceToRequest": "Control library; risk and control matrix (RCM)",
+   "stakeholders": "Risk & Compliance; Process owners",
+   "dim": "D04"
+  },
+  {
+   "id": "D05.01",
+   "dimension": "Business Capabilities",
+   "sub": "Capability map",
+   "question": "Does the organisation have a current business capability map describing what it does, independent of how?",
+   "good": "Levelled capability map (L1 to L3) endorsed by executives and used in planning and investment decisions.",
+   "importance": 2,
+   "evidenceToRequest": "Capability map; business architecture artefacts",
+   "stakeholders": "Enterprise / business architect; Strategy",
+   "dim": "D05"
+  },
+  {
+   "id": "D05.02",
+   "dimension": "Business Capabilities",
+   "sub": "Strategic importance",
+   "question": "Have capabilities been classified by strategic importance and differentiation (differentiating vs commodity)?",
+   "good": "Each capability rated for strategic importance and differentiation, informing sourcing and investment.",
+   "importance": 2,
+   "evidenceToRequest": "Capability heat maps; strategy documents",
+   "stakeholders": "Executive team; Architecture",
+   "dim": "D05"
+  },
+  {
+   "id": "D05.03",
+   "dimension": "Business Capabilities",
+   "sub": "Capability maturity",
+   "question": "Has capability maturity been assessed across people, process, technology and information?",
+   "good": "Periodic, evidence-based maturity assessment with a target maturity for each capability.",
+   "importance": 2,
+   "evidenceToRequest": "Capability assessments; maturity reports",
+   "stakeholders": "Capability owners; Architecture",
+   "dim": "D05"
+  },
+  {
+   "id": "D05.04",
+   "dimension": "Business Capabilities",
+   "sub": "Capability ownership",
+   "question": "Is there a named owner for each capability, accountable for its performance and uplift?",
+   "good": "Capability owners identified with clear accountability and uplift plans.",
+   "importance": 2,
+   "evidenceToRequest": "Capability ownership register",
+   "stakeholders": "Executive team",
+   "dim": "D05"
+  },
+  {
+   "id": "D05.05",
+   "dimension": "Business Capabilities",
+   "sub": "Investment alignment",
+   "question": "Is investment directed to the capabilities that matter most to the strategy?",
+   "good": "Portfolio investment mapped to capabilities, with spend weighted towards strategic gaps.",
+   "importance": 2,
+   "evidenceToRequest": "Investment portfolio mapped to capabilities; budget",
+   "stakeholders": "PMO; CFO; Architecture",
+   "dim": "D05"
+  },
+  {
+   "id": "D05.06",
+   "dimension": "Business Capabilities",
+   "sub": "Capability gaps",
+   "question": "Are gaps between current and required capabilities identified, with plans to close them?",
+   "good": "Gap analysis linked to roadmap initiatives with timeframes and funding.",
+   "importance": 2,
+   "evidenceToRequest": "Gap analyses; roadmaps",
+   "stakeholders": "Architecture; Strategy",
+   "dim": "D05"
+  },
+  {
+   "id": "D05.07",
+   "dimension": "Business Capabilities",
+   "sub": "Capability duplication",
+   "question": "Are capabilities duplicated across business units, and is any duplication deliberate?",
+   "good": "Duplication identified; consolidation or shared services considered where appropriate.",
+   "importance": 2,
+   "evidenceToRequest": "Capability-to-organisation mapping",
+   "stakeholders": "COO; Architecture",
+   "dim": "D05"
+  },
+  {
+   "id": "D05.08",
+   "dimension": "Business Capabilities",
+   "sub": "Capability sourcing",
+   "question": "Is there a deliberate decision on which capabilities are delivered in-house, shared, outsourced or partnered?",
+   "good": "Sourcing decisions follow a documented framework linked to differentiation, cost and risk.",
+   "importance": 2,
+   "evidenceToRequest": "Sourcing strategy; outsourcing contracts",
+   "stakeholders": "COO; Procurement",
+   "dim": "D05"
+  },
+  {
+   "id": "D06.01",
+   "dimension": "Organisation Structure & Roles",
+   "sub": "Structural archetype",
+   "question": "Is the organisational structure (functional, divisional, matrix, product / platform, network) aligned to the strategy and design principles?",
+   "good": "Structure explicitly linked to strategy with a documented rationale. Trade-offs are understood and managed.",
+   "importance": 2,
+   "evidenceToRequest": "Organisation charts; restructure business cases",
+   "stakeholders": "CEO; CHRO; Executive team",
+   "dim": "D06"
+  },
+  {
+   "id": "D06.02",
+   "dimension": "Organisation Structure & Roles",
+   "sub": "Spans of control",
+   "question": "Are spans of control appropriate for the nature of the work?",
+   "good": "Spans within agreed benchmarks (see Lists tab); outliers are justified.",
+   "importance": 2,
+   "evidenceToRequest": "HR system extract (reporting lines); organisation charts",
+   "stakeholders": "CHRO; HR analytics",
+   "dim": "D06"
+  },
+  {
+   "id": "D06.03",
+   "dimension": "Organisation Structure & Roles",
+   "sub": "Layers",
+   "question": "Is the number of management layers appropriate for the organisation's size and complexity?",
+   "good": "Minimal layers between the CEO and the frontline (commonly 5 to 7 for large organisations); decisions are not slowed by hierarchy.",
+   "importance": 2,
+   "evidenceToRequest": "HR system extract; organisation charts",
+   "stakeholders": "CHRO; HR analytics",
+   "dim": "D06"
+  },
+  {
+   "id": "D06.04",
+   "dimension": "Organisation Structure & Roles",
+   "sub": "Centralisation vs devolution",
+   "question": "Is there a clear, deliberate balance between centralised, shared and devolved functions?",
+   "good": "The rationale for what is centralised versus local is documented; there are minimal shadow functions.",
+   "importance": 2,
+   "evidenceToRequest": "Functional model documentation; cost data",
+   "stakeholders": "COO; CFO; CHRO",
+   "dim": "D06"
+  },
+  {
+   "id": "D06.05",
+   "dimension": "Organisation Structure & Roles",
+   "sub": "Shared services & CoEs",
+   "question": "Are shared services and centres of excellence used where they add value, with clear service agreements?",
+   "good": "Shared services operate with service catalogues, SLAs and customer satisfaction measures.",
+   "importance": 2,
+   "evidenceToRequest": "Shared services catalogue; SLAs; satisfaction surveys",
+   "stakeholders": "Shared services leads; Business unit heads",
+   "dim": "D06"
+  },
+  {
+   "id": "D06.06",
+   "dimension": "Organisation Structure & Roles",
+   "sub": "Role clarity",
+   "question": "Are roles, accountabilities and responsibilities clearly defined and understood?",
+   "good": "Current role descriptions and documented accountabilities, with little overlap or gaps between roles.",
+   "importance": 2,
+   "evidenceToRequest": "Position descriptions; RACIs; engagement survey",
+   "stakeholders": "CHRO; Managers; Staff",
+   "dim": "D06"
+  },
+  {
+   "id": "D06.07",
+   "dimension": "Organisation Structure & Roles",
+   "sub": "Duplication & shadow functions",
+   "question": "Is there duplication of roles or activities across units (e.g. shadow finance, HR or IT teams)?",
+   "good": "Duplicated activity identified and deliberately resolved.",
+   "importance": 2,
+   "evidenceToRequest": "Activity analysis; organisation charts; cost centre data",
+   "stakeholders": "CFO; CHRO; COO",
+   "dim": "D06"
+  },
+  {
+   "id": "D06.08",
+   "dimension": "Organisation Structure & Roles",
+   "sub": "Interfaces & collaboration",
+   "question": "Are interfaces between organisational units clearly defined, with effective mechanisms for cross-unit work?",
+   "good": "Cross-functional teams, forums and operating agreements support end-to-end delivery.",
+   "importance": 2,
+   "evidenceToRequest": "Operating agreements; forum terms of reference",
+   "stakeholders": "Executive team; Managers",
+   "dim": "D06"
+  },
+  {
+   "id": "D06.09",
+   "dimension": "Organisation Structure & Roles",
+   "sub": "Structural agility",
+   "question": "Can the structure adapt quickly to changing priorities (e.g. through cross-functional or agile teams)?",
+   "good": "Mechanisms exist to form and re-form teams around priorities without full restructures.",
+   "importance": 2,
+   "evidenceToRequest": "Team models; resourcing processes",
+   "stakeholders": "COO; CHRO",
+   "dim": "D06"
+  },
+  {
+   "id": "D07.01",
+   "dimension": "Governance & Decision Rights",
+   "sub": "Governance framework",
+   "question": "Is there a documented governance framework showing the governing bodies and committees and how they relate?",
+   "good": "Governance map with a clear hierarchy, purpose, membership and reporting lines for each body.",
+   "importance": 2,
+   "evidenceToRequest": "Governance framework; committee charters",
+   "stakeholders": "Company Secretary / Board Secretariat; CEO",
+   "dim": "D07"
+  },
+  {
+   "id": "D07.02",
+   "dimension": "Governance & Decision Rights",
+   "sub": "Committee effectiveness",
+   "question": "Do governance forums have clear terms of reference, the right membership and effective agendas?",
+   "good": "Current terms of reference. Forums focus on decisions rather than information; effectiveness is reviewed periodically.",
+   "importance": 2,
+   "evidenceToRequest": "Terms of reference; agendas; minutes; effectiveness reviews",
+   "stakeholders": "Committee chairs; Secretariat",
+   "dim": "D07"
+  },
+  {
+   "id": "D07.03",
+   "dimension": "Governance & Decision Rights",
+   "sub": "Delegations of authority",
+   "question": "Are financial and non-financial delegations documented, current and understood?",
+   "good": "Delegations instrument aligned to structure and risk appetite, reviewed annually and system-enforced where possible.",
+   "importance": 2,
+   "evidenceToRequest": "Delegations of authority schedule; system workflow rules",
+   "stakeholders": "CFO; Legal",
+   "dim": "D07"
+  },
+  {
+   "id": "D07.04",
+   "dimension": "Governance & Decision Rights",
+   "sub": "Decision rights",
+   "question": "Is it clear who recommends, agrees, decides and provides input on key decisions?",
+   "good": "Decision rights (e.g. RAPID or RACI) defined for key decisions, which are made at the lowest appropriate level.",
+   "importance": 2,
+   "evidenceToRequest": "Decision rights matrix; RACI",
+   "stakeholders": "Executive team; Managers",
+   "dim": "D07"
+  },
+  {
+   "id": "D07.05",
+   "dimension": "Governance & Decision Rights",
+   "sub": "Decision speed",
+   "question": "Are decisions made in a timely way, without excessive escalation or duplication of forums?",
+   "good": "Reasonable decision cycle times, little re-litigation of decisions and clear escalation thresholds.",
+   "importance": 2,
+   "evidenceToRequest": "Decision logs; minutes; interview evidence",
+   "stakeholders": "Executive team; Managers",
+   "dim": "D07"
+  },
+  {
+   "id": "D07.06",
+   "dimension": "Governance & Decision Rights",
+   "sub": "Policy framework",
+   "question": "Is there a structured policy framework with ownership, review cycles and alignment to obligations?",
+   "good": "Policy hierarchy (policy, standard, procedure) with owners, review dates and attestation.",
+   "importance": 2,
+   "evidenceToRequest": "Policy register; policy framework",
+   "stakeholders": "Risk & Compliance; Policy owners",
+   "dim": "D07"
+  },
+  {
+   "id": "D07.07",
+   "dimension": "Governance & Decision Rights",
+   "sub": "Board & executive oversight",
+   "question": "Does the board and executive receive timely, decision-useful information on performance, risk and change?",
+   "good": "Integrated reporting to the board covering strategy, performance, risk and major programs.",
+   "importance": 2,
+   "evidenceToRequest": "Board packs; executive reports",
+   "stakeholders": "Board; CEO; Company Secretary",
+   "dim": "D07"
+  },
+  {
+   "id": "D07.08",
+   "dimension": "Governance & Decision Rights",
+   "sub": "Three lines",
+   "question": "Are roles across the three lines (management, risk and compliance oversight, independent assurance) clear and effective?",
+   "good": "Clear separation of accountabilities between the first, second and third lines, with a coordinated assurance map.",
+   "importance": 2,
+   "evidenceToRequest": "Assurance map; risk framework; internal audit charter",
+   "stakeholders": "CRO; Head of Internal Audit",
+   "dim": "D07"
+  },
+  {
+   "id": "D07.09",
+   "dimension": "Governance & Decision Rights",
+   "sub": "Transparency & accountability",
+   "question": "Are decisions, rationale and accountabilities recorded and traceable?",
+   "good": "Decision registers, minutes and action logs maintained and followed up.",
+   "importance": 2,
+   "evidenceToRequest": "Decision and action registers",
+   "stakeholders": "Secretariat; PMO",
+   "dim": "D07"
+  },
+  {
+   "id": "D08.01",
+   "dimension": "People, Workforce & Skills",
+   "sub": "Workforce planning",
+   "question": "Is there a strategic workforce plan linking future capability needs to the strategy?",
+   "good": "Three-to-five-year workforce plan with supply and demand analysis, critical roles and actions.",
+   "importance": 2,
+   "evidenceToRequest": "Strategic workforce plan; workforce analytics",
+   "stakeholders": "CHRO; Executive team",
+   "dim": "D08"
+  },
+  {
+   "id": "D08.02",
+   "dimension": "People, Workforce & Skills",
+   "sub": "Workforce mix",
+   "question": "Is the workforce mix (permanent, fixed-term, contractor, outsourced, offshore) deliberate and cost-effective?",
+   "good": "Target workforce mix defined by capability; contractor reliance monitored and justified.",
+   "importance": 2,
+   "evidenceToRequest": "Headcount / FTE by employment type; contractor spend",
+   "stakeholders": "CHRO; CFO; Procurement",
+   "dim": "D08"
+  },
+  {
+   "id": "D08.03",
+   "dimension": "People, Workforce & Skills",
+   "sub": "Capacity & demand",
+   "question": "Is workforce capacity matched to demand, with visibility of utilisation and backlogs?",
+   "good": "Demand forecasting and capacity planning used; resources rebalanced as demand changes.",
+   "importance": 2,
+   "evidenceToRequest": "Capacity models; rosters; backlog data",
+   "stakeholders": "Operations managers; Workforce planning",
+   "dim": "D08"
+  },
+  {
+   "id": "D08.04",
+   "dimension": "People, Workforce & Skills",
+   "sub": "Skills & capability",
+   "question": "Are current skills known, and are gaps against future needs identified?",
+   "good": "Skills framework and inventory in place; gaps quantified and addressed through development plans.",
+   "importance": 2,
+   "evidenceToRequest": "Skills framework; capability assessments; training records",
+   "stakeholders": "CHRO; Learning & Development",
+   "dim": "D08"
+  },
+  {
+   "id": "D08.05",
+   "dimension": "People, Workforce & Skills",
+   "sub": "Critical roles & succession",
+   "question": "Are critical roles and key-person dependencies identified, with succession plans?",
+   "good": "Critical roles identified, with ready-now successors and captured knowledge.",
+   "importance": 2,
+   "evidenceToRequest": "Succession plans; key-person risk register",
+   "stakeholders": "CHRO; Executive team",
+   "dim": "D08"
+  },
+  {
+   "id": "D08.06",
+   "dimension": "People, Workforce & Skills",
+   "sub": "Attraction & retention",
+   "question": "Can the organisation attract and retain the talent it needs?",
+   "good": "Competitive employee value proposition; turnover, time-to-fill and regretted losses within targets.",
+   "importance": 2,
+   "evidenceToRequest": "Turnover data; recruitment metrics; exit interview themes",
+   "stakeholders": "CHRO; Talent acquisition",
+   "dim": "D08"
+  },
+  {
+   "id": "D08.07",
+   "dimension": "People, Workforce & Skills",
+   "sub": "Performance & development",
+   "question": "Is there an effective performance and development framework linked to objectives and behaviours?",
+   "good": "Regular performance conversations; objectives cascaded from strategy; development plans in place.",
+   "importance": 2,
+   "evidenceToRequest": "Performance framework; completion rates",
+   "stakeholders": "CHRO; Managers",
+   "dim": "D08"
+  },
+  {
+   "id": "D08.08",
+   "dimension": "People, Workforce & Skills",
+   "sub": "Reward & recognition",
+   "question": "Do reward and recognition mechanisms reinforce the desired outcomes and behaviours?",
+   "good": "Remuneration and incentives aligned to strategy, risk and behaviours; pay equity monitored.",
+   "importance": 2,
+   "evidenceToRequest": "Remuneration framework; incentive plans; pay equity analysis",
+   "stakeholders": "CHRO; Remuneration committee",
+   "dim": "D08"
+  },
+  {
+   "id": "D08.09",
+   "dimension": "People, Workforce & Skills",
+   "sub": "WHS & wellbeing",
+   "question": "Are work health and safety risks, including psychosocial hazards, managed effectively?",
+   "good": "WHS management system in place; psychosocial risks identified and controlled in line with WHS regulations.",
+   "importance": 2,
+   "evidenceToRequest": "WHS reports; psychosocial risk assessments; incident data",
+   "stakeholders": "WHS lead; CHRO",
+   "dim": "D08"
+  },
+  {
+   "id": "D08.10",
+   "dimension": "People, Workforce & Skills",
+   "sub": "Employee engagement",
+   "question": "Is employee engagement measured and acted upon?",
+   "good": "Regular engagement surveys with action plans and visible follow-through.",
+   "importance": 2,
+   "evidenceToRequest": "Engagement survey results and action plans",
+   "stakeholders": "CHRO; Managers",
+   "dim": "D08"
+  },
+  {
+   "id": "D09.01",
+   "dimension": "Culture, Leadership & Behaviours",
+   "sub": "Values & behaviours",
+   "question": "Are organisational values defined and translated into observable behaviours?",
+   "good": "Values embedded in recruitment, performance and recognition; behaviours are observable in practice.",
+   "importance": 2,
+   "evidenceToRequest": "Values framework; behavioural competencies",
+   "stakeholders": "CEO; CHRO; Staff",
+   "dim": "D09"
+  },
+  {
+   "id": "D09.02",
+   "dimension": "Culture, Leadership & Behaviours",
+   "sub": "Culture diagnosis",
+   "question": "Has the current culture been diagnosed and compared with the culture needed to deliver the strategy?",
+   "good": "Culture diagnostic completed; priority culture shifts defined and tracked.",
+   "importance": 2,
+   "evidenceToRequest": "Culture surveys; diagnostics",
+   "stakeholders": "CHRO; Executive team",
+   "dim": "D09"
+  },
+  {
+   "id": "D09.03",
+   "dimension": "Culture, Leadership & Behaviours",
+   "sub": "Leadership capability",
+   "question": "Do leaders have the capability to lead through change and deliver the strategy?",
+   "good": "Leadership framework, development programs and 360-degree feedback; leaders role-model desired behaviours.",
+   "importance": 2,
+   "evidenceToRequest": "Leadership framework; 360 results; development programs",
+   "stakeholders": "CEO; CHRO",
+   "dim": "D09"
+  },
+  {
+   "id": "D09.04",
+   "dimension": "Culture, Leadership & Behaviours",
+   "sub": "Accountability",
+   "question": "Do people take ownership of outcomes, and are they held to account constructively?",
+   "good": "Clear expectations, consequences and recognition; issues raised and resolved without blame.",
+   "importance": 2,
+   "evidenceToRequest": "Engagement survey; performance data; interviews",
+   "stakeholders": "Managers; Staff",
+   "dim": "D09"
+  },
+  {
+   "id": "D09.05",
+   "dimension": "Culture, Leadership & Behaviours",
+   "sub": "Collaboration",
+   "question": "Is there effective collaboration across teams and functions, or are silos evident?",
+   "good": "Cross-functional collaboration is the norm, with shared goals across units and little siloed behaviour.",
+   "importance": 2,
+   "evidenceToRequest": "Engagement survey; organisational network analysis; interviews",
+   "stakeholders": "Managers; Staff",
+   "dim": "D09"
+  },
+  {
+   "id": "D09.06",
+   "dimension": "Culture, Leadership & Behaviours",
+   "sub": "Customer centricity",
+   "question": "Do staff make decisions with the customer or beneficiary outcome in mind?",
+   "good": "Customer outcomes feature in everyday decision making and in measures.",
+   "importance": 2,
+   "evidenceToRequest": "Interviews; CX metrics; decision examples",
+   "stakeholders": "Frontline staff; Managers",
+   "dim": "D09"
+  },
+  {
+   "id": "D09.07",
+   "dimension": "Culture, Leadership & Behaviours",
+   "sub": "Psychological safety",
+   "question": "Do staff feel safe to raise concerns, challenge ideas and report issues?",
+   "good": "High psychological safety scores; effective speak-up and whistleblower mechanisms.",
+   "importance": 2,
+   "evidenceToRequest": "Engagement survey; whistleblower reports",
+   "stakeholders": "CHRO; Staff; Risk",
+   "dim": "D09"
+  },
+  {
+   "id": "D09.08",
+   "dimension": "Culture, Leadership & Behaviours",
+   "sub": "Risk culture",
+   "question": "Is there a healthy risk culture in which risks are identified, escalated and managed openly?",
+   "good": "Risk culture assessed; risks and incidents reported promptly; lessons learned applied.",
+   "importance": 2,
+   "evidenceToRequest": "Risk culture survey; incident reporting trends",
+   "stakeholders": "CRO; Managers",
+   "dim": "D09"
+  },
+  {
+   "id": "D09.09",
+   "dimension": "Culture, Leadership & Behaviours",
+   "sub": "Change readiness",
+   "question": "How ready and able is the organisation to adopt change?",
+   "good": "Change fatigue understood, change capacity managed and a history of successful adoption.",
+   "importance": 2,
+   "evidenceToRequest": "Change readiness assessments; post-implementation reviews",
+   "stakeholders": "Change lead; Managers",
+   "dim": "D09"
+  },
+  {
+   "id": "D10.01",
+   "dimension": "Performance Management & Planning",
+   "sub": "Planning cycle",
+   "question": "Is there an integrated planning cycle linking strategic, business, workforce and financial planning?",
+   "good": "Annual integrated planning calendar with clear inputs, outputs and decision points.",
+   "importance": 2,
+   "evidenceToRequest": "Planning calendar; business plans; budget process",
+   "stakeholders": "CFO; Strategy; PMO",
+   "dim": "D10"
+  },
+  {
+   "id": "D10.02",
+   "dimension": "Performance Management & Planning",
+   "sub": "KPI framework",
+   "question": "Is there a balanced set of KPIs (financial, customer, process, people, risk) aligned to the strategy?",
+   "good": "Balanced scorecard or equivalent with defined measures, targets, owners and data sources.",
+   "importance": 2,
+   "evidenceToRequest": "KPI framework; scorecards; metric definitions",
+   "stakeholders": "Executive team; Performance team",
+   "dim": "D10"
+  },
+  {
+   "id": "D10.03",
+   "dimension": "Performance Management & Planning",
+   "sub": "Cascade & line of sight",
+   "question": "Do KPIs and objectives cascade from enterprise to business unit, team and individual levels?",
+   "good": "Clear line of sight from enterprise goals to team and individual objectives (e.g. OKRs).",
+   "importance": 2,
+   "evidenceToRequest": "Cascaded scorecards; OKRs; performance agreements",
+   "stakeholders": "Managers; CHRO",
+   "dim": "D10"
+  },
+  {
+   "id": "D10.04",
+   "dimension": "Performance Management & Planning",
+   "sub": "Management reporting",
+   "question": "Is management reporting timely, accurate, insightful and trusted?",
+   "good": "Automated, single-source reporting focused on insight and exceptions, with little manual effort.",
+   "importance": 2,
+   "evidenceToRequest": "Management reports; report inventory; production effort",
+   "stakeholders": "CFO; Data & Analytics",
+   "dim": "D10"
+  },
+  {
+   "id": "D10.05",
+   "dimension": "Performance Management & Planning",
+   "sub": "Performance forums",
+   "question": "Are there regular forums where performance is reviewed and actions agreed?",
+   "good": "A rhythm of performance reviews at each level, with actions tracked to closure.",
+   "importance": 2,
+   "evidenceToRequest": "Performance review agendas; action logs",
+   "stakeholders": "Executive team; Managers",
+   "dim": "D10"
+  },
+  {
+   "id": "D10.06",
+   "dimension": "Performance Management & Planning",
+   "sub": "Target setting",
+   "question": "Are targets stretching yet achievable, and based on evidence and benchmarks?",
+   "good": "Targets informed by baselines, benchmarks and capacity, and reviewed as conditions change.",
+   "importance": 2,
+   "evidenceToRequest": "Target-setting methodology; benchmarks",
+   "stakeholders": "CFO; Performance team",
+   "dim": "D10"
+  },
+  {
+   "id": "D10.07",
+   "dimension": "Performance Management & Planning",
+   "sub": "Incentive alignment",
+   "question": "Are performance measures aligned with incentives and consequences?",
+   "good": "Incentives reward balanced performance, including risk and behaviours, not just financial outcomes.",
+   "importance": 2,
+   "evidenceToRequest": "Incentive plans; scorecards",
+   "stakeholders": "CHRO; Remuneration committee",
+   "dim": "D10"
+  },
+  {
+   "id": "D10.08",
+   "dimension": "Performance Management & Planning",
+   "sub": "Performance data",
+   "question": "Is performance data reliable, with clear definitions and data ownership?",
+   "good": "KPI definitions documented, data lineage understood and data quality monitored.",
+   "importance": 2,
+   "evidenceToRequest": "Metric dictionary; data quality reports",
+   "stakeholders": "Data & Analytics; Performance team",
+   "dim": "D10"
+  },
+  {
+   "id": "D10.09",
+   "dimension": "Performance Management & Planning",
+   "sub": "External reporting",
+   "question": "Are external and regulatory performance reporting obligations met efficiently?",
+   "good": "External reporting automated where possible, reconciled to internal reporting and delivered on time.",
+   "importance": 2,
+   "evidenceToRequest": "Annual report; regulatory returns; reporting calendar",
+   "stakeholders": "CFO; Company Secretary; Compliance",
+   "dim": "D10"
+  },
+  {
+   "id": "D11.01",
+   "dimension": "Technology & Applications",
+   "sub": "Technology strategy",
+   "question": "Is there a technology strategy aligned to the business strategy and target operating model?",
+   "good": "Current technology strategy with roadmap, principles and funding, endorsed by the executive.",
+   "importance": 2,
+   "evidenceToRequest": "Technology strategy; IT roadmap",
+   "stakeholders": "CIO; Executive team",
+   "dim": "D11"
+  },
+  {
+   "id": "D11.02",
+   "dimension": "Technology & Applications",
+   "sub": "Enterprise architecture",
+   "question": "Is there an enterprise architecture function with current and target state architectures and standards?",
+   "good": "EA practice (e.g. TOGAF-based) with architecture governance, standards and reference architectures.",
+   "importance": 2,
+   "evidenceToRequest": "Architecture repository; standards; architecture review board minutes",
+   "stakeholders": "Enterprise architect; CIO",
+   "dim": "D11"
+  },
+  {
+   "id": "D11.03",
+   "dimension": "Technology & Applications",
+   "sub": "Application portfolio",
+   "question": "Is the application portfolio documented with ownership, cost, business fit and technical health?",
+   "good": "Complete application inventory with a TIME assessment (Tolerate, Invest, Migrate, Eliminate) and rationalisation plan.",
+   "importance": 2,
+   "evidenceToRequest": "Application inventory; CMDB extract; licence data",
+   "stakeholders": "CIO; Application owners",
+   "dim": "D11"
+  },
+  {
+   "id": "D11.04",
+   "dimension": "Technology & Applications",
+   "sub": "Technical debt",
+   "question": "Is technical debt (legacy, unsupported or end-of-life systems) known and managed?",
+   "good": "Technical debt quantified and prioritised; remediation funded in the roadmap.",
+   "importance": 2,
+   "evidenceToRequest": "End-of-life / end-of-support register; technical debt register",
+   "stakeholders": "CIO; Architecture",
+   "dim": "D11"
+  },
+  {
+   "id": "D11.05",
+   "dimension": "Technology & Applications",
+   "sub": "Infrastructure & cloud",
+   "question": "Is the hosting model (on-premises, cloud, hybrid) fit for purpose, secure and cost-effective?",
+   "good": "Deliberate hosting strategy; cloud costs managed through FinOps; resilience tested.",
+   "importance": 2,
+   "evidenceToRequest": "Infrastructure architecture; cloud strategy; cloud cost reports",
+   "stakeholders": "CIO; Infrastructure lead",
+   "dim": "D11"
+  },
+  {
+   "id": "D11.06",
+   "dimension": "Technology & Applications",
+   "sub": "Integration",
+   "question": "Are systems integrated effectively, minimising manual re-keying and point-to-point interfaces?",
+   "good": "Integration platform or API strategy with reusable services and little manual re-keying.",
+   "importance": 2,
+   "evidenceToRequest": "Integration architecture; interface catalogue",
+   "stakeholders": "Architecture; IT",
+   "dim": "D11"
+  },
+  {
+   "id": "D11.07",
+   "dimension": "Technology & Applications",
+   "sub": "IT operating model",
+   "question": "Is the IT operating model (plan-build-run, product teams, sourcing) clear and effective?",
+   "good": "Defined IT operating model with clear roles, sourcing and a business engagement model.",
+   "importance": 2,
+   "evidenceToRequest": "IT organisation chart; IT operating model; IT service catalogue",
+   "stakeholders": "CIO; IT leadership",
+   "dim": "D11"
+  },
+  {
+   "id": "D11.08",
+   "dimension": "Technology & Applications",
+   "sub": "IT service management",
+   "question": "Are IT services managed to agreed levels using recognised practices (e.g. ITIL 4)?",
+   "good": "Service catalogue, SLAs, incident, problem and change management, and service performance reporting.",
+   "importance": 2,
+   "evidenceToRequest": "ITSM reports; SLAs; major incident reviews",
+   "stakeholders": "IT service manager",
+   "dim": "D11"
+  },
+  {
+   "id": "D11.09",
+   "dimension": "Technology & Applications",
+   "sub": "Digital, automation & AI",
+   "question": "Is the organisation using digital, automation and AI capabilities to improve services and efficiency, with appropriate governance?",
+   "good": "AI and automation strategy with a use-case pipeline, responsible AI governance and measured benefits.",
+   "importance": 2,
+   "evidenceToRequest": "AI strategy; AI use-case register; AI policy",
+   "stakeholders": "CIO; Digital lead; Risk",
+   "dim": "D11"
+  },
+  {
+   "id": "D11.10",
+   "dimension": "Technology & Applications",
+   "sub": "Technology investment",
+   "question": "Is technology spend visible, benchmarked and aligned to business value?",
+   "good": "IT spend understood by run / grow / transform and by capability; business cases track benefits.",
+   "importance": 2,
+   "evidenceToRequest": "IT budget; IT cost model; benchmarks",
+   "stakeholders": "CIO; CFO",
+   "dim": "D11"
+  },
+  {
+   "id": "D11.11",
+   "dimension": "Technology & Applications",
+   "sub": "End-user technology",
+   "question": "Do staff have the tools and devices they need to work effectively, including in hybrid settings?",
+   "good": "Modern collaboration tools, high user satisfaction and secure access from any location.",
+   "importance": 2,
+   "evidenceToRequest": "User satisfaction survey; device and tool inventory",
+   "stakeholders": "IT; Staff",
+   "dim": "D11"
+  },
+  {
+   "id": "D12.01",
+   "dimension": "Data, Information & Analytics",
+   "sub": "Data strategy",
+   "question": "Is there a data strategy that treats data as an asset and supports business priorities?",
+   "good": "Endorsed data strategy with roadmap, funding and executive sponsorship.",
+   "importance": 2,
+   "evidenceToRequest": "Data strategy",
+   "stakeholders": "Chief Data Officer / data lead; CIO",
+   "dim": "D12"
+  },
+  {
+   "id": "D12.02",
+   "dimension": "Data, Information & Analytics",
+   "sub": "Data governance",
+   "question": "Is there a data governance framework with defined owners, stewards and decision forums?",
+   "good": "Data owners and stewards named for key domains; a data governance council operating.",
+   "importance": 2,
+   "evidenceToRequest": "Data governance framework; data owner register",
+   "stakeholders": "Chief Data Officer; Data stewards",
+   "dim": "D12"
+  },
+  {
+   "id": "D12.03",
+   "dimension": "Data, Information & Analytics",
+   "sub": "Data quality",
+   "question": "Is data quality measured and managed for critical data elements?",
+   "good": "Critical data elements identified; quality dimensions measured; issues remediated at source.",
+   "importance": 2,
+   "evidenceToRequest": "Data quality reports; data issue logs",
+   "stakeholders": "Data stewards; Operations",
+   "dim": "D12"
+  },
+  {
+   "id": "D12.04",
+   "dimension": "Data, Information & Analytics",
+   "sub": "Master & reference data",
+   "question": "Is master data (customer, product, supplier, employee) managed as a single source of truth?",
+   "good": "Master data management approach in place, with minimal duplication and defined authoritative sources.",
+   "importance": 2,
+   "evidenceToRequest": "MDM architecture; data lineage",
+   "stakeholders": "Architecture; Data team",
+   "dim": "D12"
+  },
+  {
+   "id": "D12.05",
+   "dimension": "Data, Information & Analytics",
+   "sub": "Analytics & insight",
+   "question": "Does the organisation have the analytics capability to generate insight for decisions?",
+   "good": "Self-service BI, advanced analytics capability and a data-driven decision culture.",
+   "importance": 2,
+   "evidenceToRequest": "BI platform inventory; analytics use cases",
+   "stakeholders": "Data & Analytics lead; Business users",
+   "dim": "D12"
+  },
+  {
+   "id": "D12.06",
+   "dimension": "Data, Information & Analytics",
+   "sub": "Records management",
+   "question": "Are information and records managed in line with legislative and business requirements?",
+   "good": "Records management policy, classification and retention and disposal schedules applied.",
+   "importance": 2,
+   "evidenceToRequest": "Records management policy; retention schedules",
+   "stakeholders": "Records manager; Legal",
+   "dim": "D12"
+  },
+  {
+   "id": "D12.07",
+   "dimension": "Data, Information & Analytics",
+   "sub": "Privacy",
+   "question": "Is personal information handled in line with privacy obligations (e.g. Privacy Act 1988 and the APPs)?",
+   "good": "Privacy management plan, privacy impact assessments and a tested data breach response plan.",
+   "importance": 2,
+   "evidenceToRequest": "Privacy policy; PIAs; data breach response plan",
+   "stakeholders": "Privacy officer; Legal",
+   "dim": "D12"
+  },
+  {
+   "id": "D12.08",
+   "dimension": "Data, Information & Analytics",
+   "sub": "Classification & protection",
+   "question": "Is data classified and protected according to its sensitivity?",
+   "good": "Classification scheme applied, controls proportionate to classification, access reviewed regularly.",
+   "importance": 2,
+   "evidenceToRequest": "Classification policy; access reviews",
+   "stakeholders": "CISO; Data owners",
+   "dim": "D12"
+  },
+  {
+   "id": "D12.09",
+   "dimension": "Data, Information & Analytics",
+   "sub": "AI & data readiness",
+   "question": "Is data of sufficient quality, accessibility and governance to support AI and advanced analytics?",
+   "good": "Data platforms, lineage and governance ready for AI use cases, with responsible AI controls in place.",
+   "importance": 2,
+   "evidenceToRequest": "Data platform architecture; AI readiness assessment",
+   "stakeholders": "Chief Data Officer; CIO",
+   "dim": "D12"
+  },
+  {
+   "id": "D13.01",
+   "dimension": "Suppliers, Partners & Sourcing",
+   "sub": "Sourcing strategy",
+   "question": "Is there a sourcing strategy defining what is performed in-house, outsourced or delivered through partners?",
+   "good": "Sourcing decisions based on differentiation, capability, cost and risk, and reviewed periodically.",
+   "importance": 2,
+   "evidenceToRequest": "Sourcing strategy; make-vs-buy analyses",
+   "stakeholders": "COO; Procurement",
+   "dim": "D13"
+  },
+  {
+   "id": "D13.02",
+   "dimension": "Suppliers, Partners & Sourcing",
+   "sub": "Supplier register",
+   "question": "Is there a complete register of suppliers with spend, services, criticality and contract details?",
+   "good": "Single supplier register with segmentation (e.g. strategic, leverage, bottleneck, non-critical).",
+   "importance": 2,
+   "evidenceToRequest": "Supplier register; spend analysis",
+   "stakeholders": "Procurement; Finance",
+   "dim": "D13"
+  },
+  {
+   "id": "D13.03",
+   "dimension": "Suppliers, Partners & Sourcing",
+   "sub": "Contract management",
+   "question": "Are contracts actively managed, with clear obligations, performance measures and renewal dates?",
+   "good": "Contract management system; obligations tracked; renewals planned well in advance.",
+   "importance": 2,
+   "evidenceToRequest": "Contract register; contract management plans",
+   "stakeholders": "Procurement; Contract managers",
+   "dim": "D13"
+  },
+  {
+   "id": "D13.04",
+   "dimension": "Suppliers, Partners & Sourcing",
+   "sub": "Supplier performance",
+   "question": "Is supplier performance measured and managed through regular reviews?",
+   "good": "Supplier scorecards and performance reviews for strategic and critical suppliers.",
+   "importance": 2,
+   "evidenceToRequest": "Supplier scorecards; review minutes",
+   "stakeholders": "Contract managers",
+   "dim": "D13"
+  },
+  {
+   "id": "D13.05",
+   "dimension": "Suppliers, Partners & Sourcing",
+   "sub": "Concentration & dependency",
+   "question": "Are dependencies on critical or single-source suppliers (including fourth parties) understood and mitigated?",
+   "good": "Material service providers identified; exit and contingency plans in place and tested.",
+   "importance": 2,
+   "evidenceToRequest": "Third-party risk assessments; exit plans",
+   "stakeholders": "CRO; Procurement",
+   "dim": "D13"
+  },
+  {
+   "id": "D13.06",
+   "dimension": "Suppliers, Partners & Sourcing",
+   "sub": "Procurement process",
+   "question": "Is the procurement process efficient, compliant and value-driven?",
+   "good": "Procurement policy aligned to applicable rules (e.g. Commonwealth Procurement Rules); reasonable cycle times.",
+   "importance": 2,
+   "evidenceToRequest": "Procurement policy; procurement metrics",
+   "stakeholders": "Procurement lead; CFO",
+   "dim": "D13"
+  },
+  {
+   "id": "D13.07",
+   "dimension": "Suppliers, Partners & Sourcing",
+   "sub": "Partnerships & ecosystem",
+   "question": "Are partnerships and ecosystem relationships used effectively to deliver the value proposition?",
+   "good": "Strategic partnerships with shared objectives, governance and measured value.",
+   "importance": 2,
+   "evidenceToRequest": "Partnership agreements",
+   "stakeholders": "Executive team; Partnership leads",
+   "dim": "D13"
+  },
+  {
+   "id": "D13.08",
+   "dimension": "Suppliers, Partners & Sourcing",
+   "sub": "Third-party security & privacy",
+   "question": "Are third-party security, privacy and compliance risks assessed before and during engagement?",
+   "good": "Due diligence and ongoing monitoring of third-party controls (e.g. ISO/IEC 27001 certification, SOC 2 reports).",
+   "importance": 2,
+   "evidenceToRequest": "Third-party risk assessments; security questionnaires",
+   "stakeholders": "CISO; Procurement",
+   "dim": "D13"
+  },
+  {
+   "id": "D14.01",
+   "dimension": "Locations & Physical Assets",
+   "sub": "Location footprint",
+   "question": "Is the location footprint (offices, sites, service centres) aligned to customers, talent and cost?",
+   "good": "Footprint strategy based on customer proximity, talent pools and cost, with a documented rationale.",
+   "importance": 2,
+   "evidenceToRequest": "Site list; property strategy",
+   "stakeholders": "COO; Property",
+   "dim": "D14"
+  },
+  {
+   "id": "D14.02",
+   "dimension": "Locations & Physical Assets",
+   "sub": "Workplace model",
+   "question": "Is there a deliberate workplace model (e.g. hybrid, activity-based working) supported by policy and technology?",
+   "good": "Workplace model defined, utilisation measured, and policy and tools support it.",
+   "importance": 2,
+   "evidenceToRequest": "Hybrid work policy; utilisation data",
+   "stakeholders": "CHRO; Property; IT",
+   "dim": "D14"
+  },
+  {
+   "id": "D14.03",
+   "dimension": "Locations & Physical Assets",
+   "sub": "Space utilisation",
+   "question": "Is space utilisation measured and optimised?",
+   "good": "Utilisation tracked; surplus space consolidated or sub-let.",
+   "importance": 2,
+   "evidenceToRequest": "Utilisation reports; lease schedule",
+   "stakeholders": "Property; CFO",
+   "dim": "D14"
+  },
+  {
+   "id": "D14.04",
+   "dimension": "Locations & Physical Assets",
+   "sub": "Property costs & leases",
+   "question": "Are property costs and lease commitments understood and managed in line with strategy?",
+   "good": "Lease expiries aligned to the footprint strategy; property cost per FTE benchmarked.",
+   "importance": 2,
+   "evidenceToRequest": "Lease register; property costs",
+   "stakeholders": "Property; CFO",
+   "dim": "D14"
+  },
+  {
+   "id": "D14.05",
+   "dimension": "Locations & Physical Assets",
+   "sub": "Site resilience",
+   "question": "Are critical sites resilient, with business continuity arrangements for site loss?",
+   "good": "Alternate sites or work-from-anywhere arrangements tested; critical infrastructure protected.",
+   "importance": 2,
+   "evidenceToRequest": "Business continuity plans; site risk assessments",
+   "stakeholders": "BCM lead; Property",
+   "dim": "D14"
+  },
+  {
+   "id": "D14.06",
+   "dimension": "Locations & Physical Assets",
+   "sub": "Physical assets",
+   "question": "Are physical assets (equipment, fleet, infrastructure) managed across their lifecycle?",
+   "good": "Asset register and lifecycle management consistent with ISO 55001 principles.",
+   "importance": 2,
+   "evidenceToRequest": "Asset register; maintenance plans",
+   "stakeholders": "Asset manager; CFO",
+   "dim": "D14"
+  },
+  {
+   "id": "D14.07",
+   "dimension": "Locations & Physical Assets",
+   "sub": "Physical security",
+   "question": "Are physical security controls appropriate to the sensitivity of people, information and assets on each site?",
+   "good": "Physical security risk assessed per site; access control and monitoring proportionate to risk.",
+   "importance": 2,
+   "evidenceToRequest": "Security assessments; access control reports",
+   "stakeholders": "Security manager",
+   "dim": "D14"
+  },
+  {
+   "id": "D14.08",
+   "dimension": "Locations & Physical Assets",
+   "sub": "Environmental footprint",
+   "question": "Is the environmental impact of locations and assets measured and managed?",
+   "good": "Scope 1 and 2 emissions measured; energy efficiency targets in place.",
+   "importance": 2,
+   "evidenceToRequest": "Emissions reports; energy data",
+   "stakeholders": "Sustainability lead; Property",
+   "dim": "D14"
+  },
+  {
+   "id": "D15.01",
+   "dimension": "Risk, Compliance, Security & Resilience",
+   "sub": "Risk management framework",
+   "question": "Is there an enterprise risk management framework aligned to a recognised standard (e.g. ISO 31000)?",
+   "good": "ERM framework in operation, with risk appetite, taxonomy, assessment methodology and reporting.",
+   "importance": 2,
+   "evidenceToRequest": "Risk management framework; risk appetite statement",
+   "stakeholders": "CRO; Board Risk Committee",
+   "dim": "D15"
+  },
+  {
+   "id": "D15.02",
+   "dimension": "Risk, Compliance, Security & Resilience",
+   "sub": "Risk appetite",
+   "question": "Is risk appetite defined, measurable and used in decision making?",
+   "good": "Board-approved appetite with metrics and tolerances that are monitored, with breaches escalated.",
+   "importance": 2,
+   "evidenceToRequest": "Risk appetite statement; risk reports",
+   "stakeholders": "Board; CRO",
+   "dim": "D15"
+  },
+  {
+   "id": "D15.03",
+   "dimension": "Risk, Compliance, Security & Resilience",
+   "sub": "Risk registers",
+   "question": "Are strategic, operational and project risks identified, assessed and actively managed?",
+   "good": "Current risk registers with owners, controls, treatment plans and regular review.",
+   "importance": 2,
+   "evidenceToRequest": "Enterprise and business unit risk registers",
+   "stakeholders": "CRO; Risk owners",
+   "dim": "D15"
+  },
+  {
+   "id": "D15.04",
+   "dimension": "Risk, Compliance, Security & Resilience",
+   "sub": "Obligations register",
+   "question": "Is there a complete register of legal, regulatory and contractual obligations mapped to owners and controls?",
+   "good": "Obligations register maintained, with regulatory change monitoring (e.g. aligned to ISO 37301).",
+   "importance": 2,
+   "evidenceToRequest": "Obligations register; regulatory change log",
+   "stakeholders": "Compliance lead; Legal",
+   "dim": "D15"
+  },
+  {
+   "id": "D15.05",
+   "dimension": "Risk, Compliance, Security & Resilience",
+   "sub": "Compliance management",
+   "question": "Is compliance monitored, tested and reported, with breaches managed and remediated?",
+   "good": "Compliance monitoring plan, breach register and timely regulator notification where required.",
+   "importance": 2,
+   "evidenceToRequest": "Compliance plan; breach register; regulator correspondence",
+   "stakeholders": "Compliance lead",
+   "dim": "D15"
+  },
+  {
+   "id": "D15.06",
+   "dimension": "Risk, Compliance, Security & Resilience",
+   "sub": "Control environment",
+   "question": "Are key controls documented, owned and tested for design and operating effectiveness?",
+   "good": "Control library mapped to risks; testing results reported; issues tracked to closure.",
+   "importance": 2,
+   "evidenceToRequest": "Control library; control testing results; RCSA",
+   "stakeholders": "Risk; Process owners",
+   "dim": "D15"
+  },
+  {
+   "id": "D15.07",
+   "dimension": "Risk, Compliance, Security & Resilience",
+   "sub": "Cyber security",
+   "question": "Is cyber security maturity appropriate for the threat environment (e.g. Essential Eight, ISO/IEC 27001, NIST CSF)?",
+   "good": "Target maturity defined and achieved (e.g. Essential Eight Maturity Level 2 or higher); ISMS operating; incidents managed.",
+   "importance": 2,
+   "evidenceToRequest": "ISMS documentation; Essential Eight assessment; penetration test reports",
+   "stakeholders": "CISO; CIO",
+   "dim": "D15"
+  },
+  {
+   "id": "D15.08",
+   "dimension": "Risk, Compliance, Security & Resilience",
+   "sub": "Business continuity & resilience",
+   "question": "Can the organisation continue critical operations through disruption (e.g. ISO 22301; APRA CPS 230 where applicable)?",
+   "good": "Critical operations and tolerance levels defined; BCPs and disaster recovery tested; scenario exercises run.",
+   "importance": 2,
+   "evidenceToRequest": "BCPs; business impact analysis; DR test results; CPS 230 artefacts",
+   "stakeholders": "BCM lead; CIO; CRO",
+   "dim": "D15"
+  },
+  {
+   "id": "D15.09",
+   "dimension": "Risk, Compliance, Security & Resilience",
+   "sub": "Incident management",
+   "question": "Are operational incidents and near misses captured, investigated and learned from?",
+   "good": "Incident management process with root-cause analysis and trend reporting.",
+   "importance": 2,
+   "evidenceToRequest": "Incident register; post-incident reviews",
+   "stakeholders": "Risk; Operations",
+   "dim": "D15"
+  },
+  {
+   "id": "D15.10",
+   "dimension": "Risk, Compliance, Security & Resilience",
+   "sub": "Internal audit & assurance",
+   "question": "Is independent assurance risk-based, and are audit findings remediated on time?",
+   "good": "Risk-based internal audit plan; overdue actions tracked and reported to the Audit Committee.",
+   "importance": 2,
+   "evidenceToRequest": "Internal audit plan; audit reports; action tracker",
+   "stakeholders": "Head of Internal Audit; Audit Committee",
+   "dim": "D15"
+  },
+  {
+   "id": "D15.11",
+   "dimension": "Risk, Compliance, Security & Resilience",
+   "sub": "Fraud & integrity",
+   "question": "Are fraud, corruption and integrity risks managed?",
+   "good": "Fraud control plan, integrity framework and a whistleblower program in place and tested.",
+   "importance": 2,
+   "evidenceToRequest": "Fraud control plan; whistleblower policy",
+   "stakeholders": "CRO; Legal",
+   "dim": "D15"
+  },
+  {
+   "id": "D15.12",
+   "dimension": "Risk, Compliance, Security & Resilience",
+   "sub": "ESG & climate risk",
+   "question": "Are climate-related and other ESG risks identified, managed and disclosed as required (e.g. AASB S2)?",
+   "good": "Climate risks integrated into ERM; disclosure obligations mapped and met.",
+   "importance": 2,
+   "evidenceToRequest": "Climate risk assessment; sustainability report",
+   "stakeholders": "CFO; CRO; Sustainability lead",
+   "dim": "D15"
+  },
+  {
+   "id": "D16.01",
+   "dimension": "Finance, Funding & Cost Model",
+   "sub": "Cost baseline",
+   "question": "Is the cost base understood by business unit, capability, process and cost type?",
+   "good": "Cost baseline available at multiple cuts and reconciled to the financial statements.",
+   "importance": 2,
+   "evidenceToRequest": "General ledger extract; cost centre reports",
+   "stakeholders": "CFO; Finance business partners",
+   "dim": "D16"
+  },
+  {
+   "id": "D16.02",
+   "dimension": "Finance, Funding & Cost Model",
+   "sub": "Cost-to-serve",
+   "question": "Is the cost to serve customers, products and channels known?",
+   "good": "Activity- or driver-based costing informs pricing, channel and service decisions.",
+   "importance": 2,
+   "evidenceToRequest": "Cost-to-serve analysis; activity-based costing",
+   "stakeholders": "CFO; Product owners",
+   "dim": "D16"
+  },
+  {
+   "id": "D16.03",
+   "dimension": "Finance, Funding & Cost Model",
+   "sub": "Cost structure",
+   "question": "Is the cost structure (fixed vs variable; people vs non-people) appropriate and benchmarked?",
+   "good": "Cost structure benchmarked against peers, with flexibility to scale costs with demand.",
+   "importance": 2,
+   "evidenceToRequest": "Cost structure analysis; benchmarks",
+   "stakeholders": "CFO",
+   "dim": "D16"
+  },
+  {
+   "id": "D16.04",
+   "dimension": "Finance, Funding & Cost Model",
+   "sub": "Budgeting & forecasting",
+   "question": "Is budgeting and forecasting timely, accurate and linked to strategy and performance?",
+   "good": "Driver-based budgets, rolling forecasts and variance analysis with commentary.",
+   "importance": 2,
+   "evidenceToRequest": "Budget process; forecasts; variance reports",
+   "stakeholders": "CFO; FP&A",
+   "dim": "D16"
+  },
+  {
+   "id": "D16.05",
+   "dimension": "Finance, Funding & Cost Model",
+   "sub": "Funding model",
+   "question": "Is the funding model (e.g. project vs product funding, appropriation, fee-for-service) aligned to how value is delivered?",
+   "good": "Funding model supports the operating model (e.g. persistent funding for product teams).",
+   "importance": 2,
+   "evidenceToRequest": "Funding policy; budget allocations",
+   "stakeholders": "CFO; PMO",
+   "dim": "D16"
+  },
+  {
+   "id": "D16.06",
+   "dimension": "Finance, Funding & Cost Model",
+   "sub": "Cost allocation",
+   "question": "Are shared costs allocated or charged back in a transparent and fair way?",
+   "good": "Transparent allocation methodology, understood by business units and driving the desired behaviour.",
+   "importance": 2,
+   "evidenceToRequest": "Allocation methodology; chargeback model",
+   "stakeholders": "CFO; Shared services leads",
+   "dim": "D16"
+  },
+  {
+   "id": "D16.07",
+   "dimension": "Finance, Funding & Cost Model",
+   "sub": "Investment governance",
+   "question": "Are investments assessed using consistent business cases and benefits tracking?",
+   "good": "Standard business case template, investment committee and post-investment reviews.",
+   "importance": 2,
+   "evidenceToRequest": "Business case template; investment committee papers",
+   "stakeholders": "CFO; PMO",
+   "dim": "D16"
+  },
+  {
+   "id": "D16.08",
+   "dimension": "Finance, Funding & Cost Model",
+   "sub": "Financial controls",
+   "question": "Are financial controls, delegations and reporting robust?",
+   "good": "Strong control environment, clean audit opinions and a timely month-end close.",
+   "importance": 2,
+   "evidenceToRequest": "External audit reports; management letters; month-end timetable",
+   "stakeholders": "CFO; External auditor",
+   "dim": "D16"
+  },
+  {
+   "id": "D16.09",
+   "dimension": "Finance, Funding & Cost Model",
+   "sub": "Value for money",
+   "question": "Does the organisation regularly assess efficiency and value for money?",
+   "good": "Efficiency reviews, benchmarking and savings targets tracked; productivity trends monitored.",
+   "importance": 2,
+   "evidenceToRequest": "Efficiency reviews; benchmarking studies",
+   "stakeholders": "CFO; COO",
+   "dim": "D16"
+  },
+  {
+   "id": "D17.01",
+   "dimension": "Change, Transformation & Continuous Improvement",
+   "sub": "Portfolio management",
+   "question": "Is there a portfolio management function that prioritises, funds and oversees change initiatives?",
+   "good": "Single portfolio view with prioritisation criteria linked to strategy and regular portfolio reviews.",
+   "importance": 2,
+   "evidenceToRequest": "Portfolio register; prioritisation framework; portfolio reports",
+   "stakeholders": "PMO / EPMO; Executive team",
+   "dim": "D17"
+  },
+  {
+   "id": "D17.02",
+   "dimension": "Change, Transformation & Continuous Improvement",
+   "sub": "Delivery methodology",
+   "question": "Are delivery methods (agile, waterfall, hybrid) appropriate and consistently applied?",
+   "good": "Tailored delivery frameworks (e.g. PRINCE2, Agile / SAFe) with clear governance and stage gates.",
+   "importance": 2,
+   "evidenceToRequest": "Delivery framework; project governance; project status reports",
+   "stakeholders": "PMO; Delivery leads",
+   "dim": "D17"
+  },
+  {
+   "id": "D17.03",
+   "dimension": "Change, Transformation & Continuous Improvement",
+   "sub": "Delivery performance",
+   "question": "Are initiatives delivered on time and on budget, and do they achieve the expected outcomes?",
+   "good": "A high proportion of initiatives delivered within tolerance, with early escalation of issues.",
+   "importance": 2,
+   "evidenceToRequest": "Portfolio performance data; post-implementation reviews",
+   "stakeholders": "PMO; CFO",
+   "dim": "D17"
+  },
+  {
+   "id": "D17.04",
+   "dimension": "Change, Transformation & Continuous Improvement",
+   "sub": "Change capacity",
+   "question": "Is the volume of change managed against the organisation's capacity to absorb it?",
+   "good": "Change heat maps across business units; sequencing considers change saturation.",
+   "importance": 2,
+   "evidenceToRequest": "Change heat maps; change calendar",
+   "stakeholders": "Change lead; Business unit heads",
+   "dim": "D17"
+  },
+  {
+   "id": "D17.05",
+   "dimension": "Change, Transformation & Continuous Improvement",
+   "sub": "Change management",
+   "question": "Is structured change management applied to drive adoption (e.g. Prosci ADKAR)?",
+   "good": "Change impact assessments, stakeholder engagement, training and adoption metrics used on all major initiatives.",
+   "importance": 2,
+   "evidenceToRequest": "Change management framework; change impact assessments",
+   "stakeholders": "Change lead; Project managers",
+   "dim": "D17"
+  },
+  {
+   "id": "D17.06",
+   "dimension": "Change, Transformation & Continuous Improvement",
+   "sub": "Benefits realisation",
+   "question": "Are benefits defined, owned, tracked and realised after implementation?",
+   "good": "Benefits register with owners and baselines; benefits tracked beyond project close.",
+   "importance": 2,
+   "evidenceToRequest": "Benefits register; benefits realisation reports",
+   "stakeholders": "PMO; CFO; Benefit owners",
+   "dim": "D17"
+  },
+  {
+   "id": "D17.07",
+   "dimension": "Change, Transformation & Continuous Improvement",
+   "sub": "Business analysis",
+   "question": "Is business analysis capability mature enough to define needs and solutions effectively (e.g. BABOK v3)?",
+   "good": "Consistent BA practice with standards, templates, traceability and skilled practitioners.",
+   "importance": 2,
+   "evidenceToRequest": "BA framework; requirements artefacts; traceability matrices",
+   "stakeholders": "BA practice lead; Delivery leads",
+   "dim": "D17"
+  },
+  {
+   "id": "D17.08",
+   "dimension": "Change, Transformation & Continuous Improvement",
+   "sub": "Continuous improvement",
+   "question": "Is there an embedded continuous improvement culture and method (e.g. Lean, Six Sigma)?",
+   "good": "CI methods used by frontline teams; improvement ideas captured, prioritised and implemented.",
+   "importance": 2,
+   "evidenceToRequest": "CI register; improvement metrics",
+   "stakeholders": "Operations managers; CI lead",
+   "dim": "D17"
+  },
+  {
+   "id": "D17.09",
+   "dimension": "Change, Transformation & Continuous Improvement",
+   "sub": "Innovation",
+   "question": "Does the organisation have mechanisms to identify, test and scale innovations?",
+   "good": "Innovation process with funding, experimentation and scaling pathways.",
+   "importance": 2,
+   "evidenceToRequest": "Innovation framework; pilot results",
+   "stakeholders": "Strategy; Digital lead",
+   "dim": "D17"
+  },
+  {
+   "id": "D17.10",
+   "dimension": "Change, Transformation & Continuous Improvement",
+   "sub": "Lessons learned",
+   "question": "Are lessons learned captured and applied to future initiatives?",
+   "good": "Lessons-learned repository used in planning; recurring issues decrease over time.",
+   "importance": 2,
+   "evidenceToRequest": "Lessons-learned register; PIR reports",
+   "stakeholders": "PMO",
+   "dim": "D17"
+  }
+ ],
+ "stakeholderExample": {
+  "name": "Jane Citizen",
+  "role": "Chief Operating Officer",
+  "unit": "Operations",
+  "group": "CEO & Executive Leadership",
+  "influence": "High",
+  "interest": "High",
+  "dims": "D04; D06; D07",
+  "date": "2026-10-14",
+  "interviewer": "Lead consultant",
+  "status": "Scheduled",
+  "notes": "Sees cross-unit hand-offs as the main constraint on service times."
+ },
+ "interviewGuides": [
+  {
+   "group": "Board / Chair",
+   "n": 1,
+   "question": "What are the organisation's most important priorities over the next three to five years, and how confident are you that it can deliver them?",
+   "dims": [
+    "D01"
+   ],
+   "probe": "Which priorities are most at risk, and why?"
+  },
+  {
+   "group": "Board / Chair",
+   "n": 2,
+   "question": "How well does the information the board receives support decisions on strategy, performance and risk?",
+   "dims": [
+    "D07",
+    "D10"
+   ],
+   "probe": "What would you like to see more or less of?"
+  },
+  {
+   "group": "Board / Chair",
+   "n": 3,
+   "question": "How clear are the respective roles of the board, its committees and management?",
+   "dims": [
+    "D07"
+   ],
+   "probe": "Any areas where the board is drawn into operational matters?"
+  },
+  {
+   "group": "Board / Chair",
+   "n": 4,
+   "question": "How would you describe the organisation's risk appetite and risk culture?",
+   "dims": [
+    "D15",
+    "D09"
+   ],
+   "probe": "Recent examples where appetite shaped a decision."
+  },
+  {
+   "group": "Board / Chair",
+   "n": 5,
+   "question": "Where do you see the greatest operational, cyber or regulatory exposures?",
+   "dims": [
+    "D15"
+   ],
+   "probe": "How confident are you in the organisation's resilience?"
+  },
+  {
+   "group": "Board / Chair",
+   "n": 6,
+   "question": "How effectively does the organisation deliver major change and realise the promised benefits?",
+   "dims": [
+    "D17"
+   ],
+   "probe": "Recent programs that succeeded or struggled."
+  },
+  {
+   "group": "Board / Chair",
+   "n": 7,
+   "question": "What would a successful operating model look like to the board in three years?",
+   "dims": [
+    "D01"
+   ],
+   "probe": "How would you know it had been achieved?"
+  },
+  {
+   "group": "CEO & Executive Leadership",
+   "n": 1,
+   "question": "What is the organisation trying to achieve, and what must the operating model do differently to get there?",
+   "dims": [
+    "D01"
+   ],
+   "probe": "What are the non-negotiables?"
+  },
+  {
+   "group": "CEO & Executive Leadership",
+   "n": 2,
+   "question": "What are the biggest barriers to executing the strategy today?",
+   "dims": [
+    "D01",
+    "D06",
+    "D07"
+   ],
+   "probe": "Are they structural, process, people, technology or cultural?"
+  },
+  {
+   "group": "CEO & Executive Leadership",
+   "n": 3,
+   "question": "Which capabilities are most critical to success, and where are the largest gaps?",
+   "dims": [
+    "D05"
+   ],
+   "probe": "Which capabilities should be built, bought or partnered?"
+  },
+  {
+   "group": "CEO & Executive Leadership",
+   "n": 4,
+   "question": "How are decisions made at the executive level, and where do decisions get stuck?",
+   "dims": [
+    "D07"
+   ],
+   "probe": "Examples of decisions that took too long or were revisited."
+  },
+  {
+   "group": "CEO & Executive Leadership",
+   "n": 5,
+   "question": "How well do business units and functions work together to deliver end to end for customers?",
+   "dims": [
+    "D06",
+    "D09",
+    "D02"
+   ],
+   "probe": "Where do hand-offs break down?"
+  },
+  {
+   "group": "CEO & Executive Leadership",
+   "n": 6,
+   "question": "How is performance measured and managed across the organisation?",
+   "dims": [
+    "D10"
+   ],
+   "probe": "Which measures actually drive behaviour?"
+  },
+  {
+   "group": "CEO & Executive Leadership",
+   "n": 7,
+   "question": "What is the organisation's capacity and appetite for change over the next 12 to 24 months?",
+   "dims": [
+    "D17",
+    "D09"
+   ],
+   "probe": "What else is competing for attention?"
+  },
+  {
+   "group": "CEO & Executive Leadership",
+   "n": 8,
+   "question": "What works well today and must be protected in any future operating model?",
+   "dims": [
+    "All"
+   ],
+   "probe": "What would staff say is worth keeping?"
+  },
+  {
+   "group": "Business Unit & Operations Leaders",
+   "n": 1,
+   "question": "Describe your unit's purpose, key services and customers.",
+   "dims": [
+    "D02",
+    "D03"
+   ],
+   "probe": "How has demand changed over the last two years?"
+  },
+  {
+   "group": "Business Unit & Operations Leaders",
+   "n": 2,
+   "question": "Walk me through the end-to-end process for your most important service. Where are the delays, hand-offs and rework?",
+   "dims": [
+    "D04"
+   ],
+   "probe": "What proportion of work needs rework or escalation?"
+  },
+  {
+   "group": "Business Unit & Operations Leaders",
+   "n": 3,
+   "question": "How clear are accountabilities between your unit and the other units you depend on?",
+   "dims": [
+    "D06",
+    "D07"
+   ],
+   "probe": "Examples of work falling between the cracks."
+  },
+  {
+   "group": "Business Unit & Operations Leaders",
+   "n": 4,
+   "question": "Which decisions can you make without escalation, and which should you be able to make?",
+   "dims": [
+    "D07"
+   ],
+   "probe": "How long do escalated decisions typically take?"
+  },
+  {
+   "group": "Business Unit & Operations Leaders",
+   "n": 5,
+   "question": "Do you have the right people, skills and capacity to meet demand?",
+   "dims": [
+    "D08"
+   ],
+   "probe": "Where are you relying on contractors or key individuals?"
+  },
+  {
+   "group": "Business Unit & Operations Leaders",
+   "n": 6,
+   "question": "How well do systems and data support your team's work, and what workarounds exist?",
+   "dims": [
+    "D11",
+    "D12"
+   ],
+   "probe": "Spreadsheets, re-keying or shadow systems in use."
+  },
+  {
+   "group": "Business Unit & Operations Leaders",
+   "n": 7,
+   "question": "Which KPIs do you manage to, and how are they used?",
+   "dims": [
+    "D10"
+   ],
+   "probe": "Do the measures reflect what matters to customers?"
+  },
+  {
+   "group": "Business Unit & Operations Leaders",
+   "n": 8,
+   "question": "What are the three changes that would most improve your unit's performance?",
+   "dims": [
+    "All"
+   ],
+   "probe": "What has prevented them so far?"
+  },
+  {
+   "group": "Team Leaders & Frontline Staff",
+   "n": 1,
+   "question": "What does a typical day look like, and what gets in the way of doing your job well?",
+   "dims": [
+    "D04",
+    "D11"
+   ],
+   "probe": "How much time is lost to these issues each week?"
+  },
+  {
+   "group": "Team Leaders & Frontline Staff",
+   "n": 2,
+   "question": "Where do you spend time on manual workarounds, rework or chasing information?",
+   "dims": [
+    "D04",
+    "D12"
+   ],
+   "probe": "Can you show me an example?"
+  },
+  {
+   "group": "Team Leaders & Frontline Staff",
+   "n": 3,
+   "question": "How clear is it who is responsible for what, and whom to escalate to?",
+   "dims": [
+    "D06",
+    "D07"
+   ],
+   "probe": "What happens when something is unclear?"
+  },
+  {
+   "group": "Team Leaders & Frontline Staff",
+   "n": 4,
+   "question": "How well do you understand the organisation's strategy and how your work contributes to it?",
+   "dims": [
+    "D01",
+    "D10"
+   ],
+   "probe": "How is progress communicated to you?"
+  },
+  {
+   "group": "Team Leaders & Frontline Staff",
+   "n": 5,
+   "question": "Which customer pain points do you see most often?",
+   "dims": [
+    "D02"
+   ],
+   "probe": "What would fix them?"
+  },
+  {
+   "group": "Team Leaders & Frontline Staff",
+   "n": 6,
+   "question": "Do you have the training, tools and support you need?",
+   "dims": [
+    "D08",
+    "D11"
+   ],
+   "probe": "What is missing?"
+  },
+  {
+   "group": "Team Leaders & Frontline Staff",
+   "n": 7,
+   "question": "How comfortable do you feel raising concerns or suggesting improvements?",
+   "dims": [
+    "D09"
+   ],
+   "probe": "What happened the last time you did?"
+  },
+  {
+   "group": "Team Leaders & Frontline Staff",
+   "n": 8,
+   "question": "If you could change one thing about how the organisation works, what would it be?",
+   "dims": [
+    "All"
+   ],
+   "probe": "Why that change?"
+  },
+  {
+   "group": "CFO & Finance",
+   "n": 1,
+   "question": "How is the cost base structured, and how well is it understood by business unit and capability?",
+   "dims": [
+    "D16"
+   ],
+   "probe": "Can costs be traced to services and customers?"
+  },
+  {
+   "group": "CFO & Finance",
+   "n": 2,
+   "question": "Is the cost to serve customers, products and channels understood?",
+   "dims": [
+    "D16",
+    "D02"
+   ],
+   "probe": "Which segments or channels are unprofitable or high cost?"
+  },
+  {
+   "group": "CFO & Finance",
+   "n": 3,
+   "question": "How are budgets set and resources allocated to strategic priorities?",
+   "dims": [
+    "D16",
+    "D10"
+   ],
+   "probe": "How much of the budget is discretionary?"
+  },
+  {
+   "group": "CFO & Finance",
+   "n": 4,
+   "question": "How is investment governed, and are benefits tracked after delivery?",
+   "dims": [
+    "D16",
+    "D17"
+   ],
+   "probe": "Examples of benefits that were or were not realised."
+  },
+  {
+   "group": "CFO & Finance",
+   "n": 5,
+   "question": "How effective are delegations and financial controls?",
+   "dims": [
+    "D07",
+    "D16"
+   ],
+   "probe": "Recent audit findings or control breaches."
+  },
+  {
+   "group": "CFO & Finance",
+   "n": 6,
+   "question": "Where are the largest efficiency or cost-reduction opportunities?",
+   "dims": [
+    "D16",
+    "D04"
+   ],
+   "probe": "What has been tried before?"
+  },
+  {
+   "group": "CFO & Finance",
+   "n": 7,
+   "question": "How reliable and timely is management and financial reporting?",
+   "dims": [
+    "D10",
+    "D12"
+   ],
+   "probe": "How much manual effort goes into producing it?"
+  },
+  {
+   "group": "CHRO & People",
+   "n": 1,
+   "question": "How well does the current structure support the strategy, and what are the main pain points?",
+   "dims": [
+    "D06"
+   ],
+   "probe": "When was the structure last reviewed?"
+  },
+  {
+   "group": "CHRO & People",
+   "n": 2,
+   "question": "What does the workforce profile look like (headcount, mix, spans, layers, turnover)?",
+   "dims": [
+    "D06",
+    "D08"
+   ],
+   "probe": "Can we obtain an HR system extract?"
+  },
+  {
+   "group": "CHRO & People",
+   "n": 3,
+   "question": "Where are the critical skills gaps and key-person dependencies?",
+   "dims": [
+    "D08"
+   ],
+   "probe": "Which roles are hardest to fill?"
+  },
+  {
+   "group": "CHRO & People",
+   "n": 4,
+   "question": "How would you describe the current culture, and what needs to shift?",
+   "dims": [
+    "D09"
+   ],
+   "probe": "What evidence supports that view?"
+  },
+  {
+   "group": "CHRO & People",
+   "n": 5,
+   "question": "How do performance management and reward reinforce the desired outcomes and behaviours?",
+   "dims": [
+    "D08",
+    "D10"
+   ],
+   "probe": "Any unintended consequences?"
+  },
+  {
+   "group": "CHRO & People",
+   "n": 6,
+   "question": "How are WHS risks, including psychosocial hazards, managed?",
+   "dims": [
+    "D08",
+    "D15"
+   ],
+   "probe": "Trends in incidents, claims or absenteeism."
+  },
+  {
+   "group": "CHRO & People",
+   "n": 7,
+   "question": "What is the organisation's track record with restructures and people change?",
+   "dims": [
+    "D17",
+    "D09"
+   ],
+   "probe": "Lessons learned from previous changes."
+  },
+  {
+   "group": "CIO, Technology & Data",
+   "n": 1,
+   "question": "How well is the technology strategy aligned with the business strategy?",
+   "dims": [
+    "D11",
+    "D01"
+   ],
+   "probe": "How are technology priorities set?"
+  },
+  {
+   "group": "CIO, Technology & Data",
+   "n": 2,
+   "question": "What is the state of the application portfolio and technical debt?",
+   "dims": [
+    "D11"
+   ],
+   "probe": "Which systems are end-of-life or unsupported?"
+  },
+  {
+   "group": "CIO, Technology & Data",
+   "n": 3,
+   "question": "How effectively are systems integrated, and where is data re-keyed?",
+   "dims": [
+    "D11",
+    "D12"
+   ],
+   "probe": "Which interfaces fail most often?"
+  },
+  {
+   "group": "CIO, Technology & Data",
+   "n": 4,
+   "question": "How is the IT function organised, and how does it engage with the business?",
+   "dims": [
+    "D11",
+    "D06"
+   ],
+   "probe": "Plan-build-run, product teams or a mix?"
+  },
+  {
+   "group": "CIO, Technology & Data",
+   "n": 5,
+   "question": "How mature are data governance, data quality and analytics?",
+   "dims": [
+    "D12"
+   ],
+   "probe": "Is there a trusted single source of truth for key data?"
+  },
+  {
+   "group": "CIO, Technology & Data",
+   "n": 6,
+   "question": "What is the cyber security posture and target maturity?",
+   "dims": [
+    "D15",
+    "D11"
+   ],
+   "probe": "Latest Essential Eight or ISO/IEC 27001 assessment results."
+  },
+  {
+   "group": "CIO, Technology & Data",
+   "n": 7,
+   "question": "How is the organisation approaching automation and AI, and how is it governed?",
+   "dims": [
+    "D11",
+    "D12"
+   ],
+   "probe": "Use cases in production and their measured benefits."
+  },
+  {
+   "group": "CIO, Technology & Data",
+   "n": 8,
+   "question": "What are the largest technology risks to operations and to change delivery?",
+   "dims": [
+    "D11",
+    "D15"
+   ],
+   "probe": "Single points of failure and key-person risks."
+  },
+  {
+   "group": "CRO, Risk, Compliance & Audit",
+   "n": 1,
+   "question": "How mature is the enterprise risk management framework, and how is it used in decision making?",
+   "dims": [
+    "D15"
+   ],
+   "probe": "Examples where risk information changed a decision."
+  },
+  {
+   "group": "CRO, Risk, Compliance & Audit",
+   "n": 2,
+   "question": "How are legal and regulatory obligations identified, owned and monitored?",
+   "dims": [
+    "D15"
+   ],
+   "probe": "Is there an obligations register, and who maintains it?"
+  },
+  {
+   "group": "CRO, Risk, Compliance & Audit",
+   "n": 3,
+   "question": "What are the key compliance breaches, incidents or audit findings of the last two years, and their root causes?",
+   "dims": [
+    "D15",
+    "D04"
+   ],
+   "probe": "Are there recurring themes?"
+  },
+  {
+   "group": "CRO, Risk, Compliance & Audit",
+   "n": 4,
+   "question": "How well do the three lines of accountability work in practice?",
+   "dims": [
+    "D07",
+    "D15"
+   ],
+   "probe": "Where do roles overlap or leave gaps?"
+  },
+  {
+   "group": "CRO, Risk, Compliance & Audit",
+   "n": 5,
+   "question": "How resilient are critical operations, and when were BCP and DR arrangements last tested?",
+   "dims": [
+    "D15",
+    "D14"
+   ],
+   "probe": "Results and actions from the last test."
+  },
+  {
+   "group": "CRO, Risk, Compliance & Audit",
+   "n": 6,
+   "question": "How are third-party and supplier risks managed?",
+   "dims": [
+    "D13",
+    "D15"
+   ],
+   "probe": "Are material service providers identified?"
+  },
+  {
+   "group": "CRO, Risk, Compliance & Audit",
+   "n": 7,
+   "question": "What regulatory changes on the horizon will affect the operating model?",
+   "dims": [
+    "D15",
+    "D01"
+   ],
+   "probe": "How is regulatory change tracked?"
+  },
+  {
+   "group": "Procurement & Supplier Management",
+   "n": 1,
+   "question": "What is the sourcing strategy, and how are make, buy and partner decisions made?",
+   "dims": [
+    "D13"
+   ],
+   "probe": "Who has the final say?"
+  },
+  {
+   "group": "Procurement & Supplier Management",
+   "n": 2,
+   "question": "Who are the critical and strategic suppliers, and where is concentration risk?",
+   "dims": [
+    "D13",
+    "D15"
+   ],
+   "probe": "Are there single-source dependencies?"
+  },
+  {
+   "group": "Procurement & Supplier Management",
+   "n": 3,
+   "question": "How are contracts and supplier performance managed?",
+   "dims": [
+    "D13"
+   ],
+   "probe": "Are scorecards and regular reviews in place?"
+  },
+  {
+   "group": "Procurement & Supplier Management",
+   "n": 4,
+   "question": "How efficient and compliant is the procurement process?",
+   "dims": [
+    "D13"
+   ],
+   "probe": "Typical cycle times and bottlenecks."
+  },
+  {
+   "group": "Procurement & Supplier Management",
+   "n": 5,
+   "question": "Which major contracts are due for renewal in the next 24 months, and are they aligned to the future operating model?",
+   "dims": [
+    "D13",
+    "D17"
+   ],
+   "probe": "Opportunities to consolidate or renegotiate."
+  },
+  {
+   "group": "Procurement & Supplier Management",
+   "n": 6,
+   "question": "How are supplier security and privacy risks assessed?",
+   "dims": [
+    "D13",
+    "D15"
+   ],
+   "probe": "Before engagement and during the contract term."
+  },
+  {
+   "group": "Customers & External Partners",
+   "n": 1,
+   "question": "What do you value most about the organisation's services?",
+   "dims": [
+    "D02",
+    "D03"
+   ],
+   "probe": "What would you miss if it stopped?"
+  },
+  {
+   "group": "Customers & External Partners",
+   "n": 2,
+   "question": "What are your biggest frustrations when dealing with the organisation?",
+   "dims": [
+    "D02",
+    "D04"
+   ],
+   "probe": "A recent example."
+  },
+  {
+   "group": "Customers & External Partners",
+   "n": 3,
+   "question": "How easy is it to get things done across channels (online, phone, in person)?",
+   "dims": [
+    "D02"
+   ],
+   "probe": "Do you have to repeat information?"
+  },
+  {
+   "group": "Customers & External Partners",
+   "n": 4,
+   "question": "How well does the organisation communicate and follow through on its commitments?",
+   "dims": [
+    "D02",
+    "D09"
+   ],
+   "probe": "Examples of commitments kept or missed."
+  },
+  {
+   "group": "Customers & External Partners",
+   "n": 5,
+   "question": "How does the organisation compare with others you deal with?",
+   "dims": [
+    "D02"
+   ],
+   "probe": "Who does this well?"
+  },
+  {
+   "group": "Customers & External Partners",
+   "n": 6,
+   "question": "What should the organisation start, stop or continue doing?",
+   "dims": [
+    "All"
+   ],
+   "probe": ""
+  }
+ ],
+ "interviewNote": "Opening and closing (use in every interview): explain the purpose and confidentiality of the interview; ask the interviewee to describe their role; close by asking 'What have I not asked that I should have?' and 'Who else should we speak to?'.",
+ "documentRequests": [
+  {
+   "ref": "DR01",
+   "document": "Strategic plan / corporate plan (current and previous)",
+   "dims": [
+    "D01"
+   ],
+   "priority": "High",
+   "owner": "CEO office / Strategy",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR02",
+   "document": "Business unit plans",
+   "dims": [
+    "D01",
+    "D10"
+   ],
+   "priority": "High",
+   "owner": "Business unit heads",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR03",
+   "document": "Board and executive committee papers and minutes (last 12 months)",
+   "dims": [
+    "D07"
+   ],
+   "priority": "High",
+   "owner": "Company Secretary",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR04",
+   "document": "Previous operating model reviews, restructure proposals or consulting reports",
+   "dims": [
+    "D01",
+    "D06"
+   ],
+   "priority": "High",
+   "owner": "Strategy / CEO office",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR05",
+   "document": "ESG / sustainability strategy and report",
+   "dims": [
+    "D01",
+    "D15"
+   ],
+   "priority": "Medium",
+   "owner": "Sustainability lead",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR06",
+   "document": "Customer research, segmentation and NPS / CSAT reports",
+   "dims": [
+    "D02"
+   ],
+   "priority": "High",
+   "owner": "CX / Marketing",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR07",
+   "document": "Customer journey maps and service blueprints",
+   "dims": [
+    "D02"
+   ],
+   "priority": "Medium",
+   "owner": "CX lead",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR08",
+   "document": "Complaints register and complaints analysis",
+   "dims": [
+    "D02"
+   ],
+   "priority": "High",
+   "owner": "Complaints manager",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR09",
+   "document": "Channel volumes and cost by channel",
+   "dims": [
+    "D02",
+    "D16"
+   ],
+   "priority": "Medium",
+   "owner": "Operations / Finance",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR10",
+   "document": "Service charter and customer SLAs",
+   "dims": [
+    "D02",
+    "D03"
+   ],
+   "priority": "Medium",
+   "owner": "Operations",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR11",
+   "document": "Product / service catalogue",
+   "dims": [
+    "D03"
+   ],
+   "priority": "High",
+   "owner": "Product owners",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR12",
+   "document": "Product performance and P&L reports",
+   "dims": [
+    "D03",
+    "D16"
+   ],
+   "priority": "Medium",
+   "owner": "Finance",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR13",
+   "document": "Process architecture / process repository export",
+   "dims": [
+    "D04"
+   ],
+   "priority": "High",
+   "owner": "Process / BA team",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR14",
+   "document": "Key standard operating procedures and process maps",
+   "dims": [
+    "D04"
+   ],
+   "priority": "Medium",
+   "owner": "Process owners",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR15",
+   "document": "Operational performance reports (volumes, cycle times, backlogs, quality)",
+   "dims": [
+    "D04",
+    "D10"
+   ],
+   "priority": "High",
+   "owner": "Operations",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR16",
+   "document": "Automation, RPA and AI use-case register",
+   "dims": [
+    "D04",
+    "D11"
+   ],
+   "priority": "Medium",
+   "owner": "Digital / IT",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR17",
+   "document": "Business capability map and capability assessments",
+   "dims": [
+    "D05"
+   ],
+   "priority": "High",
+   "owner": "Enterprise architecture",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR18",
+   "document": "Organisation charts (all levels)",
+   "dims": [
+    "D06"
+   ],
+   "priority": "High",
+   "owner": "HR",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR19",
+   "document": "HR system extract: position, reporting line, grade, employment type, location, cost centre, FTE",
+   "dims": [
+    "D06",
+    "D08"
+   ],
+   "priority": "High",
+   "owner": "HR",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR20",
+   "document": "Position descriptions for key roles",
+   "dims": [
+    "D06"
+   ],
+   "priority": "Medium",
+   "owner": "HR",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR21",
+   "document": "Governance framework and committee charters / terms of reference",
+   "dims": [
+    "D07"
+   ],
+   "priority": "High",
+   "owner": "Company Secretary",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR22",
+   "document": "Delegations of authority (financial and non-financial)",
+   "dims": [
+    "D07"
+   ],
+   "priority": "High",
+   "owner": "CFO / Legal",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR23",
+   "document": "Decision rights matrices / RACIs",
+   "dims": [
+    "D07"
+   ],
+   "priority": "Medium",
+   "owner": "Executive office",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR24",
+   "document": "Policy register and policy framework",
+   "dims": [
+    "D07",
+    "D15"
+   ],
+   "priority": "Medium",
+   "owner": "Risk & Compliance",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR25",
+   "document": "Strategic workforce plan",
+   "dims": [
+    "D08"
+   ],
+   "priority": "Medium",
+   "owner": "HR",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR26",
+   "document": "Engagement and culture survey results (last two cycles)",
+   "dims": [
+    "D08",
+    "D09"
+   ],
+   "priority": "High",
+   "owner": "HR",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR27",
+   "document": "Turnover, absenteeism and recruitment metrics",
+   "dims": [
+    "D08"
+   ],
+   "priority": "Medium",
+   "owner": "HR",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR28",
+   "document": "Skills / capability framework and learning records",
+   "dims": [
+    "D08"
+   ],
+   "priority": "Medium",
+   "owner": "Learning & Development",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR29",
+   "document": "Remuneration and incentive framework",
+   "dims": [
+    "D08",
+    "D10"
+   ],
+   "priority": "Low",
+   "owner": "HR",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR30",
+   "document": "WHS reports, including psychosocial risk assessments",
+   "dims": [
+    "D08",
+    "D15"
+   ],
+   "priority": "Medium",
+   "owner": "WHS lead",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR31",
+   "document": "Values, behaviours and leadership frameworks",
+   "dims": [
+    "D09"
+   ],
+   "priority": "Medium",
+   "owner": "HR",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR32",
+   "document": "KPI framework, scorecards and monthly management reporting pack",
+   "dims": [
+    "D10"
+   ],
+   "priority": "High",
+   "owner": "Finance / Performance",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR33",
+   "document": "Planning and budget calendar",
+   "dims": [
+    "D10",
+    "D16"
+   ],
+   "priority": "Medium",
+   "owner": "Finance",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR34",
+   "document": "Technology strategy and roadmap",
+   "dims": [
+    "D11"
+   ],
+   "priority": "High",
+   "owner": "CIO",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR35",
+   "document": "Application inventory / CMDB extract",
+   "dims": [
+    "D11"
+   ],
+   "priority": "High",
+   "owner": "IT",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR36",
+   "document": "Enterprise architecture: current and target state",
+   "dims": [
+    "D11"
+   ],
+   "priority": "Medium",
+   "owner": "Enterprise architecture",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR37",
+   "document": "IT organisation chart and IT operating model",
+   "dims": [
+    "D11"
+   ],
+   "priority": "Medium",
+   "owner": "CIO",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR38",
+   "document": "IT service management performance reports",
+   "dims": [
+    "D11"
+   ],
+   "priority": "Low",
+   "owner": "IT service manager",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR39",
+   "document": "IT budget split by run / grow / transform",
+   "dims": [
+    "D11",
+    "D16"
+   ],
+   "priority": "Medium",
+   "owner": "CIO / Finance",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR40",
+   "document": "Technical debt and end-of-life / end-of-support register",
+   "dims": [
+    "D11"
+   ],
+   "priority": "Medium",
+   "owner": "IT",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR41",
+   "document": "Data strategy and data governance framework",
+   "dims": [
+    "D12"
+   ],
+   "priority": "Medium",
+   "owner": "Data lead",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR42",
+   "document": "Data quality reports",
+   "dims": [
+    "D12"
+   ],
+   "priority": "Low",
+   "owner": "Data stewards",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR43",
+   "document": "Records management policy and retention and disposal schedules",
+   "dims": [
+    "D12"
+   ],
+   "priority": "Low",
+   "owner": "Records manager",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR44",
+   "document": "Privacy management plan and privacy impact assessments",
+   "dims": [
+    "D12",
+    "D15"
+   ],
+   "priority": "Medium",
+   "owner": "Privacy officer",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR45",
+   "document": "Supplier register and spend analysis (last two financial years)",
+   "dims": [
+    "D13"
+   ],
+   "priority": "High",
+   "owner": "Procurement",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR46",
+   "document": "Contract register with key contracts and expiry dates",
+   "dims": [
+    "D13"
+   ],
+   "priority": "High",
+   "owner": "Procurement",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR47",
+   "document": "Supplier performance scorecards",
+   "dims": [
+    "D13"
+   ],
+   "priority": "Medium",
+   "owner": "Contract managers",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR48",
+   "document": "Sourcing strategy and outsourcing agreements",
+   "dims": [
+    "D13"
+   ],
+   "priority": "Medium",
+   "owner": "Procurement",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR49",
+   "document": "Site list with FTE, functions and lease details",
+   "dims": [
+    "D14"
+   ],
+   "priority": "Medium",
+   "owner": "Property",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR50",
+   "document": "Space utilisation data",
+   "dims": [
+    "D14"
+   ],
+   "priority": "Low",
+   "owner": "Property",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR51",
+   "document": "Hybrid / flexible work policy",
+   "dims": [
+    "D14",
+    "D08"
+   ],
+   "priority": "Low",
+   "owner": "HR",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR52",
+   "document": "Risk management framework and risk appetite statement",
+   "dims": [
+    "D15"
+   ],
+   "priority": "High",
+   "owner": "CRO",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR53",
+   "document": "Enterprise risk register",
+   "dims": [
+    "D15"
+   ],
+   "priority": "High",
+   "owner": "CRO",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR54",
+   "document": "Obligations register and regulatory change log",
+   "dims": [
+    "D15"
+   ],
+   "priority": "High",
+   "owner": "Compliance",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR55",
+   "document": "Compliance breach and incident registers",
+   "dims": [
+    "D15"
+   ],
+   "priority": "Medium",
+   "owner": "Compliance",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR56",
+   "document": "Internal audit plan, reports and action tracker",
+   "dims": [
+    "D15"
+   ],
+   "priority": "High",
+   "owner": "Internal Audit",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR57",
+   "document": "Cyber security assessments (Essential Eight, ISO/IEC 27001 SoA, penetration tests)",
+   "dims": [
+    "D15"
+   ],
+   "priority": "Medium",
+   "owner": "CISO",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR58",
+   "document": "Business continuity plans, business impact analysis and DR test results",
+   "dims": [
+    "D15"
+   ],
+   "priority": "Medium",
+   "owner": "BCM lead",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR59",
+   "document": "Regulator reports and correspondence (last two years)",
+   "dims": [
+    "D15"
+   ],
+   "priority": "Medium",
+   "owner": "Compliance / Legal",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR60",
+   "document": "Financial statements and annual report (last two years)",
+   "dims": [
+    "D16"
+   ],
+   "priority": "High",
+   "owner": "Finance",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR61",
+   "document": "General ledger extract: cost by cost centre and cost type",
+   "dims": [
+    "D16"
+   ],
+   "priority": "High",
+   "owner": "Finance",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR62",
+   "document": "Budget and latest forecast",
+   "dims": [
+    "D16"
+   ],
+   "priority": "High",
+   "owner": "Finance",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR63",
+   "document": "Cost allocation / chargeback methodology",
+   "dims": [
+    "D16"
+   ],
+   "priority": "Low",
+   "owner": "Finance",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR64",
+   "document": "Business case template and investment committee papers",
+   "dims": [
+    "D16",
+    "D17"
+   ],
+   "priority": "Medium",
+   "owner": "Finance / PMO",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR65",
+   "document": "Project and program portfolio register and status reports",
+   "dims": [
+    "D17"
+   ],
+   "priority": "High",
+   "owner": "PMO",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR66",
+   "document": "PMO / delivery framework and methodology",
+   "dims": [
+    "D17"
+   ],
+   "priority": "Medium",
+   "owner": "PMO",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR67",
+   "document": "Benefits register and benefits realisation reports",
+   "dims": [
+    "D17"
+   ],
+   "priority": "Medium",
+   "owner": "PMO",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR68",
+   "document": "Change heat map / change calendar",
+   "dims": [
+    "D17"
+   ],
+   "priority": "Low",
+   "owner": "Change lead",
+   "status": "Not requested"
+  },
+  {
+   "ref": "DR69",
+   "document": "Lessons-learned register and post-implementation reviews",
+   "dims": [
+    "D17"
+   ],
+   "priority": "Low",
+   "owner": "PMO",
+   "status": "Not requested"
+  }
+ ],
+ "capabilities": [
+  {
+   "id": "C01",
+   "tier": "Strategic",
+   "l1": "Strategy & Planning",
+   "l2": "Strategy development",
+   "description": "Set direction, strategic objectives and choices."
+  },
+  {
+   "id": "C02",
+   "tier": "Strategic",
+   "l1": "Strategy & Planning",
+   "l2": "Business planning",
+   "description": "Translate strategy into business unit plans and targets."
+  },
+  {
+   "id": "C03",
+   "tier": "Strategic",
+   "l1": "Strategy & Planning",
+   "l2": "Performance management",
+   "description": "Measure, report and steer performance against plans."
+  },
+  {
+   "id": "C04",
+   "tier": "Strategic",
+   "l1": "Strategy & Planning",
+   "l2": "Enterprise architecture & design",
+   "description": "Design and govern the business and technology architecture."
+  },
+  {
+   "id": "C05",
+   "tier": "Strategic",
+   "l1": "Governance & Assurance",
+   "l2": "Corporate governance",
+   "description": "Operate the board, committees and delegations."
+  },
+  {
+   "id": "C06",
+   "tier": "Strategic",
+   "l1": "Governance & Assurance",
+   "l2": "Enterprise risk management",
+   "description": "Identify, assess and treat risks within appetite."
+  },
+  {
+   "id": "C07",
+   "tier": "Strategic",
+   "l1": "Governance & Assurance",
+   "l2": "Compliance management",
+   "description": "Identify obligations and monitor compliance."
+  },
+  {
+   "id": "C08",
+   "tier": "Strategic",
+   "l1": "Governance & Assurance",
+   "l2": "Internal audit & assurance",
+   "description": "Provide independent assurance over controls."
+  },
+  {
+   "id": "C09",
+   "tier": "Strategic",
+   "l1": "Portfolio & Change",
+   "l2": "Portfolio management",
+   "description": "Prioritise, fund and oversee the change portfolio."
+  },
+  {
+   "id": "C10",
+   "tier": "Strategic",
+   "l1": "Portfolio & Change",
+   "l2": "Program & project delivery",
+   "description": "Deliver change initiatives to scope, time and budget."
+  },
+  {
+   "id": "C11",
+   "tier": "Strategic",
+   "l1": "Portfolio & Change",
+   "l2": "Business analysis & design",
+   "description": "Define needs, requirements and solution designs."
+  },
+  {
+   "id": "C12",
+   "tier": "Strategic",
+   "l1": "Portfolio & Change",
+   "l2": "Change management",
+   "description": "Drive adoption and embed change."
+  },
+  {
+   "id": "C13",
+   "tier": "Strategic",
+   "l1": "Portfolio & Change",
+   "l2": "Benefits management",
+   "description": "Define, track and realise benefits."
+  },
+  {
+   "id": "C14",
+   "tier": "Core",
+   "l1": "Customer & Stakeholder Management",
+   "l2": "Customer insight & research",
+   "description": "Understand customer needs, behaviours and outcomes."
+  },
+  {
+   "id": "C15",
+   "tier": "Core",
+   "l1": "Customer & Stakeholder Management",
+   "l2": "Marketing & communications",
+   "description": "Promote services and communicate with stakeholders."
+  },
+  {
+   "id": "C16",
+   "tier": "Core",
+   "l1": "Customer & Stakeholder Management",
+   "l2": "Customer relationship management",
+   "description": "Manage customer relationships and interactions."
+  },
+  {
+   "id": "C17",
+   "tier": "Core",
+   "l1": "Customer & Stakeholder Management",
+   "l2": "Complaints & feedback management",
+   "description": "Capture, resolve and learn from feedback and complaints."
+  },
+  {
+   "id": "C18",
+   "tier": "Core",
+   "l1": "Product & Service Management",
+   "l2": "Product & service design",
+   "description": "Design products and services that meet customer needs."
+  },
+  {
+   "id": "C19",
+   "tier": "Core",
+   "l1": "Product & Service Management",
+   "l2": "Product lifecycle management",
+   "description": "Launch, manage, change and retire products and services."
+  },
+  {
+   "id": "C20",
+   "tier": "Core",
+   "l1": "Product & Service Management",
+   "l2": "Pricing & funding management",
+   "description": "Set prices, fees or funding for services."
+  },
+  {
+   "id": "C21",
+   "tier": "Core",
+   "l1": "Channel & Access Management",
+   "l2": "Channel management",
+   "description": "Manage digital, phone, face-to-face and partner channels."
+  },
+  {
+   "id": "C22",
+   "tier": "Core",
+   "l1": "Channel & Access Management",
+   "l2": "Intake & onboarding",
+   "description": "Receive requests, assess eligibility and onboard customers."
+  },
+  {
+   "id": "C23",
+   "tier": "Core",
+   "l1": "Channel & Access Management",
+   "l2": "Partner & intermediary management",
+   "description": "Manage partners who deliver or distribute services."
+  },
+  {
+   "id": "C24",
+   "tier": "Core",
+   "l1": "Service Delivery & Operations",
+   "l2": "Service fulfilment",
+   "description": "Deliver the core products and services."
+  },
+  {
+   "id": "C25",
+   "tier": "Core",
+   "l1": "Service Delivery & Operations",
+   "l2": "Case management",
+   "description": "Manage cases through to resolution."
+  },
+  {
+   "id": "C26",
+   "tier": "Core",
+   "l1": "Service Delivery & Operations",
+   "l2": "Scheduling & resource allocation",
+   "description": "Match workforce and resources to demand."
+  },
+  {
+   "id": "C27",
+   "tier": "Core",
+   "l1": "Service Delivery & Operations",
+   "l2": "Quality management",
+   "description": "Assure and improve the quality of outputs."
+  },
+  {
+   "id": "C28",
+   "tier": "Core",
+   "l1": "Service Delivery & Operations",
+   "l2": "Customer support",
+   "description": "Resolve enquiries and issues across channels."
+  },
+  {
+   "id": "C29",
+   "tier": "Enabling",
+   "l1": "Finance",
+   "l2": "Financial planning & analysis",
+   "description": "Budget, forecast and analyse financial performance."
+  },
+  {
+   "id": "C30",
+   "tier": "Enabling",
+   "l1": "Finance",
+   "l2": "Financial accounting & reporting",
+   "description": "Record transactions and produce financial statements."
+  },
+  {
+   "id": "C31",
+   "tier": "Enabling",
+   "l1": "Finance",
+   "l2": "Revenue & receivables management",
+   "description": "Bill customers and collect payments."
+  },
+  {
+   "id": "C32",
+   "tier": "Enabling",
+   "l1": "Finance",
+   "l2": "Payables & payments",
+   "description": "Pay suppliers and manage expenses."
+  },
+  {
+   "id": "C33",
+   "tier": "Enabling",
+   "l1": "Finance",
+   "l2": "Treasury & cash management",
+   "description": "Manage liquidity, cash and funding."
+  },
+  {
+   "id": "C34",
+   "tier": "Enabling",
+   "l1": "People",
+   "l2": "Workforce planning",
+   "description": "Plan workforce size, mix and skills."
+  },
+  {
+   "id": "C35",
+   "tier": "Enabling",
+   "l1": "People",
+   "l2": "Talent acquisition",
+   "description": "Attract, recruit and onboard staff."
+  },
+  {
+   "id": "C36",
+   "tier": "Enabling",
+   "l1": "People",
+   "l2": "Learning & development",
+   "description": "Build skills and capability."
+  },
+  {
+   "id": "C37",
+   "tier": "Enabling",
+   "l1": "People",
+   "l2": "Performance & reward",
+   "description": "Manage performance, remuneration and recognition."
+  },
+  {
+   "id": "C38",
+   "tier": "Enabling",
+   "l1": "People",
+   "l2": "Employee relations & WHS",
+   "description": "Manage employee relations, health, safety and wellbeing."
+  },
+  {
+   "id": "C39",
+   "tier": "Enabling",
+   "l1": "People",
+   "l2": "Payroll & HR administration",
+   "description": "Pay staff and maintain employee records."
+  },
+  {
+   "id": "C40",
+   "tier": "Enabling",
+   "l1": "Technology",
+   "l2": "Technology strategy & architecture",
+   "description": "Set technology direction and standards."
+  },
+  {
+   "id": "C41",
+   "tier": "Enabling",
+   "l1": "Technology",
+   "l2": "Application management",
+   "description": "Build, maintain and support applications."
+  },
+  {
+   "id": "C42",
+   "tier": "Enabling",
+   "l1": "Technology",
+   "l2": "Infrastructure & cloud operations",
+   "description": "Operate hosting, network and cloud platforms."
+  },
+  {
+   "id": "C43",
+   "tier": "Enabling",
+   "l1": "Technology",
+   "l2": "IT service management",
+   "description": "Manage IT services, incidents and changes."
+  },
+  {
+   "id": "C44",
+   "tier": "Enabling",
+   "l1": "Technology",
+   "l2": "Cyber security",
+   "description": "Protect systems and information from cyber threats."
+  },
+  {
+   "id": "C45",
+   "tier": "Enabling",
+   "l1": "Technology",
+   "l2": "Digital, automation & AI",
+   "description": "Apply digital, automation and AI capabilities."
+  },
+  {
+   "id": "C46",
+   "tier": "Enabling",
+   "l1": "Data & Information",
+   "l2": "Data governance",
+   "description": "Define data ownership, standards and policies."
+  },
+  {
+   "id": "C47",
+   "tier": "Enabling",
+   "l1": "Data & Information",
+   "l2": "Data management & integration",
+   "description": "Store, integrate and maintain data assets."
+  },
+  {
+   "id": "C48",
+   "tier": "Enabling",
+   "l1": "Data & Information",
+   "l2": "Analytics & reporting",
+   "description": "Turn data into insight and reports."
+  },
+  {
+   "id": "C49",
+   "tier": "Enabling",
+   "l1": "Data & Information",
+   "l2": "Records & information management",
+   "description": "Manage records across their lifecycle."
+  },
+  {
+   "id": "C50",
+   "tier": "Enabling",
+   "l1": "Procurement & Suppliers",
+   "l2": "Sourcing & procurement",
+   "description": "Source and procure goods and services."
+  },
+  {
+   "id": "C51",
+   "tier": "Enabling",
+   "l1": "Procurement & Suppliers",
+   "l2": "Contract management",
+   "description": "Manage contractual obligations and renewals."
+  },
+  {
+   "id": "C52",
+   "tier": "Enabling",
+   "l1": "Procurement & Suppliers",
+   "l2": "Supplier relationship management",
+   "description": "Manage supplier performance and relationships."
+  },
+  {
+   "id": "C53",
+   "tier": "Enabling",
+   "l1": "Legal & Corporate Services",
+   "l2": "Legal services",
+   "description": "Provide legal advice and manage legal risk."
+  },
+  {
+   "id": "C54",
+   "tier": "Enabling",
+   "l1": "Legal & Corporate Services",
+   "l2": "Property & facilities management",
+   "description": "Manage sites, workplaces and facilities."
+  },
+  {
+   "id": "C55",
+   "tier": "Enabling",
+   "l1": "Legal & Corporate Services",
+   "l2": "Asset management",
+   "description": "Manage physical assets across their lifecycle."
+  },
+  {
+   "id": "C56",
+   "tier": "Enabling",
+   "l1": "Legal & Corporate Services",
+   "l2": "Business continuity management",
+   "description": "Plan for and respond to disruption."
+  }
+ ],
+ "processes": [
+  {
+   "id": "P01",
+   "valueStream": "Strategy-to-Execution",
+   "l1": "Develop and refresh strategy",
+   "l2": ""
+  },
+  {
+   "id": "P02",
+   "valueStream": "Strategy-to-Execution",
+   "l1": "Plan and budget",
+   "l2": ""
+  },
+  {
+   "id": "P03",
+   "valueStream": "Strategy-to-Execution",
+   "l1": "Manage the change portfolio",
+   "l2": ""
+  },
+  {
+   "id": "P04",
+   "valueStream": "Strategy-to-Execution",
+   "l1": "Monitor and report performance",
+   "l2": ""
+  },
+  {
+   "id": "P05",
+   "valueStream": "Market-to-Customer",
+   "l1": "Understand customer needs",
+   "l2": ""
+  },
+  {
+   "id": "P06",
+   "valueStream": "Market-to-Customer",
+   "l1": "Market and promote services",
+   "l2": ""
+  },
+  {
+   "id": "P07",
+   "valueStream": "Market-to-Customer",
+   "l1": "Acquire and onboard customers",
+   "l2": ""
+  },
+  {
+   "id": "P08",
+   "valueStream": "Request-to-Fulfil",
+   "l1": "Receive and triage requests",
+   "l2": ""
+  },
+  {
+   "id": "P09",
+   "valueStream": "Request-to-Fulfil",
+   "l1": "Assess eligibility and requirements",
+   "l2": ""
+  },
+  {
+   "id": "P10",
+   "valueStream": "Request-to-Fulfil",
+   "l1": "Deliver the product or service",
+   "l2": ""
+  },
+  {
+   "id": "P11",
+   "valueStream": "Request-to-Fulfil",
+   "l1": "Confirm completion and close",
+   "l2": ""
+  },
+  {
+   "id": "P12",
+   "valueStream": "Issue-to-Resolution",
+   "l1": "Receive enquiries and complaints",
+   "l2": ""
+  },
+  {
+   "id": "P13",
+   "valueStream": "Issue-to-Resolution",
+   "l1": "Investigate and resolve",
+   "l2": ""
+  },
+  {
+   "id": "P14",
+   "valueStream": "Issue-to-Resolution",
+   "l1": "Analyse root causes and remediate",
+   "l2": ""
+  },
+  {
+   "id": "P15",
+   "valueStream": "Order-to-Cash",
+   "l1": "Invoice and bill",
+   "l2": ""
+  },
+  {
+   "id": "P16",
+   "valueStream": "Order-to-Cash",
+   "l1": "Collect payments",
+   "l2": ""
+  },
+  {
+   "id": "P17",
+   "valueStream": "Order-to-Cash",
+   "l1": "Manage debt",
+   "l2": ""
+  },
+  {
+   "id": "P18",
+   "valueStream": "Procure-to-Pay",
+   "l1": "Identify need and source",
+   "l2": ""
+  },
+  {
+   "id": "P19",
+   "valueStream": "Procure-to-Pay",
+   "l1": "Contract with suppliers",
+   "l2": ""
+  },
+  {
+   "id": "P20",
+   "valueStream": "Procure-to-Pay",
+   "l1": "Receive goods and services",
+   "l2": ""
+  },
+  {
+   "id": "P21",
+   "valueStream": "Procure-to-Pay",
+   "l1": "Pay suppliers",
+   "l2": ""
+  },
+  {
+   "id": "P22",
+   "valueStream": "Hire-to-Retire",
+   "l1": "Plan the workforce",
+   "l2": ""
+  },
+  {
+   "id": "P23",
+   "valueStream": "Hire-to-Retire",
+   "l1": "Recruit and onboard",
+   "l2": ""
+  },
+  {
+   "id": "P24",
+   "valueStream": "Hire-to-Retire",
+   "l1": "Develop and manage performance",
+   "l2": ""
+  },
+  {
+   "id": "P25",
+   "valueStream": "Hire-to-Retire",
+   "l1": "Pay and reward",
+   "l2": ""
+  },
+  {
+   "id": "P26",
+   "valueStream": "Hire-to-Retire",
+   "l1": "Offboard",
+   "l2": ""
+  },
+  {
+   "id": "P27",
+   "valueStream": "Record-to-Report",
+   "l1": "Record transactions",
+   "l2": ""
+  },
+  {
+   "id": "P28",
+   "valueStream": "Record-to-Report",
+   "l1": "Close the period",
+   "l2": ""
+  },
+  {
+   "id": "P29",
+   "valueStream": "Record-to-Report",
+   "l1": "Produce financial and management reports",
+   "l2": ""
+  },
+  {
+   "id": "P30",
+   "valueStream": "Idea-to-Implementation",
+   "l1": "Capture and prioritise ideas",
+   "l2": ""
+  },
+  {
+   "id": "P31",
+   "valueStream": "Idea-to-Implementation",
+   "l1": "Design and build change",
+   "l2": ""
+  },
+  {
+   "id": "P32",
+   "valueStream": "Idea-to-Implementation",
+   "l1": "Implement and embed",
+   "l2": ""
+  },
+  {
+   "id": "P33",
+   "valueStream": "Idea-to-Implementation",
+   "l1": "Realise benefits",
+   "l2": ""
+  },
+  {
+   "id": "P34",
+   "valueStream": "Risk-to-Resilience",
+   "l1": "Identify and assess risks and obligations",
+   "l2": ""
+  },
+  {
+   "id": "P35",
+   "valueStream": "Risk-to-Resilience",
+   "l1": "Operate and test controls",
+   "l2": ""
+  },
+  {
+   "id": "P36",
+   "valueStream": "Risk-to-Resilience",
+   "l1": "Manage incidents and breaches",
+   "l2": ""
+  },
+  {
+   "id": "P37",
+   "valueStream": "Risk-to-Resilience",
+   "l1": "Maintain business continuity",
+   "l2": ""
+  },
+  {
+   "id": "P38",
+   "valueStream": "Request-to-Service (IT)",
+   "l1": "Request IT services",
+   "l2": ""
+  },
+  {
+   "id": "P39",
+   "valueStream": "Request-to-Service (IT)",
+   "l1": "Manage change and release",
+   "l2": ""
+  },
+  {
+   "id": "P40",
+   "valueStream": "Request-to-Service (IT)",
+   "l1": "Resolve incidents and problems",
+   "l2": ""
+  }
+ ],
+ "rapidRoles": [
+  "Board",
+  "Audit & Risk Committee",
+  "CEO",
+  "Executive Committee",
+  "Investment Committee",
+  "CFO",
+  "COO",
+  "CIO",
+  "CHRO",
+  "CRO",
+  "BU Head"
+ ],
+ "decisions": [
+  {
+   "id": "DEC01",
+   "decision": "Approve organisational strategy"
+  },
+  {
+   "id": "DEC02",
+   "decision": "Approve annual budget"
+  },
+  {
+   "id": "DEC03",
+   "decision": "Approve risk appetite statement"
+  },
+  {
+   "id": "DEC04",
+   "decision": "Approve launch of a new product or service"
+  },
+  {
+   "id": "DEC05",
+   "decision": "Approve investment above delegated threshold"
+  },
+  {
+   "id": "DEC06",
+   "decision": "Prioritise the change portfolio"
+  },
+  {
+   "id": "DEC07",
+   "decision": "Approve organisational restructure"
+  },
+  {
+   "id": "DEC08",
+   "decision": "Appoint executive roles"
+  },
+  {
+   "id": "DEC09",
+   "decision": "Approve headcount increases"
+  },
+  {
+   "id": "DEC10",
+   "decision": "Approve enterprise-level policies"
+  },
+  {
+   "id": "DEC11",
+   "decision": "Award a major contract / select strategic supplier"
+  },
+  {
+   "id": "DEC12",
+   "decision": "Approve technology architecture standards"
+  },
+  {
+   "id": "DEC13",
+   "decision": "Approve a new technology platform or application"
+  },
+  {
+   "id": "DEC14",
+   "decision": "Approve sharing data with third parties"
+  },
+  {
+   "id": "DEC15",
+   "decision": "Accept a risk outside appetite"
+  },
+  {
+   "id": "DEC16",
+   "decision": "Notify a regulator of a significant breach"
+  },
+  {
+   "id": "DEC17",
+   "decision": "Approve pricing or fee changes"
+  },
+  {
+   "id": "DEC18",
+   "decision": "Approve customer remediation or compensation"
+  },
+  {
+   "id": "DEC19",
+   "decision": "Invoke business continuity plans"
+  },
+  {
+   "id": "DEC20",
+   "decision": "Approve go-live of major change"
+  },
+  {
+   "id": "DEC21",
+   "decision": "Approve deployment of an AI use case"
+  }
+ ],
+ "examples": {
+  "orgUnit": {
+   "name": "Customer Operations",
+   "head": "GM Customer Operations",
+   "nature": "Standardised / operational",
+   "perm": 182,
+   "fixed": 12,
+   "contractor": 9,
+   "outsourced": 25,
+   "managers": 14,
+   "layers": 5,
+   "cost": 21450000,
+   "vacancies": 8,
+   "notes": "Two team leaders manage 25+ staff each."
+  },
+  "application": {
+   "name": "Case Management System",
+   "description": "Manages client cases from intake to closure",
+   "capabilities": "Case management; Customer support",
+   "businessOwner": "GM Operations",
+   "technicalOwner": "Applications Manager",
+   "vendor": "Vendor product (v9.2)",
+   "hosting": "Private cloud",
+   "users": 850,
+   "criticality": "Critical",
+   "cost": 420000,
+   "supportEnd": "2027-06-30",
+   "supportStatus": "Extended support",
+   "businessFit": 4,
+   "technicalFit": 2,
+   "classification": "Confidential",
+   "interfaces": 12,
+   "overlap": "Contact history duplicated in legacy CRM",
+   "notes": "Heavy customisation is blocking upgrades."
+  },
+  "supplier": {
+   "name": "Managed IT services provider",
+   "services": "Service desk, end-user support and infrastructure operations",
+   "supports": "IT service management; Infrastructure",
+   "segment": "Strategic",
+   "spend": 3200000,
+   "start": "2023-07-01",
+   "end": "2027-06-30",
+   "material": "Yes",
+   "singleSource": "Yes",
+   "exitPlan": "Partial",
+   "performance": 3,
+   "assurance": "ISO/IEC 27001 certified",
+   "owner": "Head of IT Operations",
+   "notes": "No tested exit plan; knowledge concentrated in the provider."
+  },
+  "location": {
+   "name": "Parramatta Service Centre",
+   "city": "Parramatta, NSW",
+   "type": "Service centre",
+   "functions": "Claims processing; contact centre",
+   "fte": 220,
+   "capacity": 180,
+   "utilisation": 0.62,
+   "tenure": "Leased",
+   "leaseExpiry": "2028-03-31",
+   "cost": 2150000,
+   "critical": "Yes",
+   "bcp": "Work from home; Sydney CBD office",
+   "notes": "Lease expiry aligns with footprint review."
+  },
+  "cost": {
+   "unit": "Customer Operations",
+   "employee": 21450000,
+   "contractor": 1850000,
+   "technology": 2600000,
+   "property": 2150000,
+   "outsourced": 3200000,
+   "other": 900000,
+   "fte": 228,
+   "change": 1200000,
+   "notes": "Includes allocated contact-centre technology."
+  },
+  "finding": {
+   "date": "2026-10-20",
+   "dimension": "Governance & Decision Rights",
+   "sub": "Delegations of authority",
+   "finding": "Investment decisions below $250k are escalated to the Executive Committee, adding four to six weeks to minor change.",
+   "evidence": "Executive Committee minutes (Jan–Jun 2026); six interviews",
+   "rootCause": "Delegations not updated since the 2019 restructure",
+   "impact": "Slower delivery of minor change; executive time spent on low-value decisions",
+   "severity": "High",
+   "questions": "D07.03; D07.05",
+   "validated": "Yes",
+   "owner": "CFO",
+   "recs": "See example on Recommendations tab",
+   "status": "Validated"
+  },
+  "recommendation": {
+   "dimension": "Governance & Decision Rights",
+   "recommendation": "Refresh delegations of authority to align with the current structure and risk appetite, devolving investment decisions below $250k to business unit heads.",
+   "findings": "Example finding",
+   "benefits": "Faster delivery of minor change; executive time refocused on strategic decisions",
+   "value": 4,
+   "ease": 4,
+   "horizon": "0–3 months",
+   "cost": 40000,
+   "owner": "CFO",
+   "dependencies": "Refresh of risk appetite statement",
+   "risks": "Weaker control if delegations are not system-enforced",
+   "status": "Proposed"
+  }
+ },
+ "lists": {
+  "Dimensions": [
+   "Strategy & Direction",
+   "Customers, Channels & Value Proposition",
+   "Products & Services",
+   "Value Streams & Processes",
+   "Business Capabilities",
+   "Organisation Structure & Roles",
+   "Governance & Decision Rights",
+   "People, Workforce & Skills",
+   "Culture, Leadership & Behaviours",
+   "Performance Management & Planning",
+   "Technology & Applications",
+   "Data, Information & Analytics",
+   "Suppliers, Partners & Sourcing",
+   "Locations & Physical Assets",
+   "Risk, Compliance, Security & Resilience",
+   "Finance, Funding & Cost Model",
+   "Change, Transformation & Continuous Improvement"
+  ],
+  "Maturity score": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   "N/A"
+  ],
+  "Importance weight": [
+   1,
+   2,
+   3
+  ],
+  "High / Medium / Low": [
+   "High",
+   "Medium",
+   "Low"
+  ],
+  "RAG": [
+   "Red",
+   "Amber",
+   "Green"
+  ],
+  "Severity / criticality": [
+   "Critical",
+   "High",
+   "Medium",
+   "Low"
+  ],
+  "Yes / No / Partial": [
+   "Yes",
+   "No",
+   "Partial"
+  ],
+  "Yes / No": [
+   "Yes",
+   "No"
+  ],
+  "Validation": [
+   "Yes",
+   "No",
+   "Pending"
+  ],
+  "Finding status": [
+   "Open",
+   "Validated",
+   "Closed"
+  ],
+  "Recommendation status": [
+   "Proposed",
+   "Endorsed",
+   "In progress",
+   "Complete",
+   "Rejected"
+  ],
+  "Horizon": [
+   "0–3 months",
+   "3–12 months",
+   "12–24 months",
+   "24+ months"
+  ],
+  "Recommendation category": [
+   "Quick win",
+   "Strategic initiative",
+   "Fill-in",
+   "Deprioritise"
+  ],
+  "Stakeholder group": [
+   "Board / Chair",
+   "CEO & Executive Leadership",
+   "Business Unit & Operations Leaders",
+   "Team Leaders & Frontline Staff",
+   "CFO & Finance",
+   "CHRO & People",
+   "CIO, Technology & Data",
+   "CRO, Risk, Compliance & Audit",
+   "Procurement & Supplier Management",
+   "Customers & External Partners"
+  ],
+  "Interview status": [
+   "Not scheduled",
+   "Scheduled",
+   "Completed",
+   "Cancelled"
+  ],
+  "Document status": [
+   "Not requested",
+   "Requested",
+   "Received",
+   "Partially received",
+   "Not available"
+  ],
+  "Differentiation": [
+   "Differentiating",
+   "Competitive parity",
+   "Commodity"
+  ],
+  "Sourcing model": [
+   "In-house",
+   "Shared service",
+   "Outsourced",
+   "Partnered",
+   "Hybrid"
+  ],
+  "Automation level": [
+   "Manual",
+   "Partially automated",
+   "Highly automated"
+  ],
+  "Hosting model": [
+   "On-premises",
+   "Private cloud",
+   "Public cloud (IaaS / PaaS)",
+   "SaaS",
+   "Hybrid"
+  ],
+  "Support status": [
+   "Supported",
+   "Extended support",
+   "End of life",
+   "Unknown"
+  ],
+  "Data classification": [
+   "Public",
+   "Internal",
+   "Confidential",
+   "Restricted"
+  ],
+  "Supplier segment (Kraljic)": [
+   "Strategic",
+   "Leverage",
+   "Bottleneck",
+   "Non-critical"
+  ],
+  "Security assurance": [
+   "ISO/IEC 27001 certified",
+   "SOC 2 Type II report",
+   "Assessed by client",
+   "Not assessed"
+  ],
+  "Site type": [
+   "Head office",
+   "Regional office",
+   "Service centre",
+   "Contact centre",
+   "Operations site",
+   "Data centre",
+   "Warehouse / logistics",
+   "Retail / shopfront"
+  ],
+  "Tenure": [
+   "Owned",
+   "Leased",
+   "Shared / co-located",
+   "Serviced office"
+  ],
+  "RAPID code": [
+   "R",
+   "A",
+   "P",
+   "I",
+   "D"
+  ],
+  "Engagement status": [
+   "Mobilising",
+   "Discovery",
+   "Analysis",
+   "Recommendations",
+   "Complete"
+  ],
+  "Principle status": [
+   "Proposed",
+   "Agreed",
+   "Retired"
+  ]
+ },
+ "spanBenchmarks": [
+  {
+   "nature": "Specialist / complex",
+   "min": 5,
+   "max": 7
+  },
+  {
+   "nature": "Mixed / professional",
+   "min": 8,
+   "max": 10
+  },
+  {
+   "nature": "Standardised / operational",
+   "min": 11,
+   "max": 15
+  },
+  {
+   "nature": "Highly routine / transactional",
+   "min": 15,
+   "max": 20
+  }
+ ],
+ "spanNote": "Indicative practitioner benchmarks for average span of control by nature of work. Adjust to the client context and any benchmark data available.",
+ "importanceWeights": [
+  {
+   "importance": "High",
+   "weight": 3
+  },
+  {
+   "importance": "Medium",
+   "weight": 2
+  },
+  {
+   "importance": "Low",
+   "weight": 1
+  }
+ ]
+}
