@@ -247,7 +247,11 @@ export function buildSeed({ now = new Date() } = {}) {
     bid.criteria = ext.criteria.map((c, i) => ({ ...c, id: `cr_${idPrefix}_${i + 1}` }));
     const critMap = new Map(ext.criteria.map((c, i) => [c.id, `cr_${idPrefix}_${i + 1}`]));
     bid.requirements = ext.requirements.map((r) => ({ ...r, id: `rq_${idPrefix}_${r.ref}`, criterionId: critMap.get(r.criterionId) || null, confirmed, confirmedBy: confirmed ? by : null, confirmedAt: confirmed ? when : null, extracted: { text: r.text, kind: r.kind } }));
-    bid.extraction = { status: confirmed ? 'confirmed' : 'draft', mode: 'rules', model: null, at: when, by, docIds: bid.documents.map((x) => x.id), fields: ext.fields, closing: ext.closing, dates: ext.dates.map((x, i) => ({ ...x, id: `dt_${idPrefix}_${i}` })), submission: ext.submission.map((x, i) => ({ ...x, id: `si_${idPrefix}_${i}` })), pricing: ext.pricing, forms: ext.forms, confirmed: {}, corrections: [], confirmedAt: confirmed ? when : null };
+    const dates = ext.dates.map((x, i) => ({ ...x, id: `dt_${idPrefix}_${i}` }));
+    const submission = ext.submission.map((x, i) => ({ ...x, id: `si_${idPrefix}_${i}` }));
+    const mark = { by, at: when };
+    const confirmedMap = confirmed ? Object.fromEntries([...['client', 'title', 'reference', 'channel', 'closing'].map((k) => [k, mark]), ...dates.map((x) => [`date:${x.id}`, mark]), ...submission.map((x) => [`sub:${x.id}`, mark])]) : {};
+    bid.extraction = { status: confirmed ? 'confirmed' : 'draft', mode: 'rules', model: null, at: when, by, docIds: bid.documents.map((x) => x.id), fields: ext.fields, closing: ext.closing, dates, submission, pricing: ext.pricing, forms: ext.forms, confirmed: confirmedMap, corrections: [], confirmedAt: confirmed ? when : null };
   };
   const gatePass = (bid, gateId, deciders, when, snapLabel) => {
     const snap = { id: `snap_${bid.id.slice(4)}_${gateId}`, label: snapLabel || `Gate ${gateId.slice(1)}`, gateId, at: when, by: bid.bidManagerId, sections: bid.sections.map((s) => ({ id: s.id, title: s.title, v: s.v, status: s.status, hash: sha256Safe(s.content) })), pricingHash: sha256Safe(JSON.stringify(bid.pricing)), passedAt: when };

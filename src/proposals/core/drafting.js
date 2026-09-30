@@ -165,7 +165,7 @@ function sourcesOf(blocks) {
 
 const isKind = (section, re) => re.test(`${section.key} ${section.title}`);
 
-export function draftSection(state, bid, section, { wordLimit } = {}) {
+export function draftSection(state, bid, section, { wordLimit, existing = '' } = {}) {
   const client = clientShort(state, bid);
   const reqs = bid.requirements.filter((r) => (r.sectionIds || []).includes(section.id) && !r.excluded);
   const consultants = (bid.staffing || []).map((l) => state.consultants.find((c) => c.id === l.consultantId)).filter(Boolean);
@@ -177,11 +177,16 @@ export function draftSection(state, bid, section, { wordLimit } = {}) {
   const blocks = [];
   const take = (list, n) => list.slice(0, n).map((p) => { used.add(p.text); return { text: p.text, cites: [p.cite] }; });
   const limit = wordLimit || section.wordLimit || 600;
+  // When adding to existing text, never repeat a sentence the section already contains.
+  const norm = (t) => t.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  const have = norm(htmlToText(existing || ''));
+  const already = (t) => have.length > 0 && have.includes(norm(t));
+  for (const p of pool) if (already(p.text)) used.add(p.text);
 
   if (isKind(section, /exec/i)) return executiveSummary(state, bid, section);
 
   // Opening: restate what the client asked for, cited to the request.
-  if (reqs.length) {
+  if (reqs.length && !have.includes('this section responds to')) {
     const refs = reqs.slice(0, 6).map((r) => r.ref);
     blocks.push({ type: 'p', sentences: [{ text: `This section responds to ${client}’s requirement${refs.length > 1 ? 's' : ''} ${refs.length > 1 ? `${refs.slice(0, -1).join(', ')} and ${refs[refs.length - 1]}` : refs[0]}.`, cites: reqs.slice(0, 6).map(reqCite) }] });
   }
@@ -211,6 +216,7 @@ export function draftSection(state, bid, section, { wordLimit } = {}) {
 
   // One paragraph per linked requirement: commitment (cited to the request) plus evidence (cited to the library).
   for (const r of reqs.slice(0, 10)) {
+    if (already(restate(r))) continue;
     const ev = rank(pool, r.text, used, { boost: (p) => (p.outcome ? 1.15 : 1) }).filter((p) => p.score >= 0.2);
     const sentences = [{ text: restate(r), cites: [reqCite(r)] }];
     if (ev.length) sentences.push(...take(ev, r.kind === 'mandatory' ? 2 : 1));
