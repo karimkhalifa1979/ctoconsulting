@@ -22,7 +22,8 @@ async function parsePdf(bytes) {
     const workerUrl = (await import('pdfjs-dist/legacy/build/pdf.worker.min.mjs?url')).default;
     pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
   }
-  const doc = await pdfjs.getDocument({ data: bytes, isEvalSupported: false, useSystemFonts: true }).promise;
+  // pdf.js transfers its buffer to the worker, so it gets a copy and the original stays intact for storage.
+  const doc = await pdfjs.getDocument({ data: bytes.slice(), isEvalSupported: false, useSystemFonts: true }).promise;
   const pages = [];
   const warnings = [];
   for (let n = 1; n <= doc.numPages; n++) {

@@ -2,7 +2,7 @@
   "name": "cto-regulatory-assessment",
   "private": true,
   "version": "1.0.0",
-  "description": "CTO Consulting Regulatory & Standards Assessment Tool",
+  "description": "CTO Consulting Regulatory Assessment Tool and Proposal Platform",
   "type": "module",
   "scripts": {
     "seed": "node scripts/build-seed.mjs",

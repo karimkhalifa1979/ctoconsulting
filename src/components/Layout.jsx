@@ -54,6 +54,7 @@ export default function Layout() {
         </nav>
         <div className="sidebar-foot">
           <div>AI research: {ai === null ? '…' : ai.ai ? <span style={{ color: '#7ee2c4' }}>enabled</span> : 'rules engine'}</div>
+          <div style={{ marginTop: 6 }}><a href={`${import.meta.env.BASE_URL}proposals.html`}>Proposal Platform →</a></div>
           <div style={{ marginTop: 6 }}>© CTO Consulting · <a href="https://www.ctoconsulting.com.au" target="_blank" rel="noreferrer">ctoconsulting.com.au</a></div>
         </div>
       </aside>
