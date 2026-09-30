@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "start": "node server/index.mjs",
     "check": "node scripts/check.mjs",
-    "check:proposals": "node scripts/check-proposals.mjs"
+    "check:proposals": "node scripts/check-proposals.mjs",
+    "check:server": "node scripts/check-proposals-server.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.129.0",

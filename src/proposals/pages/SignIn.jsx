@@ -37,7 +37,9 @@ export default function SignIn() {
             <svg width="18" height="18" viewBox="0 0 21 21" aria-hidden><rect width="10" height="10" fill="#f25022" /><rect x="11" width="10" height="10" fill="#7fba00" /><rect y="11" width="10" height="10" fill="#00a4ef" /><rect x="11" y="11" width="10" height="10" fill="#ffb900" /></svg>
             Sign in with Microsoft
           </button>
-          {(
+          {backend?.mode === 'server' && backend.session.demoSignIn === false ? (
+            <p className="small" style={{ marginTop: 18 }}>Demonstration sign-in is switched off on this server. Use Sign in with Microsoft.</p>
+          ) : (
             <div style={{ marginTop: 18 }}>
               <div className="eyebrow">Demonstration sign-in — choose a person to see their role’s view</div>
               {groups.map((g) => (

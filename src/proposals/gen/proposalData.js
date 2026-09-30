@@ -30,7 +30,7 @@ export function buildProposalData(state, bid, { assets = {}, caseStudyIds = null
     'partner.name': partner.name || '', 'partner.title': partner.title || '', 'partner.email': partner.email || '', 'bid_manager.name': bm.name || '', 'bid_manager.email': bm.email || '',
     'org.name': state.settings.orgName || 'CTO Consulting', 'org.website': state.settings.website || 'www.ctoconsulting.com.au', 'org.abn': state.settings.orgAbn || '', today: longDate(now.toISOString().slice(0, 10)),
     'pricing.model': model, 'pricing.total_ex_gst': aud(p.subtotal, { cents: true }), 'pricing.gst': aud(p.gst, { cents: true }), 'pricing.total_inc_gst': aud(p.total, { cents: true }),
-    'ai.disclosure': aiDisclosureText(state, bid, aiLog),
+    'ai.disclosure': typeof bid.aiDisclosure === 'string' && bid.aiDisclosure.trim() ? bid.aiDisclosure.trim() : aiDisclosureText(state, bid, aiLog),
   };
   const pr = bid.pricing || {};
   const flags = {

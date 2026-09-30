@@ -87,9 +87,12 @@ export default function BidSettings({ bid }) {
       <div className="split">
         <Card title="AI on this bid" subtitle="Switch AI off where the client prohibits its use (spec 16, AI governance)">
           <label className="check"><input type="checkbox" checked={bid.aiEnabled !== false} disabled={ro} onChange={(e) => dispatch('bid.update', { bidId: bid.id, patch: { aiEnabled: e.target.checked } }, { success: e.target.checked ? 'AI enabled' : 'AI switched off for this bid' })} /><span>Allow AI drafting, storyboards and analysis on this bid</span></label>
-          <Field label="AI disclosure statement" hint="Included in the proposal where the template uses {{#if ai_disclosure}}; leave empty to use the default" full>
-            <textarea rows={3} disabled={ro} defaultValue={bid.aiDisclosure || ''} placeholder={disclosureDefault} onBlur={(e) => { if (e.target.value !== (bid.aiDisclosure || '')) dispatch('bid.update', { bidId: bid.id, patch: { aiDisclosure: e.target.value } }, { success: 'Disclosure saved' }); }} />
-          </Field>
+          <label className="check" style={{ marginTop: 10 }}><input type="checkbox" checked={Boolean(bid.aiDisclosure)} disabled={ro} onChange={(e) => dispatch('bid.update', { bidId: bid.id, patch: { aiDisclosure: e.target.checked } }, { success: e.target.checked ? 'The proposal will include an AI disclosure' : 'AI disclosure removed' })} /><span>Include an AI disclosure statement in the proposal</span></label>
+          {bid.aiDisclosure && (
+            <Field label="Disclosure wording" hint="Leave empty to use the standard wording shown" full>
+              <textarea rows={3} disabled={ro} defaultValue={typeof bid.aiDisclosure === 'string' ? bid.aiDisclosure : ''} placeholder={disclosureDefault} onBlur={(e) => { const v = e.target.value.trim() || true; if (v !== bid.aiDisclosure) dispatch('bid.update', { bidId: bid.id, patch: { aiDisclosure: v } }, { success: 'Disclosure saved' }); }} />
+            </Field>
+          )}
         </Card>
         <Card title="Template conditions" subtitle="Custom flags used by {{#if …}} blocks in Word templates, such as lot_1 or lot_2">
           <div className="row" style={{ flexWrap: 'wrap', gap: 6 }}>

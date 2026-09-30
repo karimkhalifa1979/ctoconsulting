@@ -1,10 +1,11 @@
-// Production server: serves the built app (dist/) and optional AI endpoints.
+// Production server: serves the built apps (dist/), the Proposal Platform API (/api/p/*) and optional AI endpoints.
 // AI features are enabled when ANTHROPIC_API_KEY (or another Anthropic credential) is available.
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Anthropic from '@anthropic-ai/sdk';
+import { createProposalsApi } from './proposals.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = path.join(root, 'dist');
@@ -12,6 +13,7 @@ const PORT = Number(process.env.PORT) || 8080;
 const MODEL = process.env.CLAUDE_MODEL || 'claude-opus-5-5';
 const AI_ENABLED = Boolean(process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_AUTH_TOKEN) && process.env.DISABLE_AI !== '1';
 const client = AI_ENABLED ? new Anthropic() : null;
+const proposals = createProposalsApi({ root, client, model: MODEL, aiEnabled: AI_ENABLED });
 
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
@@ -138,7 +140,7 @@ ${String(html).slice(0, 60000)}`;
 }
 
 async function handleApi(req, res, pathname) {
-  if (pathname === '/api/health') return send(res, 200, { ok: true, ai: AI_ENABLED, model: AI_ENABLED ? MODEL : null });
+  if (pathname === '/api/health') return send(res, 200, { ok: true, ai: AI_ENABLED, model: AI_ENABLED ? MODEL : null, proposals: proposals.health() });
   if (req.method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
   if (!AI_ENABLED) return send(res, 503, { error: 'AI features are not configured on this server (set ANTHROPIC_API_KEY).' });
   try {
@@ -170,9 +172,14 @@ function serveStatic(res, pathname) {
 }
 
 http.createServer((req, res) => {
-  const { pathname } = new URL(req.url, 'http://localhost');
+  const { pathname, searchParams } = new URL(req.url, 'http://localhost');
+  if (pathname.startsWith('/api/p/')) return void proposals.handle(req, res, pathname, searchParams);
   if (pathname.startsWith('/api/')) return void handleApi(req, res, pathname);
   serveStatic(res, pathname);
 }).listen(PORT, () => {
-  console.log(`CTO Consulting Regulatory Assessment Tool on http://localhost:${PORT} (AI ${AI_ENABLED ? `enabled, ${MODEL}` : 'disabled'})`);
+  console.log(`CTO Consulting tools on http://localhost:${PORT} (AI ${AI_ENABLED ? `enabled, ${MODEL}` : 'disabled'})`);
+  console.log(`  Regulatory Assessment: http://localhost:${PORT}/   Proposal Platform: http://localhost:${PORT}/proposals.html`);
 });
+
+// Save pending Proposal Platform state before the process stops.
+for (const sig of ['SIGTERM', 'SIGINT']) process.on(sig, () => { proposals.flush(); process.exit(0); });

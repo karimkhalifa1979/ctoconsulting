@@ -157,6 +157,7 @@ class ServerBackend {
   }
 
   connect() {
+    if (!this.userId) return;
     try {
       this.es?.close();
       this.es = new EventSource(`${BASE}api/p/events`);
@@ -171,6 +172,10 @@ class ServerBackend {
   async api(path, opts = {}) {
     const r = await fetch(`${BASE}api/p/${path}`, { credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, ...opts });
     const j = await r.json().catch(() => ({}));
+    if (r.status === 401 && this.userId) {
+      // The server session ended (30 minutes idle or 12 hours): return to sign-in.
+      this.userId = null; this.cached = null; this.es?.close(); this.emit();
+    }
     if (!r.ok) { const e = new Error(j.error || `Request failed (${r.status})`); e.status = r.status; throw e; }
     return j;
   }
@@ -191,7 +196,7 @@ class ServerBackend {
     this.connect();
   }
 
-  async signOut() { await this.api('signout', { method: 'POST', body: '{}' }).catch(() => {}); this.userId = null; this.cached = null; }
+  async signOut() { await this.api('signout', { method: 'POST', body: '{}' }).catch(() => {}); this.es?.close(); this.userId = null; this.cached = null; }
 
   async dispatch(cmd, args) {
     const j = await this.api('cmd', { method: 'POST', body: JSON.stringify({ cmd, args }) });
