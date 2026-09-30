@@ -144,3 +144,14 @@ export const OUTPUT_KINDS = {
   docx: 'Word proposal', pdf: 'PDF', pdfa: 'PDF/A', pptx: 'PowerPoint deck', 'deck-pdf': 'Deck PDF', xlsx: 'Excel', cv: 'CV pack',
   'manual-docx': 'Word (final edit, re-uploaded)', 'manual-pptx': 'PowerPoint (final edit, re-uploaded)', rehearsal: 'Rehearsal pack',
 };
+
+// Slide kinds used by deck recipes and their default layout in the CTO master.
+export const SLIDE_KINDS = {
+  title: { title: 'Title', layout: 'title' }, agenda: { title: 'Agenda', layout: 'content' }, understanding: { title: 'Our understanding of your needs', layout: 'content' },
+  approach: { title: 'Our approach', layout: 'content' }, timeline: { title: 'Timeline', layout: 'timeline' }, team: { title: 'Your team', layout: 'team' },
+  case_studies: { title: 'Relevant case studies', layout: 'case_study' }, why: { title: 'Why CTO Consulting', layout: 'content' }, next_steps: { title: 'Next steps', layout: 'content' },
+  questions: { title: 'Questions', layout: 'section' }, exec_summary: { title: 'Executive summary', layout: 'content' }, commercial: { title: 'Commercial summary', layout: 'table' },
+  who_we_are: { title: 'Who we are', layout: 'content' }, services: { title: 'Services', layout: 'content' }, sectors: { title: 'Sectors', layout: 'content' },
+  credentials: { title: 'Credentials', layout: 'content' }, contacts: { title: 'Contacts', layout: 'content' }, objectives: { title: 'Objectives', layout: 'content' },
+  scope: { title: 'Scope', layout: 'content' }, governance: { title: 'Governance', layout: 'content' }, plan: { title: 'Plan', layout: 'timeline' }, first_30_days: { title: 'First 30 days', layout: 'content' },
+};

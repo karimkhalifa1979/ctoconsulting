@@ -295,4 +295,42 @@ export function tasmanRfp(base, closing) {
   };
 }
 
+export function harbourRfq(base) {
+  const closing = nextWeekday(addDays(base, 29), 3);
+  return {
+    name: 'Harbourside City Council RFQ – Customer Portal Discovery.pdf',
+    type: 'request',
+    pages: [
+      [
+        'Harbourside City Council',
+        'Request for Quotation',
+        'Customer Portal Discovery and Roadmap',
+        'RFQ Reference: HCC-RFQ-2026-19',
+        `Closing time: 2:00 pm AEDT, ${longDate(closing)}`,
+        'Quotations must be lodged through the Council’s eProcurement portal.',
+        '1. Background',
+        '1.1 The Council receives 180,000 customer requests each year, two thirds of them by phone. It launched an online portal in 2024 and now wants to extend it to planning, rates and waste services.',
+        '1.2 The Council is seeking a supplier to complete discovery, service design and a three-year roadmap for the next phase of its customer portal.',
+      ],
+      [
+        '2. Requirements',
+        'R1\tThe supplier must engage at least 60 residents in research, including people with disability and culturally and linguistically diverse residents.',
+        'R2\tThe supplier must assess the current portal and CRM integration and identify technical debt.',
+        'R3\tThe supplier must deliver a prioritised three-year roadmap with cost estimates.',
+        'R4\tAll designs must meet WCAG 2.2 Level AA.',
+        'R5\tThe supplier should demonstrate experience delivering customer portals for local government.',
+        '3. Evaluation criteria',
+        'Criterion\tWeighting',
+        'Understanding and approach\t40%',
+        'Relevant experience\t30%',
+        'Price\t30%',
+        '4. Submission',
+        '4.1 The quotation must not exceed 10 pages.',
+        '4.2 Quotations must be lodged through the Council’s eProcurement portal by the closing time.',
+        '4.3 The engagement will be priced as a fixed price.',
+      ],
+    ],
+  };
+}
+
 export const toPages = (doc) => doc.pages.map((paras, i) => ({ n: i + 1, paras }));

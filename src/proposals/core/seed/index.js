@@ -11,7 +11,8 @@ import { backSchedule } from '../schedule.js';
 import { buildBrief, prefillScorecard } from '../qualify.js';
 import { draftSection, executiveSummary, acceptAllAi } from '../drafting.js';
 import { citationsIn, parseSrc } from '../html.js';
-import { LOSS_REASONS } from '../constants.js';
+import { LOSS_REASONS, SLIDE_KINDS } from '../constants.js';
+export { SLIDE_KINDS };
 
 const USERS = [
   ['u_priya', 'Priya Raman', 'Platform Administrator', ['admin']],
@@ -79,15 +80,7 @@ export const RECIPES = [
   { id: 'rcp_kickoff', name: 'Kick-off', use: 'First meeting after award', could: true, slides: ['title', 'objectives', 'scope', 'governance', 'team', 'plan', 'first_30_days'] },
 ];
 
-export const SLIDE_KINDS = {
-  title: { title: 'Title', layout: 'title' }, agenda: { title: 'Agenda', layout: 'content' }, understanding: { title: 'Our understanding of your needs', layout: 'content' },
-  approach: { title: 'Our approach', layout: 'content' }, timeline: { title: 'Timeline', layout: 'timeline' }, team: { title: 'Your team', layout: 'team' },
-  case_studies: { title: 'Relevant case studies', layout: 'case_study' }, why: { title: 'Why CTO Consulting', layout: 'content' }, next_steps: { title: 'Next steps', layout: 'content' },
-  questions: { title: 'Questions', layout: 'section' }, exec_summary: { title: 'Executive summary', layout: 'content' }, commercial: { title: 'Commercial summary', layout: 'table' },
-  who_we_are: { title: 'Who we are', layout: 'content' }, services: { title: 'Services', layout: 'content' }, sectors: { title: 'Sectors', layout: 'content' },
-  credentials: { title: 'Credentials', layout: 'content' }, contacts: { title: 'Contacts', layout: 'content' }, objectives: { title: 'Objectives', layout: 'content' },
-  scope: { title: 'Scope', layout: 'content' }, governance: { title: 'Governance', layout: 'content' }, plan: { title: 'Plan', layout: 'timeline' }, first_30_days: { title: 'First 30 days', layout: 'content' },
-};
+
 
 export const STYLE_GUIDE = {
   tone: 'Plain, confident Australian English. Active voice. Short sentences. Say what we will do and what the client gets. Evidence every claim.',

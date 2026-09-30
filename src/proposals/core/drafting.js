@@ -124,7 +124,9 @@ export function shortLabel(req) {
     if (words.length >= 6 || /[,.;:]$/.test(w)) break;
   }
   const out = words.join(' ');
-  return out ? `${out.charAt(0).toUpperCase()}${out.slice(1)}` : req.ref;
+  // Labels that start with the client or read as a fragment fall back to the requirement reference.
+  if (!out || /^(the\s+)?(authority|commission|office|council|department|agency|fund|group|client)\b/i.test(out) || / (against|and|or)$/i.test(out)) return `Requirement ${req.ref}`;
+  return `${out.charAt(0).toUpperCase()}${out.slice(1)}`;
 }
 
 // ---------- Rendering ----------
@@ -213,7 +215,8 @@ export function draftSection(state, bid, section, { wordLimit } = {}) {
     const sentences = [{ text: restate(r), cites: [reqCite(r)] }];
     if (ev.length) sentences.push(...take(ev, r.kind === 'mandatory' ? 2 : 1));
     else sentences.push({ text: `Add evidence showing how CTO Consulting meets ${r.ref}, such as a certification, method or case study outcome.`, cites: [], flag: true });
-    blocks.push({ type: 'p', lead: `${shortLabel(r)} (${r.ref}).`, sentences });
+    const label = shortLabel(r);
+    blocks.push({ type: 'p', lead: label.startsWith('Requirement ') ? `${label}.` : `${label} (${r.ref}).`, sentences });
   }
 
   // No linked requirements: compose from the most relevant content.
