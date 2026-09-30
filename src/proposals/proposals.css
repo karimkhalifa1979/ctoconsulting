@@ -326,3 +326,7 @@ cite[data-kind="consultant"] { background: #fdece4; color: #a84517; }
 @media (max-width: 900px) { .deck-editor { grid-template-columns: 1fr; } }
 .modal:has(.doc-preview), .modal:has(.modal-wide) { width: min(1000px, calc(100% - 32px)); }
 @media (max-width: 900px) { .consultant-grid { grid-template-columns: 1fr; } }
+
+/* Full-page notification and outbox lists (the menu uses the two-column .notif layout) */
+.notif.row-item { display: block; padding: 12px 18px; }
+.notif.row-item.unread { background: #f3fafb; box-shadow: inset 3px 0 0 var(--brand-teal); }

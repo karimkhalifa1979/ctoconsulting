@@ -29,7 +29,7 @@ export default function Notifications() {
           {items.length ? (
             <Card pad={false}>
               {items.map((n) => (
-                <div key={n.id} className={`notif ${n.read ? '' : 'unread'}`} role="button" tabIndex={0} onClick={() => { if (!n.read) dispatch('notif.read', { ids: [n.id] }, { quiet: true }); if (n.link) nav(n.link); }} onKeyDown={(e) => { if (e.key === 'Enter' && n.link) nav(n.link); }}>
+                <div key={n.id} className={`notif row-item ${n.read ? '' : 'unread'}`} role="button" tabIndex={0} onClick={() => { if (!n.read) dispatch('notif.read', { ids: [n.id] }, { quiet: true }); if (n.link) nav(n.link); }} onKeyDown={(e) => { if (e.key === 'Enter' && n.link) nav(n.link); }}>
                   <div className="row" style={{ justifyContent: 'space-between' }}><strong className="small">{n.title}</strong><span className="mini"><When at={n.at} /></span></div>
                   {n.text && <div className="small muted">{n.text}</div>}
                   <div className="mini">{KIND[n.kind] || n.kind}{n.teams ? ' · also sent to Teams' : ''}</div>

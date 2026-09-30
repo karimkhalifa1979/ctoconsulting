@@ -25,7 +25,7 @@ export default function Outbox() {
       {shown.length ? (
         <Card pad={false}>
           {shown.slice(0, 300).map((m) => (
-            <div key={m.id} className="notif" role="button" tabIndex={0} onClick={() => setOpen(open === m.id ? null : m.id)}>
+            <div key={m.id} className="notif row-item" role="button" tabIndex={0} onClick={() => setOpen(open === m.id ? null : m.id)}>
               <div className="row" style={{ justifyContent: 'space-between' }}>
                 <span className="small"><span className={`pill ${m.channel === 'teams' ? 'navy' : ''}`}>{m.channel === 'teams' ? 'Teams' : 'Email'}</span> <strong>{m.subject}</strong></span>
                 <span className="mini"><When at={m.at} /></span>
