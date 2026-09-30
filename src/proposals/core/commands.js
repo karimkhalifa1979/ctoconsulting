@@ -57,11 +57,11 @@ function notify(state, now, userIds, n) {
   for (const id of userIds) {
     const u = userOf(state, id);
     if (!u || u.active === false) continue;
-    const note = { id: uid('nt'), userId: id, at: now, kind: n.kind || 'info', title: n.title, text: n.text || '', bidId: n.bidId || null, link: n.link || null, read: false, dedupe: n.dedupe || null };
+    const note = { id: uid('nt'), userId: id, at: now, kind: n.kind || 'info', title: n.title, text: n.text || '', bidId: n.bidId || null, link: n.link || null, read: false, dedupe: n.dedupe || null, teams: Boolean(state.settings.teamsEnabled && u.prefs?.teams !== false && (n.teams || ['approval', 'mention', 'escalation'].includes(n.kind))) };
     if (n.dedupe && state.notifications.some((x) => x.userId === id && x.dedupe === n.dedupe)) continue;
     state.notifications.push(note);
     if (u.prefs?.email !== false) state.outbox.push({ id: uid('ob'), at: now, channel: 'email', to: u.email, toName: u.name, userId: id, subject: `[CTO Proposals] ${n.title}`, text: n.text || '', bidId: n.bidId || null, link: n.link || null });
-    if (state.settings.teamsEnabled && (n.teams || ['approval', 'mention', 'escalation'].includes(n.kind))) {
+    if (state.settings.teamsEnabled && u.prefs?.teams !== false && (n.teams || ['approval', 'mention', 'escalation'].includes(n.kind))) {
       state.outbox.push({ id: uid('ob'), at: now, channel: 'teams', to: u.email, toName: u.name, userId: id, subject: n.title, text: n.text || '', bidId: n.bidId || null, link: n.link || null, card: n.card || null });
     }
   }

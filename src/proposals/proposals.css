@@ -30,6 +30,7 @@
 .avatar { width: 28px; height: 28px; border-radius: 50%; display: inline-grid; place-items: center; color: #fff; font-weight: 700; font-size: 11px; flex: none; font-family: var(--font-head); letter-spacing: 0.02em; }
 .avatar.lg { width: 44px; height: 44px; font-size: 15px; }
 .avatar.sm { width: 22px; height: 22px; font-size: 9px; }
+.avatar.xl { width: 120px; height: 120px; font-size: 38px; }
 .avatar-stack { display: inline-flex; }
 .avatar-stack .avatar { border: 2px solid var(--surface); margin-left: -6px; }
 .avatar-stack .avatar:first-child { margin-left: 0; }
@@ -324,3 +325,4 @@ cite[data-kind="consultant"] { background: #fdece4; color: #a84517; }
 .deck-editor .slide { max-width: 640px; }
 @media (max-width: 900px) { .deck-editor { grid-template-columns: 1fr; } }
 .modal:has(.doc-preview), .modal:has(.modal-wide) { width: min(1000px, calc(100% - 32px)); }
+@media (max-width: 900px) { .consultant-grid { grid-template-columns: 1fr; } }

@@ -72,7 +72,7 @@ export function ProposalProvider({ children }) {
     const today = todayISO();
     if (view.jobs?.digest === today) return;
     backend.system('jobs.run', {}).then(() => refresh(backend)).catch(() => {});
-  }, [backend, view?.jobs?.digest]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [backend, Boolean(view), view?.jobs?.digest]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!backend) return;
