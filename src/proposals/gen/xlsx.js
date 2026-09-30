@@ -148,6 +148,81 @@ export async function fillClientWorkbook(bytes, bid) {
   throw new Error('No header row with a requirement reference column and a compliance or response column was found in the first 30 rows.');
 }
 
+const PRICE_MATCHERS = {
+  role: /^(role|position|labour category|personnel category|resource|category|title)\b/i,
+  level: /^(level|seniority|grade|classification)\b/i,
+  name: /(name|nominated|personnel|consultant)/i,
+  days: /^(estimated\s+)?(days|no\.? of days|number of days|quantity|qty|effort)\b/i,
+  rate: /(day rate|daily rate|rate|unit price)/i,
+  amount: /(amount|total|price|extended|cost)/i,
+};
+const cellText = (v) => (typeof v === 'object' && v?.richText ? v.richText.map((t) => t.text).join('') : typeof v === 'object' && v?.result !== undefined ? String(v.result) : String(v ?? '')).trim();
+
+// Fills the client's own pricing schedule (PR-07): finds the header row by its headings, then writes one row per
+// priced line, matching rows the client pre-filled with roles or levels, with live Excel formulas for amounts.
+export async function fillClientPricing(bytes, state, bid) {
+  const Excel = await ExcelJS();
+  const wb = new Excel.Workbook();
+  await wb.xlsx.load(bytes);
+  const p = computePricing(state, bid);
+  const name = (l) => state.consultants.find((c) => c.id === l.consultantId)?.name || 'To be named';
+  const report = { sheet: null, headerRow: null, matched: {}, filled: 0, added: 0, unmatched: [] };
+  for (const ws of wb.worksheets) {
+    for (let r = 1; r <= Math.min(ws.rowCount, 30); r++) {
+      const cells = ws.getRow(r).values.map(cellText);
+      const cols = {};
+      cells.forEach((v, i) => {
+        if (!v) return;
+        for (const [k, re] of Object.entries(PRICE_MATCHERS)) if (!cols[k] && re.test(v) && !Object.values(cols).includes(i)) { cols[k] = i; break; }
+      });
+      if (!((cols.role || cols.level) && cols.rate)) continue;
+      report.sheet = ws.name; report.headerRow = r; report.matched = Object.fromEntries(Object.entries(cols).map(([k, i]) => [k, cells[i]]));
+      const colLetter = (i) => ws.getColumn(i).letter;
+      const pending = [...p.lines];
+      let last = r;
+      // Rows the client pre-filled (a role or level with no amount yet) are matched first.
+      for (let rr = r + 1; rr <= ws.rowCount; rr++) {
+        const row = ws.getRow(rr);
+        const label = cellText(row.getCell(cols.role || cols.level).value);
+        if (!label) continue;
+        if (/^(sub-?total|total|gst)/i.test(label)) break;
+        last = rr;
+        const i = pending.findIndex((l) => [l.role, l.level].some((x) => x && (x.toLowerCase() === label.toLowerCase() || label.toLowerCase().includes(x.toLowerCase()))));
+        if (i < 0) { report.unmatched.push(label); continue; }
+        const l = pending.splice(i, 1)[0];
+        if (cols.name) row.getCell(cols.name).value = name(l);
+        if (cols.days) row.getCell(cols.days).value = l.days;
+        row.getCell(cols.rate).value = l.rate;
+        if (cols.amount) row.getCell(cols.amount).value = cols.days ? { formula: `${colLetter(cols.days)}${rr}*${colLetter(cols.rate)}${rr}`, result: l.sell } : l.sell;
+        report.filled++;
+      }
+      // Remaining lines go into the rows after the last used one.
+      for (const l of pending) {
+        last += 1;
+        const row = ws.getRow(last);
+        if (cols.role) row.getCell(cols.role).value = l.role || l.level;
+        if (cols.level && cols.level !== cols.role) row.getCell(cols.level).value = l.level;
+        if (cols.name) row.getCell(cols.name).value = name(l);
+        if (cols.days) row.getCell(cols.days).value = l.days;
+        row.getCell(cols.rate).value = l.rate;
+        if (cols.amount) row.getCell(cols.amount).value = cols.days ? { formula: `${colLetter(cols.days)}${last}*${colLetter(cols.rate)}${last}`, result: l.sell } : l.sell;
+        report.added++;
+      }
+      if (cols.amount) {
+        const a = colLetter(cols.amount);
+        const labelCol = cols.role || cols.level;
+        const put = (offset, label, formula, result) => { const row = ws.getRow(last + offset); row.getCell(labelCol).value = label; row.getCell(cols.amount).value = { formula, result }; row.font = { bold: true }; };
+        put(2, 'Subtotal (ex GST)', `SUM(${a}${r + 1}:${a}${last})`, p.labour);
+        put(3, `GST (${Math.round(p.gstRate * 100)}%)`, `${a}${last + 2}*${p.gstRate}`, round(p.labour * p.gstRate));
+        put(4, 'Total (inc GST)', `${a}${last + 2}+${a}${last + 3}`, round(p.labour * (1 + p.gstRate)));
+      }
+      return { bytes: new Uint8Array(await wb.xlsx.writeBuffer()), report };
+    }
+  }
+  throw new Error('No header row with a role or level column and a rate column was found in the first 30 rows.');
+}
+const round = (n) => Math.round(n * 100) / 100;
+
 // Generic export of a dashboard view (section 12: every view exports to Excel).
 export async function tableWorkbook(sheets) {
   const Excel = await ExcelJS();

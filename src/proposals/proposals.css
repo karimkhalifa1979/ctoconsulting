@@ -304,3 +304,23 @@ cite[data-kind="consultant"] { background: #fdece4; color: #a84517; }
 @media print {
   .toolbar, .side-panel, .subnav, .toasts { display: none !important; }
 }
+
+/* Microsoft Teams approval card preview (WF-12) */
+.teams-card { border: 1px solid #c8c6f0; border-radius: 8px; background: #fff; box-shadow: 0 1px 4px rgba(70, 71, 117, 0.15); max-width: 420px; font-size: 13px; }
+.teams-card .tc-head { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #f0f0fb; border-bottom: 1px solid #e1e0f5; border-radius: 8px 8px 0 0; }
+.teams-card .tc-app { font-weight: 700; color: #464775; }
+.teams-card .tc-body { padding: 10px 12px; }
+.teams-card .tc-actions { display: flex; gap: 6px; padding: 8px 12px 12px; flex-wrap: wrap; }
+.rate-src { max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: auto; }
+
+/* Deck outline editor (PP-04) */
+.deck-editor { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 18px; align-items: start; }
+.deck-list { list-style: none; margin: 0; padding: 0; max-height: 72vh; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; }
+.deck-list li { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 8px 10px; border-bottom: 1px solid var(--line); font-size: 13px; }
+.deck-list li:last-child { border-bottom: 0; }
+.deck-list li.on { background: #e8f6f7; box-shadow: inset 3px 0 0 var(--brand-teal); }
+.deck-list li.off { opacity: 0.5; }
+.deck-list .linkish { text-align: left; color: var(--ink); font-weight: 600; }
+.deck-editor .slide { max-width: 640px; }
+@media (max-width: 900px) { .deck-editor { grid-template-columns: 1fr; } }
+.modal:has(.doc-preview), .modal:has(.modal-wide) { width: min(1000px, calc(100% - 32px)); }

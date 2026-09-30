@@ -1322,6 +1322,24 @@ def('deck.update', {
   },
 });
 
+// Questionnaire returnables answered from standard answers, with a confidence per answer (spec 9.1).
+def('returnable.set', {
+  target: bidTarget,
+  run(ctx, a) {
+    const bid = ctx.bid(a.bidId);
+    ctx.require('generateOutputs', { bid }, 'answer questionnaires');
+    const doc = bid.documents.find((d) => d.id === a.docId);
+    if (!doc) fail('Document not found.');
+    const answers = (a.answers || []).map((x) => ({
+      id: x.id, ref: x.ref, question: x.question, answer: x.answer || '', itemId: x.itemId || null, key: x.key || null, v: x.v || null,
+      confidence: typeof x.confidence === 'number' ? Math.round(x.confidence * 100) / 100 : null, status: x.status === 'accepted' ? 'accepted' : 'draft', src: x.src || null,
+    }));
+    bid.returnables = { ...(bid.returnables || {}), [doc.id]: { docId: doc.id, name: doc.name, answers, at: ctx.now, by: ctx.actor.id } };
+    const accepted = answers.filter((x) => x.status === 'accepted').length;
+    ctx.label = `Saved ${answers.length} questionnaire answer${answers.length === 1 ? '' : 's'} for ${doc.name} (${accepted} accepted)`;
+  },
+});
+
 def('output.add', {
   target: bidTarget,
   run(ctx, a) {

@@ -200,3 +200,31 @@ export function outputChecks(state, bid, sections, render = {}) {
 }
 
 export const checksPass = (checks) => !checks.some((c) => c.status === 'fail');
+
+// Checks for a file finalised outside the platform and re-uploaded (WD-09, PP-07): its own text is scanned, because
+// the platform no longer controls what it contains.
+export function manualChecks(state, bid, scan) {
+  const out = [];
+  const unresolved = (scan.text.match(/\{\{[^{}]*\}\}/g) || []);
+  out.push(res('placeholders', 'No unresolved placeholders remain', unresolved.length ? 'fail' : 'pass', unresolved.length ? `${unresolved.length} unresolved tag(s).` : 'No template tags left in the file.', unresolved.slice(0, 20).map((t) => ({ text: t }))));
+  const open = [];
+  if (scan.trackedChanges) open.push({ text: 'The file contains tracked changes. Accept or reject them in Word, then upload again.' });
+  if (scan.comments) open.push({ text: 'The file contains comments. Delete them in Word, then upload again.' });
+  out.push(res('comments', 'No comments or tracked changes remain', open.length ? 'fail' : 'pass', open.length ? `${open.length} issue(s).` : 'No comments or tracked changes.', open));
+  const names = [];
+  for (const n of otherClientNames(state, bid)) {
+    const canonical = state.clients.find((c) => c.id === n.clientId)?.name || n.name;
+    if (new RegExp(`\\b${n.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(scan.text)) names.push({ text: `Mentions “${n.name}”`, level: clientConsented(state, bid, canonical) ? 'warn' : 'fail' });
+  }
+  out.push(res('confidential', 'No other client’s name appears', names.some((n) => n.level === 'fail') ? 'fail' : names.length ? 'warn' : 'pass', names.length ? `${names.length} mention(s) found.` : 'No other client names found.', names));
+  const spell = spellingIssues(scan.text).slice(0, 30).map((x) => ({ text: `“${x.word}” → “${x.fix}”` }));
+  const style = styleIssues(scan.text, state.settings.styleGuide).map((x) => ({ text: x.kind === 'banned' ? `Banned phrase “${x.phrase}”` : `Use “${x.use}” instead of “${x.phrase}”`, level: x.kind === 'banned' ? 'fail' : 'warn' }));
+  out.push(res('spelling', 'Australian English spelling and the style guide are followed', style.some((x) => x.level === 'fail') ? 'fail' : spell.length || style.length ? 'warn' : 'pass', spell.length || style.length ? `${spell.length} spelling and ${style.length} style issue(s).` : 'No issues found.', [...spell, ...style]));
+  const props = [];
+  if (scan.hiddenText) props.push({ text: 'Hidden text found in the file' });
+  for (const p of scan.personal || []) props.push({ text: `Document property contains personal data: ${p}` });
+  out.push(res('properties', 'Document properties and hidden text are cleaned', props.length ? 'fail' : 'pass', props.length ? `${props.length} issue(s).` : 'No hidden text or personal properties.', props));
+  const gates = ['g2', 'g3'].filter((g) => !gatePassed(state, bid, g));
+  out.push(res('approvals', 'Required approvals are in place', gates.length ? 'warn' : 'pass', gates.length ? `Gate ${gates.map((g) => g.slice(1)).join(' and ')} not yet passed.` : 'Gates 2 and 3 have passed.'));
+  return out;
+}
