@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LISTS, config, demoMode } from './config.js';
 import { initAuth, signIn, signOut } from './lib/auth.js';
 import { getMe } from './lib/graph.js';
-import { loadCachedScan, loadSelections, saveSelections, scan } from './lib/backend.js';
+import { loadCachedScan, loadSelections, resetDemo, saveSelections, scan } from './lib/backend.js';
 import { effectiveChanges, emptyDoc } from './lib/selections.js';
 import Layout from './components/Layout.jsx';
 import Library from './pages/Library.jsx';
@@ -108,6 +108,12 @@ export default function App() {
       route={route}
       user={auth.user}
       onSignOut={demoMode ? null : signOut}
+      onResetDemo={() => {
+        if (!window.confirm('Clear all demo selections?')) return;
+        resetDemo();
+        setPending(emptyPending());
+        reloadSelections();
+      }}
       counts={{ proposals: Object.keys(saved.doc.proposalFiles).length, resumes: Object.keys(saved.doc.activeResumes).length }}
       location={saved.location}
       changeCount={changeCount}

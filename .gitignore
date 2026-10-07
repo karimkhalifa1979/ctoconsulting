@@ -5,3 +5,4 @@ dist/
 .env
 dist-artifact/
 .env.local
+dist-offline/

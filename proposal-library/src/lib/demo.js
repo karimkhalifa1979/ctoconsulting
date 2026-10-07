@@ -1,37 +1,62 @@
 // Sample data for demo mode (no Azure app registration configured). Names are placeholders, not real clients or people.
 import { LISTS } from '../config.js';
 
+const engagement = (extra = {}) => ({
+  'Requirements': ['Approach to Market.pdf', 'Statement of Requirement.docx', 'Questions and answers.pdf'],
+  'Proposal Drafts': ['Proposal v0.1.docx', 'Proposal v0.2.docx'],
+  'Pricing': ['Pricing schedule.xlsx'],
+  'Final': ['Proposal - Final.docx', 'Proposal - Final.pdf'],
+  ...extra,
+});
+
 const CLIENTS = {
   'Example Agency': {
-    '202609 Capability Review': {
-      'Requirements': ['Approach to Market.pdf', 'Statement of Requirement.docx'],
-      'Proposal Drafts': ['Proposal v0.3.docx', 'Proposal v0.4.docx'],
-      'Pricing': ['Pricing schedule.xlsx'],
-      'Final': ['Proposal - Final.pdf', 'Proposal - Final.docx', 'Presentation.pptx'],
+    '202609 Capability Review': engagement({ 'Presentations': ['Orals presentation.pptx'] }),
+    '202503 Digital Strategy': {
+      'Deliverables': ['Digital strategy.docx', 'Digital strategy - board pack.pptx', 'Investment roadmap.xlsx'],
+      'Final': ['Proposal - Final.pdf'],
     },
   },
   'Example University': {
     'IT Service Operations': {
       'Requirements': ['RFQ.pdf', 'Questions and answers.docx'],
-      'Response': ['Response.docx', 'Case studies.docx', 'Team CVs.pdf'],
+      'Response': ['Response.docx', 'Case studies.docx', 'Team CVs.pdf', 'Methodology.docx'],
     },
+    'Cyber Uplift': engagement(),
   },
   'Example Department': {
     'Architecture Services': {
       'Inputs': ['Current state architecture.pptx', 'Application inventory.xlsx'],
       'Deliverables': ['Target state architecture.docx', 'Roadmap.pptx', 'Executive summary.pdf'],
     },
-    'Metrics': ['Service metrics.xlsx'],
+    'Metrics': ['Service metrics.xlsx', 'Benefits register.xlsx'],
+    'ISO27001': { 'Presentations': ['ISMS overview.pptx'], 'Deliverables': ['Statement of Applicability.xlsx', 'Gap assessment.docx'] },
   },
-  'Example Health Service': ['Capability statement.pdf', 'Engagement letter.docx'],
+  'Example Health Service': {
+    '': ['Capability statement.pdf', 'Engagement letter.docx'],
+    'IT Operating Model': {
+      'Deliverables': ['Operating model.docx', 'Operating model.pptx', 'RACI.xlsx'],
+      'Workshops': ['Workshop 1 notes.docx', 'Workshop 2 notes.docx'],
+    },
+  },
+  'Example Regulator': { '202608 Solution Architect': engagement() },
+  'Example Council': {
+    'ERP Selection': {
+      'Requirements': ['Business requirements.xlsx', 'Tender.pdf'],
+      'Evaluation': ['Evaluation report.docx', 'Scoring.xlsx'],
+      'Final': ['Recommendation.pptx'],
+    },
+  },
 };
 
 const RESUMES = {
-  '': ['Resume - Consultant A.docx', 'Resume - Consultant B.docx', 'Resume - Consultant C.pdf'],
-  'Business Analysts': ['Resume - Analyst A.docx', 'Resume - Analyst B.docx', 'Resume - Analyst C.pdf'],
-  'Scrum Masters_Delivery Managers': ['Resume - Delivery Manager A.docx', 'Resume - Scrum Master B.docx'],
-  'Testers': ['Resume - Tester A.docx', 'Resume - Tester B.pdf'],
-  'Architects': ['Resume - Architect A.docx', 'Resume - Architect B.docx'],
+  '': ['Resume - Consultant A.docx', 'Resume - Consultant B.docx', 'Resume - Consultant C.pdf', 'Resume - Consultant D.docx'],
+  'Business Analysts': ['Resume - Analyst A.docx', 'Resume - Analyst B.docx', 'Resume - Analyst C.pdf', 'Resume - Analyst D.docx'],
+  'Scrum Masters_Delivery Managers': ['Resume - Delivery Manager A.docx', 'Resume - Scrum Master B.docx', 'Resume - Delivery Manager C.pdf'],
+  'Testers': ['Resume - Tester A.docx', 'Resume - Tester B.pdf', 'Resume - Test Lead C.docx'],
+  'Architects': ['Resume - Architect A.docx', 'Resume - Architect B.docx', 'Resume - Enterprise Architect C.pdf'],
+  'Project Managers': ['Resume - Project Manager A.docx', 'Resume - Program Manager B.docx'],
+  'Cyber Security': ['Resume - Security Consultant A.docx', 'Resume - IRAP Assessor B.pdf'],
 };
 
 function flatten(tree, path, out) {

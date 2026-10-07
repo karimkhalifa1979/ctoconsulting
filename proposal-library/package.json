@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "build:offline": "node scripts/build-offline.mjs",
     "check": "node scripts/check.mjs"
   },
   "dependencies": {

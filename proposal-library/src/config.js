@@ -14,7 +14,8 @@ export const config = {
   selectionsPath: trimSlashes(env.VITE_SELECTIONS_PATH || 'Sales and Marketing/Proposal Library/proposal-library-selections.json'),
 };
 
-export const demoMode = !config.clientId;
+// VITE_DEMO_MODE=1 forces demo mode (used by the offline build) even when a client ID is configured.
+export const demoMode = !config.clientId || env.VITE_DEMO_MODE === '1';
 
 // The two lists the app manages. `key` is the property in the saved selections file.
 export const LISTS = {

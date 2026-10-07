@@ -70,6 +70,16 @@ To deploy, run `npm run build` and host `dist/` on any static host (Azure Static
 
 With no `VITE_AZURE_CLIENT_ID` set, the app runs in **demo mode** with placeholder sample folders and saves selections in the browser only. It is labelled *Demo mode* in the sidebar.
 
+### Offline demo (single file)
+
+`offline/CTO-Proposal-Library-Demo.html` is the whole app in one file, in demo mode. Copy it anywhere (laptop, USB stick, email attachment) and double-click it to open in Edge or Chrome: no install, sign-in, server or internet connection needed.
+
+- It uses placeholder sample folders and resumes (no real client or staff data).
+- Selections are saved in that browser, so they are still there when you reopen the file. **Reset demo selections** in the sidebar clears them before the next demo.
+- Without internet the page uses system fonts instead of Montserrat/Inter; everything else looks the same.
+
+Rebuild it after changing the app with `npm run build:offline`.
+
 ## Checks
 
 ```bash

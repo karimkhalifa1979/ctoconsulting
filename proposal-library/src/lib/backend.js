@@ -11,6 +11,7 @@ const DEMO_KEY = 'cto-proposal-library:demo-selections';
 const cacheKey = (folder) => `scan:${demoMode ? 'demo' : config.spHostname + config.spSitePath}:${folder}`;
 
 export async function loadCachedScan(folder) {
+  if (demoMode) return null; // sample data is generated instantly; no cache to go stale
   try {
     return (await get(cacheKey(folder))) || null;
   } catch {
@@ -21,15 +22,21 @@ export async function loadCachedScan(folder) {
 export async function scan(folder, onProgress) {
   const files = demoMode ? await demoFiles(folder, onProgress) : await scanFolder(folder, onProgress);
   const result = { files, scannedAt: new Date().toISOString() };
-  try { await set(cacheKey(folder), result); } catch { /* private mode: no cache, still works */ }
+  if (!demoMode) {
+    try { await set(cacheKey(folder), result); } catch { /* private mode: no cache, still works */ }
+  }
   return result;
+}
+
+export function resetDemo() {
+  try { localStorage.removeItem(DEMO_KEY); } catch { /* ignore */ }
 }
 
 // Returns { doc, eTag, location }.
 export async function loadSelections() {
   if (demoMode) {
     let raw = null;
-    try { raw = JSON.parse(localStorage.getItem(DEMO_KEY)); } catch { /* ignore */ }
+    try { raw = JSON.parse(localStorage.getItem(DEMO_KEY)); } catch { /* storage unavailable: start empty */ }
     return { doc: normaliseDoc(raw), eTag: null, location: 'this browser (demo mode)' };
   }
   const found = await readJsonFile(config.selectionsPath);
@@ -41,7 +48,7 @@ export async function saveSelections(changes, user) {
   if (demoMode) {
     const { doc } = await loadSelections();
     const next = applyChanges(doc, changes, user);
-    localStorage.setItem(DEMO_KEY, JSON.stringify(next));
+    try { localStorage.setItem(DEMO_KEY, JSON.stringify(next)); } catch { /* storage unavailable: kept for this session only */ }
     return { doc: next, eTag: null };
   }
   for (let attempt = 0; attempt < 4; attempt++) {

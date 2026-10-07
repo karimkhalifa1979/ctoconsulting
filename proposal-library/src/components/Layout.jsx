@@ -7,7 +7,7 @@ const ICONS = {
   resumes: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-4.4 0-8 2.2-8 5v1h16v-1c0-2.8-3.6-5-8-5Z',
 };
 
-export default function Layout({ route, user, onSignOut, counts, location, changeCount, saving, onSave, onDiscard, children }) {
+export default function Layout({ route, user, onSignOut, onResetDemo, counts, location, changeCount, saving, onSave, onDiscard, children }) {
   const [open, setOpen] = useState(false);
   useEffect(() => setOpen(false), [route]);
   const nav = [
@@ -33,6 +33,7 @@ export default function Layout({ route, user, onSignOut, counts, location, chang
         </nav>
         <div className="sidebar-foot">
           {demoMode && <div className="demo-pill">Demo mode · sample data</div>}
+          {demoMode && onResetDemo && <button className="link-btn" onClick={onResetDemo}>Reset demo selections</button>}
           <div className="foot-row"><span className="muted-inv">Signed in as</span> {user}</div>
           <div className="foot-row"><span className="muted-inv">Selections saved to</span> <span className="path">{location || '…'}</span></div>
           {onSignOut && <button className="link-btn" onClick={onSignOut}>Sign out</button>}
