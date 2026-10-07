@@ -1,0 +1,23 @@
+{
+  "name": "cto-proposal-library",
+  "private": true,
+  "version": "1.0.0",
+  "description": "CTO Consulting Proposal Library: choose client files for proposals and manage active resumes from SharePoint/OneDrive",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "node scripts/check.mjs"
+  },
+  "dependencies": {
+    "@azure/msal-browser": "^5.25.0",
+    "idb-keyval": "^6.3.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.2",
+    "vite": "^8.3.3"
+  }
+}

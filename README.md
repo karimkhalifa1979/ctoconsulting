@@ -22,6 +22,10 @@ It ships pre-loaded with the complete *NDIA ICT Policy Requirements Register v0.
 | 12 | Full register loaded against *National Insurance Disability Agency* | Reference organisation; all 53 worksheets also browsable in **Register explorer** |
 | 13 | Multiple organisations | Organisation switcher, **Organisations** page, backup / restore, Excel export, workbook import |
 
+## Proposal Library app
+
+`proposal-library/` is a separate CTO Consulting app that reads the SharePoint `Clients` folder and the resume `Originals` folder, and saves which client files to reuse in proposals and which resumes are active. See [proposal-library/README.md](proposal-library/README.md).
+
 ## Getting started
 
 Requires Node.js 20+.
