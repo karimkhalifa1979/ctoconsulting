@@ -58,7 +58,7 @@ export default function SavedProposals({ proposals, onOpen, onDuplicate, onDelet
         <div className="table-wrap">
           <table className="table proposals-table">
             <thead>
-              <tr><th>Proposal</th><th>Client</th><th>Status</th><th>Submission due</th><th className="num">Docs</th><th className="num">Team</th><th>Updated</th><th><span className="sr-only">Actions</span></th></tr>
+              <tr><th>Proposal</th><th>Client</th><th>Status</th><th>Submission due</th><th className="num">Docs</th><th className="num">Case studies</th><th className="num">Team</th><th>Updated</th><th><span className="sr-only">Actions</span></th></tr>
             </thead>
             <tbody>
               {rows.map((p) => (
@@ -71,6 +71,7 @@ export default function SavedProposals({ proposals, onOpen, onDuplicate, onDelet
                   <td><StatusBadge status={p.details.status} /></td>
                   <td className="nowrap">{p.details.dueDate ? <>{fmtDate(p.details.dueDate)}<div><DueLabel date={p.details.dueDate} status={p.details.status} /></div></> : <span className="muted">—</span>}</td>
                   <td className="num tabular">{p.files.length}</td>
+                  <td className="num tabular">{p.caseStudies.length}</td>
                   <td className="num tabular">{p.team.length}</td>
                   <td className="small nowrap">{fmtAgo(p.updatedAt)}{p.updatedBy && <div className="muted">{p.updatedBy}</div>}</td>
                   <td className="nowrap actions" onClick={(e) => e.stopPropagation()}>
@@ -80,7 +81,7 @@ export default function SavedProposals({ proposals, onOpen, onDuplicate, onDelet
                 </tr>
               ))}
               {!rows.length && (
-                <tr><td colSpan={8} className="empty">
+                <tr><td colSpan={9} className="empty">
                   {all.length ? 'No proposals match these filters.' : <>No proposals yet. <a href="#/new-proposal">Record your first proposal</a>.</>}
                 </td></tr>
               )}

@@ -1,17 +1,18 @@
 // The proposal record: its sections, fields and completeness rules. Pure data and logic (tested in scripts/check.mjs).
 //
 // Proposal = {
-//   id, details: { [fieldId]: value }, files: [ProposalFile], team: [TeamMember],
+//   id, details: { [fieldId]: value }, files: [ProposalFile], caseStudies: [CaseStudy], team: [TeamMember],
 //   createdAt, createdBy, updatedAt, updatedBy
 // }
 // ProposalFile = { id, name, path, webUrl, note }       — a file chosen from the Proposal library
+// CaseStudy    = { id, name, path, webUrl, note }       — a file from the Case Studies folder, with why it is relevant
 // TeamMember   = { id, name, path, webUrl, role }       — an active resume, with the person's role on this bid
 
 export const STATUSES = ['Draft', 'In progress', 'In review', 'Submitted', 'Shortlisted', 'Won', 'Lost', 'Withdrawn'];
 export const CLOSED = new Set(['Won', 'Lost', 'Withdrawn']);
 
 // Sections in the order they are shown. `fields` sections are rendered from their field list;
-// documents, team and review have their own screens.
+// documents, case studies, team and review have their own screens.
 export const SECTIONS = [
   {
     id: 'overview', label: 'Overview', hint: 'What the opportunity is and where it stands',
@@ -64,6 +65,7 @@ export const SECTIONS = [
     ],
   },
   { id: 'documents', label: 'Supporting documents', hint: 'Files from the Proposal library to reuse' },
+  { id: 'caseStudies', label: 'Case studies', hint: 'Relevant case studies from the Case Studies folder' },
   { id: 'team', label: 'Proposed team', hint: 'Active resumes and their roles' },
   { id: 'review', label: 'Review', hint: 'Check everything in one place' },
 ];
@@ -73,7 +75,7 @@ export const FIELDS = Object.fromEntries(SECTIONS.flatMap((s) => (s.fields || []
 const newId = () => (globalThis.crypto?.randomUUID?.() || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`);
 
 export function newProposal(user) {
-  return { id: newId(), details: { status: 'Draft', lead: user || '' }, files: [], team: [], createdAt: null, createdBy: null, updatedAt: null, updatedBy: null };
+  return { id: newId(), details: { status: 'Draft', lead: user || '' }, files: [], caseStudies: [], team: [], createdAt: null, createdBy: null, updatedAt: null, updatedBy: null };
 }
 
 export function duplicateProposal(p, user) {
@@ -87,6 +89,7 @@ const filled = (v) => (Array.isArray(v) ? v.length > 0 : v != null && String(v).
 // state: 'complete' (all required filled, and something entered), 'missing' (a required field is empty), 'partial', 'empty'.
 export function sectionStatus(p, section) {
   if (section.id === 'documents') return { state: p.files.length ? 'complete' : 'empty', count: p.files.length };
+  if (section.id === 'caseStudies') return { state: p.caseStudies.length ? 'complete' : 'empty', count: p.caseStudies.length };
   if (section.id === 'team') return { state: p.team.length ? 'complete' : 'empty', count: p.team.length };
   if (section.id === 'review') return { state: missingRequired(p).length ? 'missing' : 'complete' };
   const fields = section.fields || [];
@@ -104,6 +107,7 @@ export function readiness(p) {
   return [
     ...Object.values(FIELDS).filter((f) => f.required).map((f) => ({ label: f.label, ok: filled(p.details[f.id]), section: SECTIONS.find((s) => s.fields?.includes(f)).id })),
     { label: 'At least one supporting document', ok: p.files.length > 0, section: 'documents' },
+    { label: 'At least one case study', ok: p.caseStudies.length > 0, section: 'caseStudies' },
     { label: 'At least one team member', ok: p.team.length > 0, section: 'team' },
     { label: 'A role for every team member', ok: p.team.length > 0 && p.team.every((m) => filled(m.role)), section: 'team' },
   ];
@@ -114,6 +118,7 @@ export function normaliseProposal(raw) {
     ...raw,
     details: raw?.details && typeof raw.details === 'object' ? raw.details : {},
     files: Array.isArray(raw?.files) ? raw.files : [],
+    caseStudies: Array.isArray(raw?.caseStudies) ? raw.caseStudies : [],
     team: Array.isArray(raw?.team) ? raw.team : [],
   };
 }
@@ -137,4 +142,42 @@ export function daysUntil(isoDate, today = new Date()) {
   const due = Date.UTC(y, m - 1, d);
   const now = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
   return Math.round((due - now) / 86_400_000);
+}
+
+// Case study suggestions: words from the proposal (title, client, services, locations, sector, summary)
+// that also appear in a case study's file or folder name.
+const STOP = new Set(('the and for with from into this that our their your about over under within across '
+  + 'services service management review project projects program support work proposal client clients '
+  + 'case study studies final draft copy version word powerpoint web input data supporting information '
+  + 'docx pptx pdf doc ppt key government department australian new existing').split(' '));
+
+const words = (text) => String(text || '').toLowerCase().split(/[^a-z0-9]+/).filter((w) => w.length >= 3 && !STOP.has(w) && !/^\d+$/.test(w));
+
+// Term -> weight. Client and title words count most, services next, the rest least.
+export function relevanceTerms(p) {
+  const d = p.details;
+  const terms = new Map();
+  const add = (text, weight) => { for (const w of words(text)) terms.set(w, Math.max(terms.get(w) || 0, weight)); };
+  add([d.summary, d.winThemes, d.division].join(' '), 1);
+  add([d.sector, ...(d.locations || [])].join(' '), 1);
+  add((d.services || []).join(' '), 2);
+  add([d.title, d.client].join(' '), 3);
+  return terms;
+}
+
+export const SUGGEST_AT = 3;
+
+// How well a case study's file and folder name match the proposal: { score, matches }.
+// A score of SUGGEST_AT or more (e.g. the same client, or a title word plus a service) is suggested.
+export function relevance(file, terms) {
+  const own = [...new Set(words(`${file.name} ${file.path}`))];
+  const matches = [];
+  let score = 0;
+  for (const [t, weight] of terms) {
+    if (own.includes(t) || (t.length >= 5 && own.some((w) => w.length >= 5 && (w.startsWith(t) || t.startsWith(w))))) {
+      matches.push(t);
+      score += weight;
+    }
+  }
+  return { score, matches };
 }

@@ -1,5 +1,5 @@
 // Sample data for demo mode (no Azure app registration configured). Names are placeholders, not real clients or people.
-import { LISTS } from '../config.js';
+import { CASE_STUDIES, LISTS } from '../config.js';
 
 const engagement = (extra = {}) => ({
   'Requirements': ['Approach to Market.pdf', 'Statement of Requirement.docx', 'Questions and answers.pdf'],
@@ -49,6 +49,29 @@ const CLIENTS = {
   },
 };
 
+const CASE_STUDIES_TREE = {
+  'Word Case Studies': [
+    'IT service management uplift - university.docx',
+    'Enterprise architecture roadmap - federal agency.docx',
+    'Cyber security maturity assessment - health service.docx',
+    'ERP selection and procurement - council.docx',
+    'Digital strategy - regulator.docx',
+    'Data and analytics platform - state department.docx',
+  ],
+  'Powerpoint Case Studies': [
+    'IT service management uplift - university.pptx',
+    'Cyber security maturity assessment - health service.pptx',
+    'IT operating model redesign - health service.pptx',
+  ],
+  'Web Case Studies': [
+    'Enterprise architecture roadmap - federal agency.pdf',
+    'Program management office setup - federal department.pdf',
+    'Change management for cloud migration - university.pdf',
+  ],
+  'Input Data': ['Case study interview notes.docx', 'Benefits data.xlsx'],
+  'Supporting Information': ['Case study template.docx', 'Client approval to publish.pdf'],
+};
+
 const RESUMES = {
   '': ['Resume - Consultant A.docx', 'Resume - Consultant B.docx', 'Resume - Consultant C.pdf', 'Resume - Consultant D.docx'],
   'Business Analysts': ['Resume - Analyst A.docx', 'Resume - Analyst B.docx', 'Resume - Analyst C.pdf', 'Resume - Analyst D.docx'],
@@ -75,7 +98,7 @@ function hash(s) {
 }
 
 export function demoFileList(folder) {
-  const tree = folder === LISTS.resumes.folder ? RESUMES : CLIENTS;
+  const tree = folder === LISTS.resumes.folder ? RESUMES : folder === CASE_STUDIES.folder ? CASE_STUDIES_TREE : CLIENTS;
   const base = Date.UTC(2026, 8, 30);
   return flatten(tree, '', []).map(({ name, path }) => {
     const id = 'DEMO' + hash(path + '/' + name);
@@ -150,6 +173,10 @@ export function demoSeed(today = new Date()) {
       doc('Case studies.docx', 'Example University/IT Service Operations/Response', 'Case study'),
       doc('Operating model.docx', 'Example Health Service/IT Operating Model/Deliverables', 'Sample deliverable'),
     ],
+    caseStudies: (() => {
+      const f = demoFileList(CASE_STUDIES.folder).find((x) => x.name === 'IT service management uplift - university.docx');
+      return [{ id: f.id, name: f.name, path: f.path, webUrl: '#', note: 'Similar services' }];
+    })(),
     team: [
       person('Resume - Delivery Manager A.docx', 'Engagement Manager'),
       person('Resume - Analyst A.docx', 'Business Analyst'),

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { LISTS, config, demoMode } from './config.js';
+import { CASE_STUDIES, LISTS, config, demoMode } from './config.js';
 import { initAuth, signIn, signOut } from './lib/auth.js';
 import { getMe } from './lib/graph.js';
 import { loadCachedScan, loadSelections, resetDemo, saveSelections, scan } from './lib/backend.js';
@@ -18,6 +18,7 @@ function routeFromHash() {
   if (m) return { page: 'proposal', id: decodeURIComponent(m[1]) };
   return { page: 'saved-proposals' };
 }
+const FOLDERS = { proposals: LISTS.proposals.folder, resumes: LISTS.resumes.folder, caseStudies: CASE_STUDIES.folder };
 const emptyPending = () => ({ proposalFiles: new Map(), activeResumes: new Map() });
 
 export default function App() {
@@ -78,7 +79,7 @@ export default function App() {
   useEffect(() => { if (ready) reloadSelections(); }, [ready, reloadSelections]);
 
   const runScan = useCallback((listId) => {
-    const { folder } = LISTS[listId];
+    const folder = FOLDERS[listId];
     setScans((s) => ({ ...s, [listId]: { ...s[listId], loading: true, error: null, progress: null } }));
     scan(folder, (progress) => setScans((s) => ({ ...s, [listId]: { ...s[listId], progress } })))
       .then((r) => setScans((s) => ({ ...s, [listId]: { ...r, loading: false, error: null } })))
@@ -185,6 +186,18 @@ export default function App() {
     return [...names].sort((a, b) => a.localeCompare(b));
   }, [saved.doc, scans.proposals]);
 
+  // Case studies: read when the proposal form first needs them (cached scan if there is one).
+  const needCaseStudies = useCallback(() => {
+    if (opened.current.has('caseStudies')) return;
+    opened.current.add('caseStudies');
+    setScans((s) => ({ ...s, caseStudies: { loading: true } }));
+    loadCachedScan(CASE_STUDIES.folder).then((cached) => {
+      if (cached) setScans((s) => ({ ...s, caseStudies: { ...cached, loading: false } }));
+      else runScan('caseStudies');
+    });
+  }, [runScan]);
+  const rescanCaseStudies = useCallback(() => runScan('caseStudies'), [runScan]);
+
   // A fresh draft each time New proposal is opened.
   const [draftKey, setDraftKey] = useState(0);
   const draft = useMemo(() => newProposal(auth.user), [auth.user, draftKey]);
@@ -211,10 +224,10 @@ export default function App() {
       />
     );
   } else if (route.page === 'new-proposal') {
-    page = <ProposalEditor key={draft.id} initial={draft} isNew library={library} clientNames={clientNames} onSave={saveProposal} onDirtyChange={setEditorDirty} />;
+    page = <ProposalEditor key={draft.id} initial={draft} isNew library={library} clientNames={clientNames} caseStudies={scans.caseStudies} onNeedCaseStudies={needCaseStudies} onRescanCaseStudies={rescanCaseStudies} onSave={saveProposal} onDirtyChange={setEditorDirty} />;
   } else if (route.page === 'proposal') {
     page = existing
-      ? <ProposalEditor key={route.id} initial={normaliseProposal(existing)} library={library} clientNames={clientNames} onSave={saveProposal} onDelete={deleteProposal} onDirtyChange={setEditorDirty} />
+      ? <ProposalEditor key={route.id} initial={normaliseProposal(existing)} library={library} clientNames={clientNames} caseStudies={scans.caseStudies} onNeedCaseStudies={needCaseStudies} onRescanCaseStudies={rescanCaseStudies} onSave={saveProposal} onDelete={deleteProposal} onDirtyChange={setEditorDirty} />
       : <div className="card empty-card">{saved.loaded ? <>This proposal was not found. It may have been deleted. <a href="#/saved-proposals">Back to saved proposals</a></> : 'Loading…'}</div>;
   } else {
     page = (

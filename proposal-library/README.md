@@ -2,15 +2,17 @@
 
 A CTO Consulting–branded web app that reads the CTO Consulting SharePoint / OneDrive document library and lets you:
 
-1. **New proposal** — record the details of a new proposal and choose its supporting documents and proposed team from the two lists below. **Saved proposals** lists every proposal recorded.
+1. **New proposal** — record the details of a new proposal and choose its supporting documents and proposed team from the two lists below, and its case studies from **`Sales and Marketing/Case Studies`**. **Saved proposals** lists every proposal recorded.
 2. **Proposal library** — browse every file in the **`Clients`** folder (all client sub-folders) and choose which files to reuse in future proposals.
 3. **Active resumes** — browse every resume in **`Sales and Marketing/People/Resumes/Originals`** (including its sub-folders) and mark which ones are active.
 
 Everything is saved and reloaded every time the app opens.
 
+The Case Studies folder location can be changed with `VITE_CASE_STUDIES_PATH`.
+
 ## New proposal
 
-The proposal form is split into seven sections, shown as numbered steps down the left. Each step shows its progress (for example "5 of 8 filled", or a tick when complete) and flags any required field that is still empty. Move between them with **Next** / **Back** or by clicking a step.
+The proposal form is split into eight sections, shown as numbered steps down the left. Each step shows its progress (for example "5 of 8 filled", or a tick when complete) and flags any required field that is still empty. Move between them with **Next** / **Back** or by clicking a step.
 
 | Step | What it records |
 |---|---|
@@ -19,10 +21,13 @@ The proposal form is split into seven sections, shown as numbered steps down the
 | 3. Key dates | Released, questions close, submission due\* (and time), expected decision, expected start, contract term |
 | 4. Scope & requirements | Requirement summary, services, work locations, security clearance, pricing model, evaluation criteria, win themes |
 | 5. Supporting documents | Files picked from those selected in the **Proposal library**, grouped by client (the proposal's own client is listed first), each with an optional "how it will be used" note |
-| 6. Proposed team | People picked from the **Active resumes**, grouped by resume folder, each with their role on this proposal |
-| 7. Review | A readiness checklist, every section on one page with **Edit** links, and **Print / save as PDF** |
+| 6. Case studies | Case studies picked straight from the **`Sales and Marketing/Case Studies`** folder (Word, PowerPoint and Web case studies, plus its other sub-folders), each with an optional "why it is relevant" note. Likely matches are listed first under **Suggested for this proposal** (see below) |
+| 7. Proposed team | People picked from the **Active resumes**, grouped by resume folder, each with their role on this proposal |
+| 8. Review | A readiness checklist, every section on one page with **Edit** links, and **Print / save as PDF** |
 
 \* required before submission; only the title is needed to save a draft.
+
+**Case study suggestions.** The app compares the words in the proposal with each case study's file and folder name. Client and title words count most, then the selected services, then sector, locations and the scope text. A case study is suggested when it shares the client, or a title word plus a service, and the best matches are listed first, with the matching words shown. Fill in the title, client, services and scope before opening the step to get the best suggestions. The Case Studies folder is read the first time the step is opened and cached after that; **Rescan** re-reads it.
 
 **Saved proposals** shows open / due-soon / awaiting-decision / won counts and lists the proposals soonest deadline first, with search, Open / Closed / All views and a status filter. Each one can be opened, duplicated (to start a similar bid) or deleted. The app asks before you leave a proposal with unsaved changes.
 
@@ -55,6 +60,7 @@ A proposal keeps its own copy of each chosen document and resume (name, folder, 
     "<proposal id>": {
       "details": { "title": "…", "client": "…", "status": "Draft", "dueDate": "2026-10-20", "…": "…" },
       "files": [{ "id": "<SharePoint item id>", "name": "…", "path": "…", "webUrl": "…", "note": "Case study" }],
+      "caseStudies": [{ "id": "<SharePoint item id>", "name": "…", "path": "Word Case Studies", "webUrl": "…", "note": "Similar services" }],
       "team":  [{ "id": "<SharePoint item id>", "name": "…", "path": "…", "webUrl": "…", "role": "Business Analyst" }],
       "createdAt": "…", "createdBy": "…", "updatedAt": "…", "updatedBy": "…"
     }
@@ -126,9 +132,9 @@ src/lib/graph.js         Microsoft Graph: library lookup, recursive folder scan,
 src/lib/backend.js       Scan cache, load/save selections (SharePoint or demo)
 src/lib/selections.js    Saved-selections document and merge logic
 src/lib/tree.js          Folder tree from file paths
-src/lib/proposal.js      Proposal sections, fields, progress and readiness rules
+src/lib/proposal.js      Proposal sections, fields, progress, readiness and case study suggestion rules
 src/pages/Library.jsx    File browser used by the Proposal library and Active resumes
 src/pages/SavedProposals.jsx  Saved proposals list
 src/pages/ProposalEditor.jsx  New proposal / edit proposal form
-src/components/Picker.jsx     Document and team chooser
+src/components/Picker.jsx     Document, case study and team chooser
 ```

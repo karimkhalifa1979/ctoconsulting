@@ -256,6 +256,8 @@ button.tile:hover { border-color: var(--brand-teal); }
 .pitem-sub { font-size: 12px; color: var(--ink-3); overflow-wrap: anywhere; }
 .pitem-extra { margin-top: 4px; padding: 5px 8px !important; font-size: 12.5px; }
 .remove { color: var(--ink-3); }
+.picker-status { justify-content: space-between; }
+.hint-below { margin: 10px 0 0; }
 
 /* Review */
 .review { display: flex; flex-direction: column; gap: 18px; }

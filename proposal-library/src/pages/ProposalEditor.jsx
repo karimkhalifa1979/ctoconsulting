@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import Picker from '../components/Picker.jsx';
 import { StatusBadge, DueLabel } from '../components/ProposalBits.jsx';
-import { FIELDS, SECTIONS, clientOf, missingRequired, personName, readiness, sectionStatus } from '../lib/proposal.js';
+import { FIELDS, SECTIONS, clientOf, missingRequired, personName, readiness, SUGGEST_AT, relevance, relevanceTerms, sectionStatus } from '../lib/proposal.js';
 import { extOf } from '../lib/selections.js';
-import { fmtDate, fmtDateTime } from '../lib/format.js';
+import { fmtAgo, fmtDate, fmtDateTime } from '../lib/format.js';
 
 const ROLES = ['Engagement Director', 'Engagement Manager', 'Project Manager', 'Program Manager', 'Delivery Manager', 'Scrum Master', 'Business Analyst', 'Solution Architect', 'Enterprise Architect', 'Cyber Security Consultant', 'Test Lead', 'Change Manager', 'Subject Matter Expert'];
+const SUGGESTED = 'Suggested for this proposal';
+const CASE_REASONS = ['Same client', 'Similar services', 'Same sector', 'Similar scale', 'Same technology', 'Strong outcome'];
 const PURPOSES = ['Case study', 'Previous response', 'Methodology', 'Pricing reference', 'Capability statement', 'Sample deliverable', 'Client requirement'];
 
-export default function ProposalEditor({ initial, isNew, library, clientNames, onSave, onDelete, onDirtyChange }) {
+export default function ProposalEditor({ initial, isNew, library, clientNames, caseStudies, onNeedCaseStudies, onRescanCaseStudies, onSave, onDelete, onDirtyChange }) {
   const [draft, setDraft] = useState(initial);
   const [section, setSection] = useState('overview');
   const [dirty, setDirty] = useState(false);
@@ -17,6 +19,8 @@ export default function ProposalEditor({ initial, isNew, library, clientNames, o
   useEffect(() => { onDirtyChange(dirty); }, [dirty, onDirtyChange]);
   useEffect(() => () => onDirtyChange(false), [onDirtyChange]);
   useEffect(() => { window.scrollTo({ top: 0 }); }, [section]);
+  // The Case Studies folder is only read when that step is opened (or reviewed).
+  useEffect(() => { if (section === 'caseStudies' || section === 'review') onNeedCaseStudies(); }, [section, onNeedCaseStudies]);
 
   const update = (fn) => { setDraft((d) => fn(d)); setDirty(true); setState((s) => ({ ...s, error: null })); };
   const setField = (id, value) => update((d) => ({ ...d, details: { ...d.details, [id]: value } }));
@@ -44,6 +48,12 @@ export default function ProposalEditor({ initial, isNew, library, clientNames, o
   const files = useMemo(() => Object.entries(library.proposalFiles).map(([id, e]) => ({ id, ...e })), [library.proposalFiles]);
   const resumes = useMemo(() => Object.entries(library.activeResumes).map(([id, e]) => ({ id, ...e })), [library.activeResumes]);
   const missing = missingRequired(draft);
+  const details = draft.details;
+  const terms = useMemo(() => relevanceTerms({ details }), [details]);
+  const caseFiles = useMemo(() => (caseStudies?.files || []).map((f) => {
+    const { score, matches } = relevance(f, terms);
+    return { ...f, score, matches: score >= SUGGEST_AT ? matches : [] };
+  }), [caseStudies?.files, terms]);
 
   return (
     <div className="editor">
@@ -122,6 +132,39 @@ export default function ProposalEditor({ initial, isNew, library, clientNames, o
               />
             )}
 
+            {current.id === 'caseStudies' && (
+              <Picker
+                available={caseFiles}
+                chosen={draft.caseStudies}
+                onAdd={(f) => update((x) => ({ ...x, caseStudies: [...x.caseStudies, { id: f.id, name: f.name, path: f.path, webUrl: f.webUrl, note: '' }] }))}
+                onRemove={(id) => update((x) => ({ ...x, caseStudies: x.caseStudies.filter((f) => f.id !== id) }))}
+                onUpdate={(id, patch) => update((x) => ({ ...x, caseStudies: x.caseStudies.map((f) => (f.id === id ? { ...f, ...patch } : f)) }))}
+                groupOf={(f) => (f.matches?.length ? SUGGESTED : f.path || 'Case Studies')}
+                rankOf={(f) => f.score || 0}
+                chosenGroupOf={(f) => f.path || 'Case Studies'}
+                labelOf={(f) => f.name.replace(/\.[a-z0-9]+$/i, '')}
+                subOf={(f) => [`${extOf(f.name).toUpperCase() || 'File'} · ${f.path || 'Case Studies'}`, f.matches?.length ? `matches: ${f.matches.join(', ')}` : ''].filter(Boolean).join(' · ')}
+                featuredGroup={SUGGESTED}
+                groupRank={(g) => (/case stud/i.test(g) ? 1 : 0)}
+                extra={{ key: 'note', label: 'Why it is relevant', placeholder: 'Why it is relevant (optional)', list: 'case-reasons' }}
+                noun={{ singular: 'case study', plural: 'case studies' }}
+                missingLabel="not in folder"
+                status={(
+                  <div className="row small muted picker-status">
+                    <span>
+                      {caseStudies?.loading ? (caseStudies.progress ? `Reading the Case Studies folder… ${caseStudies.progress.files} files` : 'Reading the Case Studies folder…')
+                        : caseStudies?.scannedAt ? `Case Studies folder read ${fmtAgo(caseStudies.scannedAt)}` : ''}
+                    </span>
+                    <button className="btn btn-sm" onClick={onRescanCaseStudies} disabled={caseStudies?.loading}>Rescan</button>
+                  </div>
+                )}
+                emptyLibrary={caseStudies?.error
+                  ? <>Could not read the Case Studies folder: {caseStudies.error}</>
+                  : caseStudies?.loading || !caseStudies ? 'Reading the Case Studies folder…' : 'The Case Studies folder has no files.'}
+              />
+            )}
+            {current.id === 'caseStudies' && !terms.size && <p className="muted small hint-below">Fill in the title, client, services or scope to get suggested case studies.</p>}
+
             {current.id === 'team' && (
               <Picker
                 available={resumes}
@@ -141,6 +184,7 @@ export default function ProposalEditor({ initial, isNew, library, clientNames, o
             {current.id === 'review' && <Review draft={draft} go={setSection} />}
 
             <datalist id="roles">{ROLES.map((r) => <option key={r} value={r} />)}</datalist>
+            <datalist id="case-reasons">{CASE_REASONS.map((r) => <option key={r} value={r} />)}</datalist>
             <datalist id="purposes">{PURPOSES.map((r) => <option key={r} value={r} />)}</datalist>
           </div>
           <div className="section-foot no-print">
@@ -270,6 +314,21 @@ function Review({ draft, go }) {
             </ul>
           </div>
         ))}
+      </div>
+
+      <div className="review-block">
+        <div className="review-head"><h3>Case studies ({draft.caseStudies.length})</h3><button className="link-btn dark no-print" onClick={() => go('caseStudies')}>Edit</button></div>
+        {!draft.caseStudies.length ? <p className="muted">None added.</p> : (
+          <ul className="review-list">
+            {draft.caseStudies.map((f) => (
+              <li key={f.id}>
+                {f.webUrl && f.webUrl !== '#' ? <a href={f.webUrl} target="_blank" rel="noreferrer">{f.name}</a> : f.name}
+                <span className="muted small"> · {f.path || 'Case Studies'}</span>
+                {f.note && <span className="badge badge-teal">{f.note}</span>}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="review-block">

@@ -4,8 +4,8 @@ import { useMemo, useState } from 'react';
 // Used for supporting documents (from the Proposal library) and the proposed team (from active resumes).
 export default function Picker({
   available, chosen, onAdd, onRemove, onUpdate,
-  groupOf, labelOf, subOf, featuredGroup, featuredLabel,
-  extra, noun, emptyLibrary,
+  groupOf, chosenGroupOf = groupOf, rankOf = () => 0, groupRank = () => 0, labelOf, subOf, featuredGroup, featuredLabel,
+  extra, noun, emptyLibrary, status, missingLabel = 'not in library',
 }) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState({});
@@ -21,20 +21,20 @@ export default function Picker({
       if (!map.has(g)) map.set(g, []);
       map.get(g).push(item);
     }
-    const out = [...map.entries()].map(([name, items]) => ({ name, items: items.sort((a, b) => labelOf(a).localeCompare(labelOf(b))) }));
-    out.sort((a, b) => (b.name === featuredGroup) - (a.name === featuredGroup) || a.name.localeCompare(b.name));
+    const out = [...map.entries()].map(([name, items]) => ({ name, items: items.sort((a, b) => rankOf(b) - rankOf(a) || labelOf(a).localeCompare(labelOf(b))) }));
+    out.sort((a, b) => (b.name === featuredGroup) - (a.name === featuredGroup) || groupRank(b.name) - groupRank(a.name) || a.name.localeCompare(b.name));
     return out;
   }, [available, chosen, q, featuredGroup]);
 
   const chosenGroups = useMemo(() => {
     const map = new Map();
     for (const c of chosen) {
-      const g = groupOf(c);
+      const g = chosenGroupOf(c);
       if (!map.has(g)) map.set(g, []);
       map.get(g).push(c);
     }
     return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  }, [chosen, groupOf]);
+  }, [chosen, chosenGroupOf]);
 
   const libraryIds = new Set(available.map((a) => a.id));
   // Groups start expanded when searching, for the featured group (e.g. this client), or when the list is short.
@@ -46,6 +46,7 @@ export default function Picker({
       <div className="picker-col">
         <div className="picker-head">
           <h3>Available <span className="muted tabular">({available.length - chosen.filter((c) => libraryIds.has(c.id)).length})</span></h3>
+          {status}
           <input type="search" placeholder={`Search ${noun.plural}`} value={query} onChange={(e) => setQuery(e.target.value)} aria-label={`Search ${noun.plural}`} />
         </div>
         <div className="picker-list">
@@ -57,7 +58,7 @@ export default function Picker({
                 <button className="pgroup-toggle" onClick={() => setOpen((o) => ({ ...o, [g.name]: !isOpen(g.name) }))} aria-expanded={isOpen(g.name)}>
                   <span className="twist">{isOpen(g.name) ? '▾' : '▸'}</span>
                   <span className="pgroup-name">{g.name}</span>
-                  {g.name === featuredGroup && <span className="badge badge-teal">{featuredLabel}</span>}
+                  {g.name === featuredGroup && featuredLabel && <span className="badge badge-teal">{featuredLabel}</span>}
                   <span className="muted small tabular">{g.items.length}</span>
                 </button>
                 <button className="btn btn-sm btn-ghost" onClick={() => g.items.forEach(onAdd)}>Add all</button>
@@ -95,7 +96,7 @@ export default function Picker({
                     <div className="pitem-text">
                       <span className="pitem-label">
                         {c.webUrl && c.webUrl !== '#' ? <a href={c.webUrl} target="_blank" rel="noreferrer">{labelOf(c)}</a> : labelOf(c)}
-                        {!libraryIds.has(c.id) && <span className="badge badge-gold" title="Removed from the library since it was added">not in library</span>}
+                        {available.length > 0 && !libraryIds.has(c.id) && <span className="badge badge-gold" title="No longer available since it was added">{missingLabel}</span>}
                       </span>
                       <span className="pitem-sub">{subOf(c)}</span>
                       <input

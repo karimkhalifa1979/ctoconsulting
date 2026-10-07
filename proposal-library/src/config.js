@@ -11,6 +11,7 @@ export const config = {
   spLibrary: env.VITE_SP_LIBRARY || 'Documents',
   clientsPath: trimSlashes(env.VITE_CLIENTS_PATH || 'Clients'),
   resumesPath: trimSlashes(env.VITE_RESUMES_PATH || 'Sales and Marketing/People/Resumes/Originals'),
+  caseStudiesPath: trimSlashes(env.VITE_CASE_STUDIES_PATH || 'Sales and Marketing/Case Studies'),
   selectionsPath: trimSlashes(env.VITE_SELECTIONS_PATH || 'Sales and Marketing/Proposal Library/proposal-library-selections.json'),
 };
 
@@ -18,6 +19,9 @@ export const config = {
 export const demoMode = !config.clientId || env.VITE_DEMO_MODE === '1';
 
 // The two lists the app manages. `key` is the property in the saved selections file.
+// Folder read directly by the proposal form's Case studies step (no library screen of its own).
+export const CASE_STUDIES = { folder: config.caseStudiesPath };
+
 export const LISTS = {
   proposals: {
     key: 'proposalFiles',

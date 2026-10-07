@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { applyChanges, effectiveChanges, emptyDoc, isSelected, missingEntries, normaliseDoc } from '../src/lib/selections.js';
 import { buildTree, inFolder } from '../src/lib/tree.js';
-import { SECTIONS, clientOf, daysUntil, duplicateProposal, missingRequired, newProposal, personName, readiness, sectionStatus } from '../src/lib/proposal.js';
+import { SECTIONS, clientOf, SUGGEST_AT, relevance, relevanceTerms, daysUntil, duplicateProposal, missingRequired, newProposal, normaliseProposal, personName, readiness, sectionStatus } from '../src/lib/proposal.js';
 
 const f = (id, name, path) => ({ id, name, path, webUrl: `https://x/${id}` });
 const a = f('A', 'Proposal.docx', 'Client 1/Final');
@@ -88,6 +88,28 @@ assert.equal(copy.details.status, 'Draft');
 assert.equal(copy.createdAt, null);
 copy.team[0].role = 'Changed';
 assert.equal(p2.team[0].role, '');
+
+// Case studies: progress, readiness and suggestions.
+const p3 = newProposal('Karim');
+assert.deepEqual(p3.caseStudies, []);
+assert.equal(sectionStatus(p3, SECTIONS.find((s) => s.id === 'caseStudies')).state, 'empty');
+assert.equal(readiness(p3).find((c) => c.label === 'At least one case study').ok, false);
+p3.caseStudies.push({ id: 'CS1', name: 'x.docx', path: 'Word Case Studies' });
+assert.equal(sectionStatus(p3, SECTIONS.find((s) => s.id === 'caseStudies')).count, 1);
+Object.assign(p3.details, { title: 'Service Management Uplift', client: 'Example University', services: ['IT service management', 'Cyber security'] });
+Object.assign(p3.details, { summary: 'Deliver a roadmap' });
+const terms = relevanceTerms(p3);
+assert.equal(terms.get('university'), 3);
+assert.equal(terms.get('cyber'), 2);
+assert.equal(terms.get('roadmap'), 1);
+assert.ok(!terms.has('management') && !terms.has('service'));
+const r1 = relevance({ name: 'IT service management uplift - university.docx', path: 'Word Case Studies' }, terms);
+assert.deepEqual(r1.matches.sort(), ['university', 'uplift']);
+assert.equal(r1.score, 6);
+assert.ok(relevance({ name: 'Cyber security maturity assessment - health.pptx', path: 'Powerpoint Case Studies' }, terms).score >= SUGGEST_AT);
+assert.ok(relevance({ name: 'Enterprise architecture roadmap - agency.pdf', path: 'Web Case Studies' }, terms).score < SUGGEST_AT);
+assert.equal(relevance({ name: 'Case study template.docx', path: 'Supporting Information' }, terms).score, 0);
+assert.deepEqual(normaliseProposal({ details: {} }).caseStudies, []);
 
 // Helpers.
 assert.equal(personName('Resume - Jane Citizen.docx'), 'Jane Citizen');
