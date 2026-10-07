@@ -2,10 +2,31 @@
 
 A CTO Consulting–branded web app that reads the CTO Consulting SharePoint / OneDrive document library and lets you:
 
-1. **Proposal library** — browse every file in the **`Clients`** folder (all client sub-folders) and choose which files to reuse in future proposals.
-2. **Active resumes** — browse every resume in **`Sales and Marketing/People/Resumes/Originals`** (including its sub-folders) and mark which ones are active.
+1. **New proposal** — record the details of a new proposal and choose its supporting documents and proposed team from the two lists below. **Saved proposals** lists every proposal recorded.
+2. **Proposal library** — browse every file in the **`Clients`** folder (all client sub-folders) and choose which files to reuse in future proposals.
+3. **Active resumes** — browse every resume in **`Sales and Marketing/People/Resumes/Originals`** (including its sub-folders) and mark which ones are active.
 
-Both selections are saved and reloaded every time the app opens, ready for future features (e.g. assembling a proposal from the selected files and active resumes).
+Everything is saved and reloaded every time the app opens.
+
+## New proposal
+
+The proposal form is split into seven sections, shown as numbered steps down the left. Each step shows its progress (for example "5 of 8 filled", or a tick when complete) and flags any required field that is still empty. Move between them with **Next** / **Back** or by clicking a step.
+
+| Step | What it records |
+|---|---|
+| 1. Overview | Title\*, client\* (suggested from the Clients folder names), status, opportunity type, procurement channel, client reference, bid lead, estimated value |
+| 2. Client & contacts | Sector, relationship, division, contact name / role / email / phone, background notes |
+| 3. Key dates | Released, questions close, submission due\* (and time), expected decision, expected start, contract term |
+| 4. Scope & requirements | Requirement summary, services, work locations, security clearance, pricing model, evaluation criteria, win themes |
+| 5. Supporting documents | Files picked from those selected in the **Proposal library**, grouped by client (the proposal's own client is listed first), each with an optional "how it will be used" note |
+| 6. Proposed team | People picked from the **Active resumes**, grouped by resume folder, each with their role on this proposal |
+| 7. Review | A readiness checklist, every section on one page with **Edit** links, and **Print / save as PDF** |
+
+\* required before submission; only the title is needed to save a draft.
+
+**Saved proposals** shows open / due-soon / awaiting-decision / won counts and lists the proposals soonest deadline first, with search, Open / Closed / All views and a status filter. Each one can be opened, duplicated (to start a similar bid) or deleted. The app asks before you leave a proposal with unsaved changes.
+
+A proposal keeps its own copy of each chosen document and resume (name, folder, link). If one is later removed from the Proposal library or Active resumes, the proposal still lists it and marks it "not in library".
 
 ## How it works
 
@@ -14,6 +35,7 @@ Both selections are saved and reloaded every time the app opens, ready for futur
 - **Browsing:** folder tree (client → engagement → sub-folder) with file and selection counts, search, file-type filters (Word, PDF, PowerPoint, Excel), *All / Selected / Not selected* views, sort, bulk select for the files shown, and a link to open each file in SharePoint.
 - **Saving:** ticks are held as *unsaved changes* until you press **Save selections** (the app warns if you close the tab with unsaved changes). Selections are written to a JSON file in the same library — by default `Sales and Marketing/Proposal Library/proposal-library-selections.json` (the folder is created on first save). Because it lives in SharePoint, the selections are shared by everyone who uses the app, are backed up and versioned by SharePoint, and can be read by other tools.
 - **Safe concurrent edits:** a save re-reads the latest file and applies only your changes on top of it, using the file's eTag so two people saving at once never overwrite each other.
+- **Proposals** are stored in the same file under `proposals`, saved one proposal at a time with the same merge-and-retry logic, so two people working on different proposals never overwrite each other.
 - **Moved or deleted files:** selections are keyed by the SharePoint item ID, so renamed or moved files stay selected. If a selected file is no longer in the folder, the app flags it so you can review it.
 
 ### The saved selections file
@@ -28,6 +50,14 @@ Both selections are saved and reloaded every time the app opens, ready for futur
   },
   "activeResumes": {
     "<SharePoint item id>": { "name": "…", "path": "Scrum Masters_Delivery Managers", "webUrl": "https://…", "selectedAt": "…", "selectedBy": "…" }
+  },
+  "proposals": {
+    "<proposal id>": {
+      "details": { "title": "…", "client": "…", "status": "Draft", "dueDate": "2026-10-20", "…": "…" },
+      "files": [{ "id": "<SharePoint item id>", "name": "…", "path": "…", "webUrl": "…", "note": "Case study" }],
+      "team":  [{ "id": "<SharePoint item id>", "name": "…", "path": "…", "webUrl": "…", "role": "Business Analyst" }],
+      "createdAt": "…", "createdBy": "…", "updatedAt": "…", "updatedBy": "…"
+    }
   }
 }
 ```
@@ -74,8 +104,8 @@ With no `VITE_AZURE_CLIENT_ID` set, the app runs in **demo mode** with placehold
 
 `offline/CTO-Proposal-Library-Demo.html` is the whole app in one file, in demo mode. Copy it anywhere (laptop, USB stick, email attachment) and double-click it to open in Edge or Chrome: no install, sign-in, server or internet connection needed.
 
-- It uses placeholder sample folders and resumes (no real client or staff data).
-- Selections are saved in that browser, so they are still there when you reopen the file. **Reset demo selections** in the sidebar clears them before the next demo.
+- It uses placeholder sample folders and resumes (no real client or staff data), with some files and resumes already selected and one example proposal, so every screen has something to show.
+- Changes are saved in that browser, so they are still there when you reopen the file. **Reset demo** in the sidebar restores the starting sample data before the next demo.
 - Without internet the page uses system fonts instead of Montserrat/Inter; everything else looks the same.
 
 Rebuild it after changing the app with `npm run build:offline`.
@@ -96,5 +126,9 @@ src/lib/graph.js         Microsoft Graph: library lookup, recursive folder scan,
 src/lib/backend.js       Scan cache, load/save selections (SharePoint or demo)
 src/lib/selections.js    Saved-selections document and merge logic
 src/lib/tree.js          Folder tree from file paths
-src/pages/Library.jsx    File browser used by both screens
+src/lib/proposal.js      Proposal sections, fields, progress and readiness rules
+src/pages/Library.jsx    File browser used by the Proposal library and Active resumes
+src/pages/SavedProposals.jsx  Saved proposals list
+src/pages/ProposalEditor.jsx  New proposal / edit proposal form
+src/components/Picker.jsx     Document and team chooser
 ```

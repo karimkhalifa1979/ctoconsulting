@@ -74,13 +74,10 @@ function hash(s) {
   return (h >>> 0).toString(36).toUpperCase();
 }
 
-export async function demoFiles(folder, onProgress = () => {}) {
+export function demoFileList(folder) {
   const tree = folder === LISTS.resumes.folder ? RESUMES : CLIENTS;
-  const entries = flatten(tree, '', []);
-  await new Promise((r) => setTimeout(r, 400));
-  onProgress({ folders: 1, files: entries.length, pending: 0 });
   const base = Date.UTC(2026, 8, 30);
-  return entries.map(({ name, path }) => {
+  return flatten(tree, '', []).map(({ name, path }) => {
     const id = 'DEMO' + hash(path + '/' + name);
     const n = parseInt(hash(name), 36);
     return {
@@ -93,4 +90,71 @@ export async function demoFiles(folder, onProgress = () => {}) {
       modifiedBy: 'Demo user',
     };
   });
+}
+
+export async function demoFiles(folder, onProgress = () => {}) {
+  const files = demoFileList(folder);
+  await new Promise((r) => setTimeout(r, 400));
+  onProgress({ folders: 1, files: files.length, pending: 0 });
+  return files;
+}
+
+// Starting point for a demo: some library files selected, some resumes active and one example proposal.
+export function demoSeed(today = new Date()) {
+  const iso = (days) => new Date(today.getTime() + days * 86_400_000).toISOString().slice(0, 10);
+  const stamp = new Date(today.getTime() - 86_400_000).toISOString();
+  const entry = (f) => ({ name: f.name, path: f.path, webUrl: f.webUrl, selectedAt: stamp, selectedBy: 'Demo user' });
+  const pick = (files, test) => Object.fromEntries(files.filter(test).map((f) => [f.id, entry(f)]));
+
+  const clientFiles = demoFileList(LISTS.proposals.folder);
+  const proposalFiles = pick(clientFiles, (f) => /Final|Deliverables|Response/.test(f.path) || /Capability statement|Case studies|Methodology/.test(f.name));
+  const resumes = demoFileList(LISTS.resumes.folder);
+  const activeResumes = pick(resumes, (f) => !/ (C|D)\.(docx|pdf)$/.test(f.name));
+
+  const byName = (list, name) => list.find((f) => f.name === name && f.id in (list === resumes ? activeResumes : proposalFiles));
+  const doc = (name, path, note) => { const f = clientFiles.find((x) => x.name === name && x.path === path); return { id: f.id, name, path, webUrl: '#', note }; };
+  const person = (name, role) => { const f = byName(resumes, name); return { id: f.id, name, path: f.path, webUrl: '#', role }; };
+
+  const example = {
+    id: 'demo-proposal-1',
+    details: {
+      title: 'Service Management Uplift',
+      client: 'Example University',
+      status: 'In progress',
+      type: 'Request for Quote (RFQ)',
+      channel: 'Direct from client',
+      reference: 'RFQ-2026-118',
+      lead: 'Demo user',
+      value: '180000',
+      sector: 'Higher education',
+      relationship: 'Existing client',
+      division: 'Information Technology Services',
+      contactName: 'Client contact (placeholder)',
+      contactRole: 'Director, IT Operations',
+      released: iso(-9),
+      questionsClose: iso(3),
+      dueDate: iso(10),
+      dueTime: '14:00',
+      decision: iso(31),
+      startDate: iso(45),
+      term: '4 months',
+      summary: 'Assess the current IT service management practice and deliver a roadmap and operating model to lift service quality.',
+      services: ['IT service management', 'Strategy & advisory', 'Change management'],
+      locations: ['Canberra'],
+      clearance: 'None required',
+      pricing: 'Fixed price',
+      winThemes: 'Recent, directly comparable work for the same client; senior team available immediately.',
+    },
+    files: [
+      doc('Response.docx', 'Example University/IT Service Operations/Response', 'Previous response'),
+      doc('Case studies.docx', 'Example University/IT Service Operations/Response', 'Case study'),
+      doc('Operating model.docx', 'Example Health Service/IT Operating Model/Deliverables', 'Sample deliverable'),
+    ],
+    team: [
+      person('Resume - Delivery Manager A.docx', 'Engagement Manager'),
+      person('Resume - Analyst A.docx', 'Business Analyst'),
+    ],
+    createdAt: stamp, createdBy: 'Demo user', updatedAt: stamp, updatedBy: 'Demo user',
+  };
+  return { schema: 'cto-proposal-library/v1', updatedAt: stamp, updatedBy: 'Demo user', proposalFiles, activeResumes, proposals: { [example.id]: example } };
 }

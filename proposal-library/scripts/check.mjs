@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import { applyChanges, effectiveChanges, emptyDoc, isSelected, missingEntries, normaliseDoc } from '../src/lib/selections.js';
 import { buildTree, inFolder } from '../src/lib/tree.js';
+import { SECTIONS, clientOf, daysUntil, duplicateProposal, missingRequired, newProposal, personName, readiness, sectionStatus } from '../src/lib/proposal.js';
 
 const f = (id, name, path) => ({ id, name, path, webUrl: `https://x/${id}` });
 const a = f('A', 'Proposal.docx', 'Client 1/Final');
@@ -53,5 +54,49 @@ assert.equal(tree.children.get('Client 1').children.get('Final').path, 'Client 1
 assert.ok(inFolder(a, 'Client 1'));
 assert.ok(!inFolder(a, 'Client'));
 assert.ok(inFolder(a, ''));
+
+// Proposals: saved as whole records, creation stamp kept, deletion, and other lists untouched.
+const p1 = newProposal('Karim');
+p1.details.title = 'Capability Review';
+let pdoc = applyChanges(merged, { proposals: new Map([[p1.id, p1]]) }, 'Karim', 't6');
+assert.equal(pdoc.proposals[p1.id].createdAt, 't6');
+assert.equal(pdoc.proposals[p1.id].details.title, 'Capability Review');
+pdoc = applyChanges(pdoc, { proposals: new Map([[p1.id, { ...pdoc.proposals[p1.id], details: { title: 'Renamed' } }]]) }, 'Colleague', 't7');
+assert.equal(pdoc.proposals[p1.id].createdAt, 't6');
+assert.equal(pdoc.proposals[p1.id].createdBy, 'Karim');
+assert.equal(pdoc.proposals[p1.id].updatedBy, 'Colleague');
+assert.deepEqual(Object.keys(pdoc.proposalFiles), ['C']);
+pdoc = applyChanges(pdoc, { proposals: new Map([[p1.id, null]]) }, 'Karim', 't8');
+assert.deepEqual(pdoc.proposals, {});
+assert.deepEqual(normaliseDoc({}).proposals, {});
+
+// Section progress and readiness.
+const p2 = newProposal('Karim');
+const overview = SECTIONS.find((s) => s.id === 'overview');
+assert.equal(sectionStatus(p2, overview).state, 'missing');
+assert.deepEqual(missingRequired(p2).map((f) => f.id), ['title', 'client', 'dueDate']);
+Object.assign(p2.details, { title: 'T', client: 'Client 1', dueDate: '2026-10-20' });
+assert.equal(sectionStatus(p2, overview).state, 'partial');
+assert.equal(sectionStatus(p2, SECTIONS.find((s) => s.id === 'team')).state, 'empty');
+p2.team.push({ id: 'R1', name: 'Resume - Jane Citizen.docx', path: '', role: '' });
+assert.equal(readiness(p2).find((c) => c.label === 'A role for every team member').ok, false);
+assert.equal(readiness(p2).find((c) => c.label === 'At least one team member').ok, true);
+const copy = duplicateProposal({ ...p2, createdAt: 'x', updatedAt: 'y' }, 'Colleague');
+assert.notEqual(copy.id, p2.id);
+assert.equal(copy.details.title, 'Copy of T');
+assert.equal(copy.details.status, 'Draft');
+assert.equal(copy.createdAt, null);
+copy.team[0].role = 'Changed';
+assert.equal(p2.team[0].role, '');
+
+// Helpers.
+assert.equal(personName('Resume - Jane Citizen.docx'), 'Jane Citizen');
+assert.equal(personName('John Smith CV.pdf'), 'John Smith');
+assert.equal(personName('Jane Citizen - Resume.docx'), 'Jane Citizen');
+assert.equal(clientOf('Austrade/Response/Final'), 'Austrade');
+assert.equal(clientOf(''), '(top level)');
+assert.equal(daysUntil('2026-10-10', new Date(2026, 9, 7, 23, 0)), 3);
+assert.equal(daysUntil('2026-10-01', new Date(2026, 9, 7)), -6);
+assert.equal(daysUntil('', new Date()), null);
 
 console.log('All checks passed.');

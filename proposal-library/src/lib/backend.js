@@ -3,7 +3,7 @@ import { get, set } from 'idb-keyval';
 import { config, demoMode } from '../config.js';
 import { readJsonFile, writeJsonFile, scanFolder } from './graph.js';
 import { applyChanges, emptyDoc, normaliseDoc } from './selections.js';
-import { demoFiles } from './demo.js';
+import { demoFiles, demoSeed } from './demo.js';
 
 const DEMO_KEY = 'cto-proposal-library:demo-selections';
 
@@ -35,8 +35,13 @@ export function resetDemo() {
 // Returns { doc, eTag, location }.
 export async function loadSelections() {
   if (demoMode) {
-    let raw = null;
-    try { raw = JSON.parse(localStorage.getItem(DEMO_KEY)); } catch { /* storage unavailable: start empty */ }
+    // First run (or after Reset demo): start from the sample selections and example proposal.
+    let raw = demoSeed();
+    try {
+      const stored = localStorage.getItem(DEMO_KEY);
+      if (stored) raw = JSON.parse(stored);
+      else localStorage.setItem(DEMO_KEY, JSON.stringify(raw));
+    } catch { /* storage unavailable: use the sample data for this session */ }
     return { doc: normaliseDoc(raw), eTag: null, location: 'this browser (demo mode)' };
   }
   const found = await readJsonFile(config.selectionsPath);
