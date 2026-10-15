@@ -9,7 +9,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "start": "node server/index.mjs",
-    "check": "node scripts/check.mjs"
+    "check": "node scripts/check.mjs",
+    "build:offline": "vite build -c vite.offline.config.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.129.0",
@@ -21,6 +22,8 @@
     "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/montserrat": "^5.3.0",
     "@vitejs/plugin-react": "^6.1.1",
     "vite": "^8.3.1"
   }

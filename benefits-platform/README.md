@@ -96,6 +96,18 @@ npm start
 
 This enables **Refine with AI** on each business case section, which uses Claude. The prompt keeps every figure, name and date exactly as given and never adds facts. Set `DISABLE_AI=1` to switch AI off.
 
+## Offline version
+
+```bash
+npm run build:offline   # writes dist-offline/CTO_Benefits_Realisation_Platform.html
+```
+
+This builds the whole app into **one HTML file** (about 2.5 MB). The file holds every script, style, font and icon. Double-click it to open it in a browser; there is no server, no install, and no internet connection needed. Everything works offline, including the simulation, business cases (Word, PDF and HTML), and Excel and CSV import and export. The one exception is **Refine with AI**, which needs the server.
+
+- **Where your data is saved.** Your work is saved in the browser that opens the file. Use the same browser each time, and keep the file in the same place.
+- **Browser support.** Chrome and Edge are recommended. Some browsers don't let a local file save data; the app then shows a warning so you can download a backup before closing.
+- **Moving work.** **Settings → Data → Download backup** moves work between computers, browsers, and the online and offline versions.
+
 ## Data
 
 - **Storage.** Organisations are stored in the browser (IndexedDB, with an in-memory fallback). Each organisation is a separate workspace.
@@ -107,6 +119,7 @@ This enables **Refine with AI** on each business case section, which uses Claude
 ```
 benefits-platform/
   server/index.mjs        static server + /api/ai/narrative (Anthropic SDK)
+  vite.offline.config.js  single-file offline build (npm run build:offline)
   scripts/check.mjs       calculation and demo-data checks (npm run check)
   src/lib/
     config.js             defaults from Appendix C (categories, gates, risk instrument, scales)

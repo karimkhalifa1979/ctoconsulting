@@ -14,11 +14,14 @@ const safeLocal = {
   get: (k) => { try { return localStorage.getItem(k); } catch { return null; } },
   set: (k, v) => { try { localStorage.setItem(k, v); } catch { /* storage unavailable */ } },
 };
-// IndexedDB can be unavailable (private windows, sandboxed previews); fall back to memory.
+// IndexedDB can be unavailable (private windows, sandboxed previews, some browsers when the app
+// is opened as a local file); fall back to memory and tell the user so they can keep a backup.
 const memory = new Map();
-async function load(key) { try { return await get(key); } catch { return memory.get(key); } }
-async function save(key, value) { try { await set(key, value); } catch { memory.set(key, value); } }
-async function remove(key) { try { await del(key); } catch { memory.delete(key); } }
+let onVolatile = null;
+const volatile = () => onVolatile?.();
+async function load(key) { try { return await get(key); } catch { volatile(); return memory.get(key); } }
+async function save(key, value) { try { await set(key, value); } catch { volatile(); memory.set(key, value); } }
+async function remove(key) { try { await del(key); } catch { volatile(); memory.delete(key); } }
 
 const COALESCE_MS = 90_000;
 const brief = (v) => {
@@ -31,10 +34,12 @@ export function AppProvider({ children }) {
   const [list, setList] = useState(null);
   const [ws, setWs] = useState(null);
   const [error, setError] = useState(null);
+  const [storageOk, setStorageOk] = useState(true);
   const saveTimer = useRef(null);
   const latest = useRef(null);
 
   useEffect(() => {
+    onVolatile = () => setStorageOk(false);
     (async () => {
       try {
         let l = (await load(LIST_KEY)) || [];
@@ -145,10 +150,10 @@ export function AppProvider({ children }) {
   }, [addWorkspace]);
 
   const value = useMemo(() => ({
-    list, ws, error, mutate, updateProgram, patchProgram, switchWorkspace, createBlank, resetDemo, deleteWorkspace, renameWorkspace, importBackup,
+    list, ws, error, storageOk, mutate, updateProgram, patchProgram, switchWorkspace, createBlank, resetDemo, deleteWorkspace, renameWorkspace, importBackup,
     me: ws?.people.find((p) => p.id === ws.currentUser) || null,
     setMe: (id) => mutate('Changed current user', (d) => { d.currentUser = id; }, { action: 'session' }),
-  }), [list, ws, error, mutate, updateProgram, patchProgram, switchWorkspace, createBlank, resetDemo, deleteWorkspace, renameWorkspace, importBackup]);
+  }), [list, ws, error, storageOk, mutate, updateProgram, patchProgram, switchWorkspace, createBlank, resetDemo, deleteWorkspace, renameWorkspace, importBackup]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useApp } from '../lib/store.jsx';
 import { aiStatus } from '../lib/ai.js';
 
@@ -36,7 +36,7 @@ const NAV = [
 ];
 
 export default function Layout() {
-  const { list, ws, switchWorkspace, setMe } = useApp();
+  const { list, ws, storageOk, switchWorkspace, setMe } = useApp();
   const [open, setOpen] = useState(false);
   const [ai, setAi] = useState(null);
   const loc = useLocation();
@@ -60,7 +60,9 @@ export default function Layout() {
           ))}
         </nav>
         <div className="sidebar-foot">
-          <div>AI assistance: {ai === null ? '…' : ai.ai && ws.settings.ai ? <span style={{ color: '#7ee2c4' }}>available</span> : 'off (rules only)'}</div>
+          {import.meta.env.VITE_OFFLINE
+            ? <div>Offline edition · data is saved in this browser</div>
+            : <div>AI assistance: {ai === null ? '…' : ai.ai && ws.settings.ai ? <span style={{ color: '#7ee2c4' }}>available</span> : 'off (rules only)'}</div>}
           <div style={{ marginTop: 6 }}>© CTO Consulting · <a href="https://www.ctoconsulting.com.au" target="_blank" rel="noreferrer">ctoconsulting.com.au</a></div>
         </div>
       </aside>
@@ -84,6 +86,7 @@ export default function Layout() {
           <button className="btn btn-primary" onClick={() => nav('/ideas?new=1')} aria-label="Propose an idea">+<span className="new-org-label"> Propose idea</span></button>
         </header>
         <main className="content">
+          {!storageOk && <div className="callout warn no-print" role="alert" style={{ marginBottom: 16 }}><strong>This browser is not saving your changes.</strong> It has blocked storage for this page, so work is lost when the tab closes. Download a backup from <Link to="/settings">Settings → Data</Link> before closing, or open the app in Chrome or Edge.</div>}
           <Outlet />
         </main>
       </div>

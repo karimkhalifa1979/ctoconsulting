@@ -5,6 +5,7 @@ const BASE = import.meta.env.BASE_URL;
 let status = null;
 export async function aiStatus() {
   if (status) return status;
+  if (import.meta.env.VITE_OFFLINE) return (status = { ai: false, offline: true });
   try {
     const r = await fetch(`${BASE}api/health`);
     status = r.ok ? await r.json() : { ai: false };
