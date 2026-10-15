@@ -561,3 +561,8 @@ table.table input[type=number], table.table input[type=text], table.table select
 .tabs { flex-wrap: wrap; overflow-x: visible; }
 .kan-col h4 { gap: 8px; align-items: center; }
 .kan-col h4 > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.nowrap { white-space: nowrap; }
+.events-table td:first-child { min-width: 150px; }
+.events-table th { white-space: normal; }
+.stats-table td, .stats-table th { padding-left: 6px; padding-right: 6px; font-size: 12.5px; }

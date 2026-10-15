@@ -144,12 +144,19 @@ export function Histogram({ bins, markers = [], height = 250, format = (v) => mo
         })}
         {xt.filter((t) => t >= bins[0].x0 && t <= bins[bins.length - 1].x1).map((t) => <text key={t} className="axis" x={x(t)} y={height - 14} textAnchor="middle">{format(t)}</text>)}
         <text className="axis" x={(m.l + W - m.r) / 2} y={height - 1} textAnchor="middle">{xLabel}</text>
-        {markers.filter((mk) => Number.isFinite(mk.value) && mk.value >= bins[0].x0 && mk.value <= bins[bins.length - 1].x1).map((mk, i) => (
-          <g key={mk.label}>
-            <line x1={x(mk.value)} x2={x(mk.value)} y1={m.t - 6} y2={height - m.b} stroke={mk.color || 'var(--brand-navy)'} strokeWidth={mk.strong ? 2 : 1.25} strokeDasharray={mk.dash ? '4 3' : undefined} />
-            <text x={x(mk.value)} y={m.t - 10 - (i % 2) * 0} textAnchor="middle" fontSize="10.5" fontWeight="700" fill={mk.color || 'var(--brand-navy)'}>{mk.label}</text>
-          </g>
-        ))}
+        {markers.filter((mk) => Number.isFinite(mk.value) && mk.value >= bins[0].x0 && mk.value <= bins[bins.length - 1].x1).sort((a, b) => a.value - b.value).reduce((acc, mk) => {
+          // Raise a label when it would collide with the previous marker's label.
+          const prev = acc[acc.length - 1];
+          acc.push({ mk, raised: Boolean(prev) && x(mk.value) - x(prev.mk.value) < 30 && !prev.raised });
+          return acc;
+        }, []).map(({ mk, raised }) => {
+          return (
+            <g key={mk.label}>
+              <line x1={x(mk.value)} x2={x(mk.value)} y1={m.t - 6 - (raised ? 11 : 0)} y2={height - m.b} stroke={mk.color || 'var(--brand-navy)'} strokeWidth={mk.strong ? 2 : 1.25} strokeDasharray={mk.dash ? '4 3' : undefined} />
+              <text x={x(mk.value)} y={m.t - 10 - (raised ? 11 : 0)} textAnchor="middle" fontSize="10.5" fontWeight="700" fill={mk.color || 'var(--brand-navy)'}>{mk.label}</text>
+            </g>
+          );
+        })}
       </svg>
       <Tip tip={tip} />
     </div>
@@ -267,19 +274,21 @@ export function Tornado({ rows, base, height }) {
   const m = { l: labelW + 8, r: 16, t: 8, b: 26 };
   if (!rows.length) return <div ref={ref} className="empty-sm">No uncertain inputs</div>;
   const lo = Math.min(base, ...rows.map((r) => Math.min(r.low, r.high))); const hi = Math.max(base, ...rows.map((r) => Math.max(r.low, r.high)));
-  const xt = niceTicks(lo, hi, Math.max(3, Math.floor((W - labelW) / 100)));
+  const xt = niceTicks(lo, hi, Math.max(2, Math.floor((W - m.l - m.r) / 90)));
   const x = scale(xt[0], xt[xt.length - 1], m.l, W - m.r);
+  const every = Math.ceil(64 / Math.max(1, x(xt[1] ?? xt[0]) - x(xt[0]) || 64));
+  const maxChars = Math.max(8, Math.floor(labelW / 6.4));
   return (
     <div className="chart-wrap" ref={ref}>
       <svg width={W} height={H} role="img" aria-label="Tornado chart: NPV range when each input moves between its low and high value">
-        {xt.map((t) => <g key={t} className="axis"><line x1={x(t)} x2={x(t)} y1={m.t} y2={H - m.b} stroke="var(--grid)" /><text x={x(t)} y={H - 8} textAnchor="middle">{money(t)}</text></g>)}
+        {xt.map((t, i) => <g key={t} className="axis"><line x1={x(t)} x2={x(t)} y1={m.t} y2={H - m.b} stroke="var(--grid)" />{i % every === 0 && <text x={x(t)} y={H - 8} textAnchor="middle">{money(t)}</text>}</g>)}
         {rows.map((r, i) => {
           const yy = m.t + i * rowH;
           const a = Math.min(r.low, r.high); const b = Math.max(r.low, r.high);
           return (
             <g key={r.id} onMouseMove={(e) => setTip({ x: e.clientX, y: e.clientY, content: <><strong>{r.label}</strong>{r.program && <div className="mini" style={{ color: '#c9d5e6' }}>{r.program}</div>}{tipRow('NPV at downside', money(r.low))}{tipRow('NPV at upside', money(r.high))}{tipRow('Swing', money(r.swing))}{r.prob !== undefined && tipRow('Probability', pct(r.prob))}</> })} onMouseLeave={() => setTip(null)}>
               <rect x="0" y={yy} width={W} height={rowH} fill="transparent" />
-              <text x={labelW} y={yy + rowH / 2 + 4} textAnchor="end" fontSize="11.5" fill="var(--ink-2)">{r.label.length > 44 ? `${r.label.slice(0, 42)}…` : r.label}</text>
+              <text x={labelW} y={yy + rowH / 2 + 4} textAnchor="end" fontSize="11.5" fill="var(--ink-2)">{r.label.length > maxChars ? `${r.label.slice(0, maxChars - 1)}…` : r.label}</text>
               <rect x={x(a)} y={yy + 5} width={Math.max(1, x(Math.min(b, base)) - x(a))} height={rowH - 10} fill="var(--series-8)" rx="3" opacity={a < base ? 1 : 0} />
               <rect x={x(Math.max(a, base))} y={yy + 5} width={Math.max(1, x(b) - x(Math.max(a, base)))} height={rowH - 10} fill="var(--net)" rx="3" opacity={b > base ? 1 : 0} />
             </g>

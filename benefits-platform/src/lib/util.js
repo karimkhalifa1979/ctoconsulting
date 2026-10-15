@@ -74,7 +74,11 @@ export function money(v, { compact = true, precision = 0, sign = false } = {}) {
 }
 // Full figure rounded to the configured precision (default nearest thousand, section 7.2.7).
 export const moneyFull = (v, precision = 1000) => (v === null || v === undefined || Number.isNaN(v) ? '—' : `${v < 0 ? '−' : ''}${symbol()}${(Math.round(Math.abs(v) / precision) * precision).toLocaleString('en-AU')}`);
-export const pct = (v, dp = 0) => (v === null || v === undefined || Number.isNaN(v) || !Number.isFinite(v) ? '—' : `${(v * 100).toFixed(dp)}%`);
+export const pct = (v, dp = 0) => {
+  if (v === null || v === undefined || Number.isNaN(v) || !Number.isFinite(v)) return '—';
+  const s = (v * 100).toFixed(dp);
+  return Number(s) === 0 ? `${(0).toFixed(dp)}%` : `${s.replace('-', '−')}%`;
+};
 export const num = (v, dp = 0) => (v === null || v === undefined || Number.isNaN(v) ? '—' : Number(v).toLocaleString('en-AU', { maximumFractionDigits: dp, minimumFractionDigits: dp }));
 export const ratio = (v) => (v === null || v === undefined || !Number.isFinite(v) ? '—' : `${v.toFixed(2)}×`);
 export const months = (m) => (m === null || m === undefined ? 'Not within horizon' : m < 24 ? `${Math.round(m)} months` : `${(m / 12).toFixed(1)} years`);
