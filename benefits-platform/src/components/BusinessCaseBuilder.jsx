@@ -2,7 +2,7 @@
 // lets people edit the narrative, manages versions and review, and exports to Word and PDF.
 import { useEffect, useMemo, useState } from 'react';
 import { useApp } from '../lib/store.jsx';
-import { businessCaseModel, businessCaseHtml, businessCaseDocx, blockHtml, KEY_FIGURES, SECTIONS } from '../lib/businessCase.js';
+import { businessCaseModel, businessCaseHtml, businessCaseDocx, blockHtml, KEY_FIGURES } from '../lib/businessCase.js';
 import { simulate } from '../lib/simulation.js';
 import { nextGate } from '../lib/rules.js';
 import { GATES } from '../lib/config.js';

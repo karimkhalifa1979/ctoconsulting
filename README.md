@@ -1,5 +1,7 @@
 # CTO Consulting — Regulatory & Standards Assessment Tool
 
+> This repository also contains the **[Benefits Realisation Platform](benefits-platform/README.md)** in `benefits-platform/`. It manages benefits for projects, programs and the portfolio, and includes Monte Carlo cost and benefit simulation and automatic business case generation. It is a separate app with its own `npm install`.
+
 A web application for discovering, registering, assessing and reporting an organisation's regulatory obligations and industry standards, branded for **CTO Consulting**.
 
 It ships pre-loaded with the complete *NDIA ICT Policy Requirements Register v0.48* against the organisation **National Insurance Disability Agency**, and can assess any number of additional organisations.

@@ -192,6 +192,19 @@ export function layout(chain, { swimlanes = null } = {}) {
   // Final outcomes go in the right-most column.
   const maxRank = Math.max(0, ...Object.values(rank));
   for (const e of core) if (e.kind === 'outcome' && e.final) rank[e.id] = maxRank;
+  // Pull nodes without predecessors right, next to the earliest element they feed, so an
+  // initiative sits just before the outcome it contributes to rather than in column 0.
+  for (let pass = 0; pass < core.length; pass++) {
+    let moved = false;
+    for (const e of core) {
+      if (coreLinks.some((l) => l.to === e.id)) continue;
+      const outs = coreLinks.filter((l) => l.from === e.id).map((l) => rank[l.to]);
+      if (!outs.length) continue;
+      const target = Math.min(...outs) - 1;
+      if (target > rank[e.id]) { rank[e.id] = target; moved = true; }
+    }
+    if (!moved) break;
+  }
   const cols = [];
   for (const e of core) (cols[rank[e.id]] ||= []).push(e);
   const order = {};
@@ -209,31 +222,30 @@ export function layout(chain, { swimlanes = null } = {}) {
   }
   const pos = {};
   const laneOf = swimlanes ? (e) => swimlanes.indexOf(swimKey(e, swimlanes)) : null;
-  cols.forEach((c, ci) => {
-    if (!c) return;
+  // Assumptions take their own slot directly above their first target, so they never cover
+  // another element; untargeted assumptions get a column of their own on the right.
+  const asmOf = {}; const loose = [];
+  for (const a of els.filter((e) => e.kind === 'assumption')) {
+    const t = chain.links.find((l) => l.from === a.id && rank[l.to] !== undefined);
+    if (t) (asmOf[t.to] ||= []).push(a); else loose.push(a);
+  }
+  const stacks = cols.map((c) => {
+    if (!c) return null;
     const list = laneOf ? c.slice().sort((a, b) => laneOf(a) - laneOf(b) || order[a.id] - order[b.id]) : c;
-    list.forEach((e, i) => { pos[e.id] = { x: 30 + ci * (NODE_W + COL_GAP), y: 30 + i * (NODE_H + ROW_GAP) + 44 }; });
+    return list.flatMap((e) => [...(asmOf[e.id] || []), e]);
+  });
+  if (loose.length) stacks.push(loose);
+  stacks.forEach((c, ci) => {
+    if (!c) return;
+    c.forEach((e, i) => { pos[e.id] = { x: 30 + ci * (NODE_W + COL_GAP), y: 30 + i * (NODE_H + ROW_GAP) + 44 }; });
   });
   // Centre shorter columns vertically.
-  const height = Math.max(...cols.filter(Boolean).map((c) => c.length), 1);
-  cols.forEach((c) => {
+  const height = Math.max(...stacks.filter(Boolean).map((c) => c.length), 1);
+  stacks.forEach((c) => {
     if (!c) return;
     const off = ((height - c.length) * (NODE_H + ROW_GAP)) / 2;
     for (const e of c) pos[e.id].y += off;
   });
-  // Assumptions sit above their first target.
-  const usedAbove = {};
-  for (const a of els.filter((e) => e.kind === 'assumption')) {
-    const t = chain.links.find((l) => l.from === a.id && pos[l.to]);
-    if (t) {
-      const p = pos[t.to];
-      const k = `${p.x}`;
-      usedAbove[k] = (usedAbove[k] || 0) + 1;
-      pos[a.id] = { x: p.x + 14, y: p.y - NODE_H + 2 - (usedAbove[k] - 1) * 6 };
-    } else {
-      pos[a.id] = { x: 30 + (cols.length) * (NODE_W + COL_GAP), y: 74 + Object.keys(usedAbove).length * 10 };
-    }
-  }
   // Respect manual positions where stored.
   for (const e of els) if (e.x !== undefined && e.y !== undefined && e.pinned) pos[e.id] = { x: e.x, y: e.y };
   // Shift everything so nothing is above the top margin.

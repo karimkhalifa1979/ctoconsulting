@@ -138,7 +138,7 @@ export default function SimulationLab({ programs, scopeLabel, portfolio = false,
           </div>
           <div className="run-progress" style={{ marginTop: 8 }}><span style={{ width: `${Math.round(progress * 100)}%` }} /></div>
           <div className="form-grid" style={{ marginTop: 10, gap: 8 }}>
-            <Field label="Iterations"><Select value={String(s.iterations)} onChange={(v) => set({ iterations: Number(v) })} options={['1000', '2000', '5000', '10000', '20000']} /></Field>
+            <Field label="Iterations"><Select value={String(s.iterations)} onChange={(v) => set({ iterations: Number(v) })} options={['1000', '2000', '3000', '5000', '10000', '20000']} /></Field>
             <Field label="Distribution"><Select value={s.dist} onChange={(v) => set({ dist: v })} options={[['pert', 'PERT'], ['triangular', 'Triangular'], ['uniform', 'Uniform'], ['normal', 'Normal']]} /></Field>
           </div>
           <div className="mini" style={{ marginTop: 6 }}>Seed {s.seed} — the same inputs and seed always give the same results.</div>

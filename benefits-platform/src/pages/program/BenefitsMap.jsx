@@ -1,6 +1,6 @@
 // Benefits map: the program's living Results Chain model (section 4.3, RCM-01…24).
 // "Results Chain" is used descriptively; the feature carries a neutral name (constraint C-01).
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useApp, personName } from '../../lib/store.jsx';
 import { BTOPP, INITIATIVE_TYPES, btoppName } from '../../lib/config.js';
 import { layout, modelChecks, wording, backtrace, elementStatus, elementRisk, btoppMix, diffChains, snapshot, nextCode, NODE_W, NODE_H, elById, benefitsBehind, upstream, findCycles } from '../../lib/chain.js';
@@ -52,6 +52,14 @@ export default function BenefitsMap({ program: p }) {
   }, [L, drag]);
   const W = Math.max(L.w, ...Object.values(pos).map((q) => q.x + NODE_W + 40));
   const H = Math.max(L.h, ...Object.values(pos).map((q) => q.y + NODE_H + 40));
+  const canvasRef = useRef(null);
+  const fitted = useRef(false);
+  useEffect(() => {
+    if (fitted.current || !canvasRef.current) return;
+    fitted.current = true;
+    const avail = canvasRef.current.clientWidth - 8;
+    if (avail > 0 && W > avail) setZoom(Math.max(0.5, Math.floor((avail / W) * 20) / 20));
+  });
   const checks = useMemo(() => modelChecks(p, ws), [p, ws]);
   const mix = btoppMix(p);
   const diff = useMemo(() => {
@@ -158,6 +166,7 @@ export default function BenefitsMap({ program: p }) {
         <button className="btn btn-sm" onClick={() => setZoom(Math.max(0.4, zoom - 0.1))} aria-label="Zoom out">−</button>
         <span className="mini">{Math.round(zoom * 100)}%</span>
         <button className="btn btn-sm" onClick={() => setZoom(Math.min(1.6, zoom + 0.1))} aria-label="Zoom in">+</button>
+        <button className="btn btn-sm" onClick={() => { const avail = (canvasRef.current?.clientWidth || 800) - 8; setZoom(Math.min(1, Math.max(0.4, Math.floor((avail / W) * 20) / 20))); }}>Fit</button>
         <button className="btn btn-sm" onClick={() => upd((c) => { c.elements.forEach((e) => { e.pinned = false; }); }, 'Auto-layout')}>Auto-layout</button>
         <button className={`btn btn-sm ${outline ? 'btn-navy' : ''}`} onClick={() => setOutline(!outline)}>{outline ? 'Canvas' : 'Outline view'}</button>
       </div>
@@ -165,7 +174,7 @@ export default function BenefitsMap({ program: p }) {
       <div className="map-shell">
         <div>
           {outline ? <OutlineView p={p} onSelect={(id) => { setSel(id); setOutline(false); }} /> : (
-            <div className="map-canvas" onPointerMove={onMove} onPointerUp={onUp}>
+            <div className="map-canvas" ref={canvasRef} onPointerMove={onMove} onPointerUp={onUp}>
               <svg ref={svgRef} width={W * zoom} height={H * zoom} viewBox={`0 0 ${W} ${H}`} role="group" aria-label={`Benefits map for ${p.name}: ${chain.elements.length} elements and ${chain.links.length} contributions. Use Tab to move between elements and Enter to select.`} style={{ fontFamily: 'Inter, Arial, sans-serif' }} onClick={(e) => { if (e.target === svgRef.current) { setSel(null); setTrace(null); } }}>
                 <defs>
                   <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6b80" /></marker>

@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import { npvOf, irr, paybackMonth, financials, shapeAt, sensitivity, pathScope, realisation } from '../src/lib/finance.js';
 import { riskScore, alignmentScore, changeLoad, programHealth, calibration } from '../src/lib/scoring.js';
-import { modelChecks, wording, layout, backtrace, diffChains, snapshot } from '../src/lib/chain.js';
+import { modelChecks, wording, layout, backtrace, diffChains, snapshot, NODE_W, NODE_H } from '../src/lib/chain.js';
 import { qualityChecks, gateReadiness } from '../src/lib/rules.js';
 import { simulate, makeInverse, mulberry32, phi, invNorm, summarise } from '../src/lib/simulation.js';
 import { demoWorkspace } from '../src/lib/seed.js';
@@ -74,6 +74,15 @@ t('Sensitivity runs', () => { const s = sensitivity(cis, ws); assert.ok(s.rows.l
 t('Modelling checks find no error for initiatives in CIS', () => assert.ok(!modelChecks(cis, ws).some((c) => c.rule === 'BR-04')));
 t('MEDIC wording flags vague words', () => { assert.equal(wording('Customer service improved').ok, false); assert.equal(wording('Cycle time decreased').ok, true); });
 t('Layout places every element', () => { const L = layout(cis.chain); assert.equal(Object.keys(L.pos).length, cis.chain.elements.length); });
+t('Layout never overlaps elements', () => {
+  for (const pr of ws.programs) {
+    const P = Object.values(layout(pr.chain).pos);
+    for (let i = 0; i < P.length; i++) for (let j = i + 1; j < P.length; j++) {
+      const a = P[i]; const b = P[j];
+      assert.ok(Math.abs(a.x - b.x) >= NODE_W || Math.abs(a.y - b.y) >= NODE_H, `${pr.code} overlap`);
+    }
+  }
+});
 t('Backtrace from O4 reaches I1', () => assert.ok(backtrace(cis, 'cis-O4').some((r) => r.el.code === 'I1')));
 t('Diff detects an added element', () => { const a = snapshot(cis.chain); const b = snapshot(cis.chain); b.elements.push({ id: 'x', kind: 'outcome', title: 'X' }); assert.equal(diffChains(a, b).added.length, 1); });
 t('Gate readiness evaluates G2 criteria', () => { const g = gateReadiness(cis, ws, 'G2'); assert.equal(g.criteria.length, 7); });

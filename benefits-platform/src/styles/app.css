@@ -556,3 +556,8 @@ table.table input[type=number], table.table input[type=text], table.table select
   .map-canvas { height: 460px; }
   .design-steps { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Wrapping tab bars and tidy kanban headers */
+.tabs { flex-wrap: wrap; overflow-x: visible; }
+.kan-col h4 { gap: 8px; align-items: center; }
+.kan-col h4 > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

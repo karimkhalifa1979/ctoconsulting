@@ -115,7 +115,7 @@ export function businessCaseModel(ws, p, { vc = null, sim = null, generatedAt = 
   sections.push({ id: 'way', blocks: [narr('way'),
     { t: 'h3', text: 'Business system scope (BTOPP)' },
     { t: 'table', head: ['Element', 'Design question answered', 'Resulting initiatives'], rows: BTOPP.map((b) => [b.name, p.btoppChecklist?.[b.id]?.answer || '—', p.btoppChecklist?.[b.id]?.initiative || '—']), small: true },
-    { t: 'table', head: ['BTOPP element', 'Initiatives', 'Share of initiatives', 'Cost', 'Share of cost'], num: [1, 2, 3, 4], rows: BTOPP.map((b) => [b.name, (mix.count[b.id] || 0).toFixed(1), pct(mix.initiatives ? (mix.count[b.id] || 0) / mix.initiatives : 0), money(mix.cost[b.id] || 0), pct(mix.totalCost ? (mix.cost[b.id] || 0) / mix.totalCost : 0)]) },
+    { t: 'table', head: ['BTOPP element', 'Initiatives', 'Share of initiatives', 'Cost', 'Share of cost'], num: [1, 2, 3, 4], rows: BTOPP.map((b) => [b.name, (Math.round((mix.count[b.id] || 0) * 10) / 10).toString(), pct(mix.initiatives ? (mix.count[b.id] || 0) / mix.initiatives : 0), money(mix.cost[b.id] || 0), pct(mix.totalCost ? (mix.cost[b.id] || 0) / mix.totalCost : 0)]) },
     { t: 'h3', text: 'Projects and capabilities' },
     { t: 'table', head: ['Project', 'Statement of work', 'Capabilities', 'BTOPP'], rows: (p.projects || []).map((x) => [x.name, x.sow || '—', (x.capabilities || []).map((c) => c.name).join('; ') || '—', x.btopp]), small: true },
     ...(ws.dependencies.filter((d) => d.from === p.id || d.to === p.id).length ? [{ t: 'h3', text: 'Dependencies with other programs' }, { t: 'table', head: ['Type', 'With', 'Description', 'Resolution'], rows: ws.dependencies.filter((d) => d.from === p.id || d.to === p.id).map((d) => [d.type, ws.programs.find((x) => x.id === (d.from === p.id ? d.to : d.from))?.name || '—', d.description, d.resolution || 'Open']), small: true }] : []),
@@ -263,16 +263,24 @@ export async function businessCaseDocx(model, svgToPng) {
   const txt = (t, o = {}) => new TextRun({ text: String(t ?? ''), font: 'Calibri', size: o.size || 21, bold: o.bold, color: o.color, italics: o.italics });
   const para = (t, o = {}) => new Paragraph({ children: [txt(t, o)], spacing: { after: 120 }, alignment: o.align });
   const cell = (t, width, o = {}) => new TableCell({ borders, width: { size: width, type: WidthType.DXA }, shading: o.head ? { fill: NAVY, type: ShadingType.CLEAR, color: 'auto' } : o.key ? { fill: 'EEF3F8', type: ShadingType.CLEAR, color: 'auto' } : undefined, margins: { top: 60, bottom: 60, left: 100, right: 100 }, children: [new Paragraph({ alignment: o.num ? AlignmentType.RIGHT : AlignmentType.LEFT, children: [txt(t, { bold: o.head || o.key, color: o.head ? 'FFFFFF' : undefined, size: o.size || (o.small ? 17 : 19) })] })] });
-  const widthsFor = (head, rows) => {
-    const len = head.map((h, i) => Math.max(String(h).length, ...rows.map((r) => Math.min(60, String(r[i] ?? '').length))) + 4);
-    const tot = len.reduce((a, b) => a + b, 0);
-    const ws = len.map((l) => Math.max(700, Math.round((l / tot) * W)));
-    const diff = W - ws.reduce((a, b) => a + b, 0);
-    ws[ws.indexOf(Math.max(...ws))] += diff;
+  // Column widths: every column is at least as wide as its longest word (so words never break
+  // mid-way), and the remaining width is shared in proportion to how much text each column holds.
+  const widthsFor = (head, rows, small) => {
+    const cw = small ? 88 : 99; const pad = 220;
+    const add = (a) => a.reduce((x, y) => x + y, 0);
+    const word = (v) => String(v ?? '').split(/\s+/).reduce((m, w) => Math.max(m, w.length), 0);
+    const min = head.map((h, i) => Math.min(2600, pad + cw * Math.max(word(h) * 1.1, ...rows.map((r) => word(r[i])))));
+    const want = head.map((h, i) => Math.max(min[i], pad + cw * Math.max(String(h).length, ...rows.map((r) => Math.min(60, String(r[i] ?? '').length)))));
+    let ws;
+    if (add(min) >= W) ws = min.map((m) => (m / add(min)) * W);
+    else if (add(want) <= W) ws = want.map((w) => (w / add(want)) * W);
+    else { const k = (W - add(min)) / (add(want) - add(min)); ws = want.map((w, i) => min[i] + (w - min[i]) * k); }
+    ws = ws.map(Math.round);
+    ws[ws.indexOf(Math.max(...ws))] += W - add(ws);
     return ws;
   };
   const table = (head, rows, { num = [], small } = {}) => {
-    const widths = widthsFor(head, rows);
+    const widths = widthsFor(head, rows, small);
     return new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: widths, rows: [new TableRow({ tableHeader: true, children: head.map((h, i) => cell(h, widths[i], { head: true, num: num.includes(i), small })) }), ...rows.map((r) => new TableRow({ children: r.map((c, i) => cell(c, widths[i], { num: num.includes(i), small })) }))] });
   };
   const kv = (rows) => new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [3000, W - 3000], rows: rows.map(([k, v]) => new TableRow({ children: [cell(k, 3000, { key: true }), cell(v, W - 3000)] })) });

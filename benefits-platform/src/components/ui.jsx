@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Children, isValidElement, useEffect, useId, useMemo, useState } from 'react';
 import { ARES } from '../lib/config.js';
 import { riskBand } from '../lib/scoring.js';
 import { initials } from '../lib/util.js';
@@ -120,8 +120,17 @@ export function ChecksList({ checks, limit, empty = 'No issues found.' }) {
   );
 }
 
+// A single form control is wrapped in a <label>. Groups of buttons or several inputs get a
+// labelled role="group" instead, so the caption doesn't become the first button's name.
+const CONTROL_TAGS = new Set(['input', 'textarea', 'select']);
 export function Field({ label, hint, children, className = '' }) {
-  return <label className={`field ${className}`}><span>{label}{hint && <span className="hint"> — {hint}</span>}</span>{children}</label>;
+  const id = useId();
+  const caption = <span id={id}>{label}{hint && <span className="hint"> — {hint}</span>}</span>;
+  const kids = Children.toArray(children);
+  const isControl = (c) => isValidElement(c) && (CONTROL_TAGS.has(c.type) || CONTROLS.has(c.type));
+  const single = kids.filter(isControl).length === 1 && kids.every((c) => isControl(c) || !isValidElement(c) || c.type === 'span');
+  if (single) return <label className={`field ${className}`}>{caption}{children}</label>;
+  return <div className={`field ${className}`} role="group" aria-labelledby={id}>{caption}{children}</div>;
 }
 
 export function TextInput({ value, onChange, ...rest }) {
@@ -147,6 +156,7 @@ export function Select({ value, onChange, options, placeholder, ...rest }) {
 export function PersonSelect({ ws, value, onChange, placeholder = '— Unassigned —', ...rest }) {
   return <Select value={value} onChange={onChange} placeholder={placeholder} options={ws.people.map((p) => [p.id, `${p.name} · ${p.position}`])} {...rest} />;
 }
+const CONTROLS = new Set([TextInput, TextArea, NumberInput, DateInput, Select, PersonSelect]);
 export function MultiChips({ options, value = [], onChange }) {
   return (
     <div className="chips">
