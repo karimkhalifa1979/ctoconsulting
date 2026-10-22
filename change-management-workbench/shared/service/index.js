@@ -1,0 +1,432 @@
+// Domain service: every read and write goes through here, whether it arrives over the REST API
+// (server mode) or directly from the browser (stand-alone demo mode). It enforces validation,
+// access control (SEC-02), field-level security (STK-048), optimistic concurrency (WFL-007),
+// the closed-initiative read-only rule (SUS-007) and audit logging (SEC-05).
+import { ENTITIES, entity, fieldsOf, sensitiveKeys, INITIATIVE_TYPES } from '../schema.js';
+import { validateRecord, normalise } from '../validate.js';
+import { can, canSeeSensitive, redact, initiativeAccess, scopeContext, hasRole, ROLES } from '../access.js';
+import { mergeSettings, buildModel } from '../model.js';
+import { INTERVENTIONS, QUESTION_SETS, READINESS_CHECKLISTS, FOCUS_RULES, DEFAULT_LISTS } from '../refdata.js';
+import { AppError, uid, pad, asArray, clone, isEmpty, personName, sortBy } from '../util.js';
+import { todayIso } from '../dates.js';
+import { ConflictError } from '../memoryDriver.js';
+import { HOOKS } from './hooks.js';
+import { registerEngagementOps } from './ops/engagements.js';
+import { registerWorkflowOps } from './ops/workflow.js';
+import { registerStakeholderOps } from './ops/stakeholders.js';
+import { registerPlanningOps } from './ops/planning.js';
+import { registerInitiativeOps } from './ops/initiatives.js';
+import { registerAdminOps } from './ops/admin.js';
+import { registerArtefactOps } from './ops/artefacts.js';
+
+export const SYSTEM = { id: 'system', name: 'System', roles: ['changeLead', 'admin'], system: true };
+
+// Fields that only the service sets.
+const SYSTEM_KEYS = ['id', 'type', 'code', 'version', 'seq', 'createdAt', 'createdBy', 'updatedAt', 'updatedBy', 'deleted', '_redacted'];
+
+export function createService({ driver, env = {} }) {
+  const now = env.now || (() => new Date());
+  const nowIso = () => now().toISOString();
+  let configCache = null;
+  const ctxCache = new Map();
+  const modelCache = new Map();
+
+  const S = { driver, env, now, nowIso, SYSTEM, ops: {}, opMeta: {} };
+
+  // --- Configuration (ADM-001 to ADM-010) -------------------------------------------------------------
+  S.getConfig = async () => {
+    if (configCache) return configCache;
+    const keys = ['settings', 'lists', 'customFields', 'interventions', 'questionSets', 'readinessChecklists', 'focusRules', 'riskMatrix'];
+    const vals = await Promise.all(keys.map((k) => driver.getConfig(k)));
+    const raw = Object.fromEntries(keys.map((k, i) => [k, vals[i]]));
+    const settings = mergeSettings(raw.settings || {});
+    if (raw.riskMatrix) settings.riskMatrix = raw.riskMatrix;
+    configCache = {
+      settings,
+      lists: { ...DEFAULT_LISTS, ...(raw.lists || {}) },
+      customFields: raw.customFields || {},
+      interventions: raw.interventions || INTERVENTIONS,
+      questionSets: { ...QUESTION_SETS, ...(raw.questionSets || {}) },
+      readinessChecklists: raw.readinessChecklists || READINESS_CHECKLISTS,
+      focusRules: raw.focusRules || FOCUS_RULES,
+    };
+    return configCache;
+  };
+  S.invalidateConfig = () => { configCache = null; ctxCache.clear(); modelCache.clear(); };
+  S.today = async () => todayIso((await S.getConfig()).settings.timeZone, now());
+
+  // --- Audit (SEC-05: tamper-evident hash chain) ----------------------------------------------------------
+  S.audit = (actor, evt) => driver.appendAudit({ ts: nowIso(), userId: actor?.id || 'system', userName: actor?.name || 'System', ...evt });
+
+  // --- Notifications (WFL-003) -----------------------------------------------------------------------------
+  S.notify = async (userIds, n) => {
+    const ids = [...new Set(asArray(userIds).filter((x) => x && x !== 'system'))];
+    const out = [];
+    for (const userId of ids) {
+      const rec = { id: uid(), type: 'notification', initiativeId: n.initiativeId || null, code: null, version: 1, createdAt: nowIso(), createdBy: 'system', updatedAt: nowIso(), updatedBy: 'system', userId, kind: n.kind || 'info', title: n.title, body: n.body || '', link: n.link || null, read: false };
+      await driver.put(rec);
+      out.push(rec);
+      try { await env.onNotify?.(rec, S); } catch (e) { env.log?.('warn', 'Notification delivery failed', e.message); }
+    }
+    return out;
+  };
+
+  S.emit = async (event, payload) => {
+    try { await env.onEvent?.(event, payload, S); } catch (e) { env.log?.('warn', 'Event delivery failed', e.message); }
+  };
+
+  // --- Access helpers -----------------------------------------------------------------------------------
+  S.initiative = async (id) => (id ? driver.get('initiative', id) : null);
+
+  S.accessCtx = async (actor, initiativeId) => {
+    if (!actor || actor.system) return { allSensitive: true };
+    const config = await S.getConfig();
+    const base = { practitionerScope: config.settings.privacy?.practitionerSensitiveScope || 'assigned' };
+    if (!initiativeId || !hasRole(actor, 'peopleManager', 'changeAgent')) return base;
+    const key = `${actor.id}:${initiativeId}`;
+    const hit = ctxCache.get(key);
+    if (hit && hit.at > Date.now() - 60000) return hit.ctx;
+    const model = await S.model(initiativeId);
+    const ctx = { ...base, ...scopeContext(actor, model, config.settings) };
+    ctxCache.set(key, { at: Date.now(), ctx });
+    return ctx;
+  };
+
+  const verb = { C: 'create', R: 'view', U: 'change', D: 'delete', A: 'approve' };
+  S.assertCan = (actor, action, type, record, ctx) => {
+    if (actor?.system) return;
+    if (!can(actor, action, type, record, ctx)) throw new AppError(403, `You do not have permission to ${verb[action]} ${entity(type).plural.toLowerCase()}${record?.code ? ` (${record.code})` : ''}.`);
+  };
+
+  S.assertInitiative = (actor, initiative) => {
+    if (!initiative || actor?.system) return;
+    if (!initiativeAccess(actor, initiative.id)) throw new AppError(403, 'You are not assigned to this initiative.');
+  };
+
+  const POST_CLOSE_TYPES = new Set(['measureValue', 'task', 'comment', 'notification', 'artefact']);
+  S.assertWritable = (initiative, type, actor) => {
+    if (!initiative || actor?.system) return;
+    if (initiative.status === 'closed' && !POST_CLOSE_TYPES.has(type)) throw new AppError(409, 'This initiative is closed and read-only (SUS-007).');
+  };
+
+  S.redactFor = async (actor, type, rec, ctx) => {
+    if (!rec || actor?.system) return rec;
+    const config = await S.getConfig();
+    let out = redact(actor, type, rec, config, ctx);
+    if (type === 'profile' && out._redacted?.length) {
+      const sens = new Set(sensitiveKeys('profile', config));
+      out = { ...out, ratingHistory: asArray(out.ratingHistory).filter((h) => !sens.has(h.field)) };
+    }
+    return out;
+  };
+
+  // --- Generic record operations -----------------------------------------------------------------------------
+  const scopeKeyOf = (meta, initiativeId) => (meta.scope === 'initiative' || (meta.scope === 'any' && initiativeId) ? initiativeId : 'global');
+
+  S.makeCode = async (type, initiativeId) => {
+    const meta = entity(type);
+    if (!meta.prefix) return null;
+    const n = await driver.nextCode(scopeKeyOf(meta, initiativeId), meta.prefix);
+    return `${meta.prefix}-${pad(n, ['engagement', 'feedback', 'surveyResponse', 'notification', 'task'].includes(type) ? 4 : 3)}`;
+  };
+
+  function maskedChanges(type, before, after, config) {
+    const sens = new Set(sensitiveKeys(type, config));
+    const changes = [];
+    const keys = new Set([...Object.keys(before || {}), ...Object.keys(after || {})]);
+    for (const k of keys) {
+      if (SYSTEM_KEYS.includes(k) || k === 'statusHistory' || k === 'ratingHistory') continue;
+      const a = before?.[k], b = after?.[k];
+      if (JSON.stringify(a ?? null) === JSON.stringify(b ?? null)) continue;
+      const short = (v) => (v == null ? null : typeof v === 'string' ? (v.length > 200 ? `${v.slice(0, 200)}…` : v) : JSON.stringify(v).slice(0, 200));
+      changes.push(sens.has(k) ? { field: k, sensitive: true } : { field: k, from: short(a), to: short(b) });
+    }
+    return changes;
+  }
+
+  S.create = async (actor, type, input, opts = {}) => {
+    const meta = entity(type);
+    const config = await S.getConfig();
+    const initiativeId = meta.scope === 'initiative' ? input.initiativeId : meta.scope === 'any' ? input.initiativeId || null : null;
+    if (meta.scope === 'initiative' && !initiativeId) throw new AppError(422, `${meta.label} must belong to an initiative.`);
+    const initiative = initiativeId ? await S.initiative(initiativeId) : null;
+    if (initiativeId && !initiative) throw new AppError(404, 'Initiative not found.');
+    S.assertInitiative(actor, initiative);
+    S.assertWritable(initiative, type, actor);
+    const ctx = await S.accessCtx(actor, initiativeId);
+    let data = {};
+    for (const [k, v] of Object.entries(input || {})) if (!SYSTEM_KEYS.includes(k)) data[k] = v;
+    delete data.initiativeId;
+    for (const fd of fieldsOf(type, config)) if (fd.default !== undefined && data[fd.key] === undefined) data[fd.key] = clone(fd.default);
+    data = normalise(type, data, config);
+    const draft = { ...data, type, initiativeId, createdBy: actor.id };
+    if (!opts.system) S.assertCan(actor, 'C', type, draft, ctx);
+    const sens = sensitiveKeys(type, config).filter((k) => !isEmpty(data[k]));
+    if (sens.length && !actor.system && !canSeeSensitive(actor, type, draft, ctx)) throw new AppError(403, `You do not have permission to record ${sens.join(', ')}.`);
+    const hooks = HOOKS[type] || {};
+    if (hooks.beforeCreate) data = (await hooks.beforeCreate(S, { actor, data, initiative, config, opts })) || data;
+    const errors = opts.skipValidation ? [] : validateRecord(type, data, config, { ctx: { customPlans: initiative?.customPlans, optional: opts.optional } });
+    if (errors.length) throw new AppError(422, `${meta.label} could not be saved: ${errors.map((e) => e.message).join('; ')}`, errors);
+    const ts = nowIso();
+    const rec = { ...data, id: opts.id || uid(), type, initiativeId, code: opts.code || (await S.makeCode(type, initiativeId)), version: 1, createdAt: opts.createdAt || ts, createdBy: actor.id, updatedAt: opts.createdAt || ts, updatedBy: actor.id };
+    const stored = await driver.put(rec);
+    if (!opts.noAudit) await S.audit(actor, { action: 'create', type, recordId: rec.id, initiativeId, summary: `${meta.label} ${rec.code || ''} created`, changes: maskedChanges(type, {}, rec, config), reason: opts.reason });
+    S.touch(initiativeId);
+    if (hooks.afterCreate) await hooks.afterCreate(S, { actor, rec: stored, initiative, config, opts });
+    return opts.raw ? stored : S.redactFor(actor, type, stored, ctx);
+  };
+
+  S.update = async (actor, type, id, patch, opts = {}) => {
+    const meta = entity(type);
+    const config = await S.getConfig();
+    const cur = await driver.get(type, id);
+    if (!cur || cur.deleted) throw new AppError(404, `${meta.label} not found.`);
+    if (opts.version != null && Number(opts.version) !== cur.version) {
+      throw Object.assign(new AppError(409, `${meta.label} ${cur.code || ''} was changed by ${cur.updatedBy === actor.id ? 'you in another window' : 'someone else'} since you opened it. Review the latest version and reapply your change.`), { current: await S.redactFor(actor, type, cur, await S.accessCtx(actor, cur.initiativeId)) });
+    }
+    const initiative = cur.initiativeId ? await S.initiative(cur.initiativeId) : null;
+    S.assertInitiative(actor, type === 'initiative' ? cur : initiative);
+    if (type === 'initiative') {
+      if (cur.status === 'closed' && !opts.reopen && !actor.system) throw new AppError(409, 'This initiative is closed and read-only (SUS-007).');
+    } else {
+      S.assertWritable(initiative, type, actor);
+    }
+    const ctx = await S.accessCtx(actor, cur.initiativeId);
+    if (!opts.system) S.assertCan(actor, 'U', type, cur, ctx);
+    let clean = {};
+    for (const [k, v] of Object.entries(patch || {})) if (!SYSTEM_KEYS.includes(k) && k !== 'initiativeId') clean[k] = v;
+    clean = normalise(type, clean, config);
+    const sens = sensitiveKeys(type, config).filter((k) => k in clean && JSON.stringify(clean[k] ?? null) !== JSON.stringify(cur[k] ?? null));
+    if (sens.length && !actor.system && !canSeeSensitive(actor, type, cur, ctx)) throw new AppError(403, `You do not have permission to change ${sens.join(', ')}.`);
+    let next = { ...cur, ...clean, id: cur.id, type, initiativeId: cur.initiativeId, version: cur.version + 1, updatedAt: nowIso(), updatedBy: actor.id };
+    const hooks = HOOKS[type] || {};
+    if (hooks.beforeUpdate) next = (await hooks.beforeUpdate(S, { actor, cur, next, initiative, config, opts })) || next;
+    const errors = opts.skipValidation ? [] : validateRecord(type, next, config, { ctx: { customPlans: initiative?.customPlans, optional: opts.optional } });
+    if (errors.length) throw new AppError(422, `${meta.label} could not be saved: ${errors.map((e) => e.message).join('; ')}`, errors);
+    let stored;
+    try {
+      stored = await driver.put(next, { expectedVersion: cur.version });
+    } catch (e) {
+      if (e instanceof ConflictError || e.status === 409) throw Object.assign(new AppError(409, `${meta.label} was changed by someone else at the same moment. Reload and try again.`), { current: e.current });
+      throw e;
+    }
+    const changes = maskedChanges(type, cur, stored, config);
+    if (!opts.noAudit && changes.length) await S.audit(actor, { action: opts.auditAction || 'update', type, recordId: id, initiativeId: cur.initiativeId, summary: `${meta.label} ${cur.code || ''} changed`, changes, reason: opts.reason });
+    S.touch(cur.initiativeId);
+    if (hooks.afterUpdate) await hooks.afterUpdate(S, { actor, cur, rec: stored, initiative, config, opts });
+    return opts.raw ? stored : S.redactFor(actor, type, stored, ctx);
+  };
+
+  S.remove = async (actor, type, id, opts = {}) => {
+    const meta = entity(type);
+    const cur = await driver.get(type, id);
+    if (!cur || cur.deleted) throw new AppError(404, `${meta.label} not found.`);
+    const initiative = cur.initiativeId ? await S.initiative(cur.initiativeId) : null;
+    S.assertInitiative(actor, initiative);
+    S.assertWritable(initiative, type, actor);
+    const ctx = await S.accessCtx(actor, cur.initiativeId);
+    if (!opts.system) S.assertCan(actor, 'D', type, cur, ctx);
+    const hooks = HOOKS[type] || {};
+    if (hooks.beforeRemove) await hooks.beforeRemove(S, { actor, cur, initiative, opts });
+    const stored = await driver.put({ ...cur, deleted: true, version: cur.version + 1, updatedAt: nowIso(), updatedBy: actor.id }, { expectedVersion: cur.version });
+    await S.audit(actor, { action: 'delete', type, recordId: id, initiativeId: cur.initiativeId, summary: `${meta.label} ${cur.code || ''} deleted`, reason: opts.reason });
+    S.touch(cur.initiativeId);
+    return { id, deleted: true, version: stored.version };
+  };
+
+  S.get = async (actor, type, id) => {
+    const rec = await driver.get(type, id);
+    if (!rec || rec.deleted) throw new AppError(404, `${entity(type).label} not found.`);
+    const initiative = rec.initiativeId ? await S.initiative(rec.initiativeId) : null;
+    S.assertInitiative(actor, initiative);
+    const ctx = await S.accessCtx(actor, rec.initiativeId);
+    S.assertCan(actor, 'R', type, rec, ctx);
+    return S.redactFor(actor, type, rec, ctx);
+  };
+
+  // Lists records of a type, filtered by access. Enterprise registers support paging and search.
+  S.list = async (actor, type, { initiativeId, q, limit, offset = 0, sort, filter } = {}) => {
+    const meta = entity(type);
+    if (initiativeId) S.assertInitiative(actor, await S.initiative(initiativeId));
+    if (meta.scope === 'initiative' && !initiativeId) throw new AppError(422, 'initiativeId is required for this register.');
+    S.assertCan(actor, 'R', type, null);
+    const ctx = await S.accessCtx(actor, initiativeId);
+    let rows = await driver.list(type, meta.scope === 'enterprise' ? {} : { initiativeId });
+    if (type === 'initiative') rows = rows.filter((r) => actor.system || initiativeAccess(actor, r.id));
+    rows = rows.filter((r) => actor.system || can(actor, 'R', type, r, ctx));
+    if (type === 'notification') rows = rows.filter((r) => r.userId === actor.id);
+    if (filter) for (const [k, v] of Object.entries(filter)) rows = rows.filter((r) => (Array.isArray(r[k]) ? r[k].includes(v) : r[k] === v));
+    if (q) {
+      const words = String(q).toLowerCase().split(/\s+/).filter(Boolean);
+      const keys = meta.search || fieldsOf(type).filter((f) => ['text', 'textarea', 'email'].includes(f.type)).map((f) => f.key);
+      rows = rows.filter((r) => {
+        const hay = [r.code, ...keys.map((k) => r[k])].join(' ').toLowerCase();
+        return words.every((w) => hay.includes(w));
+      });
+    }
+    const total = rows.length;
+    if (sort) rows = sortBy(rows, sort);
+    if (limit) rows = rows.slice(offset, offset + Number(limit));
+    const out = [];
+    for (const r of rows) out.push(await S.redactFor(actor, type, r, ctx));
+    return { rows: out, total };
+  };
+
+  // Bulk edit (USE-05).
+  S.bulkUpdate = async (actor, type, ids, patch, opts = {}) => {
+    const results = [];
+    for (const id of asArray(ids)) {
+      try {
+        results.push({ id, ok: true, record: await S.update(actor, type, id, patch, { ...opts, version: undefined }) });
+      } catch (e) {
+        results.push({ id, ok: false, error: e.message });
+      }
+    }
+    return results;
+  };
+
+  // --- Initiative data (client working set) and model ----------------------------------------------------------
+  const versions = new Map();
+  S.touch = (initiativeId) => {
+    if (initiativeId) versions.set(initiativeId, (versions.get(initiativeId) || 0) + 1);
+    modelCache.delete(initiativeId);
+    ctxCache.clear();
+  };
+
+  // Raw (unredacted) data for an initiative, including the enterprise records it references.
+  S.rawInitiativeData = async (initiativeId) => {
+    const initiative = await S.initiative(initiativeId);
+    if (!initiative) throw new AppError(404, 'Initiative not found.');
+    const own = await driver.listInitiative(initiativeId);
+    const records = {};
+    for (const r of own) (records[r.type] ||= []).push(r);
+    for (const t of ['stakeholder', 'stakeholderGroup', 'membership', 'relationship', 'user', 'container']) records[t] = await driver.list(t);
+    // Keep merged stakeholders out of working sets.
+    records.stakeholder = records.stakeholder.filter((s) => !s.mergedInto);
+    return { initiative, records };
+  };
+
+  S.model = async (initiativeId, { today } = {}) => {
+    const key = `${initiativeId}:${versions.get(initiativeId) || 0}:${today || ''}`;
+    const hit = modelCache.get(initiativeId);
+    if (hit && hit.key === key && hit.at > Date.now() - 300000) return hit.model;
+    const data = await S.rawInitiativeData(initiativeId);
+    const config = await S.getConfig();
+    const model = buildModel(data, { config, today: today || (await S.today()) });
+    modelCache.set(initiativeId, { key, at: Date.now(), model });
+    return model;
+  };
+
+  // Everything the client needs to work on one initiative, filtered and redacted for the user.
+  S.loadInitiative = async (actor, initiativeId) => {
+    const initiative = await S.initiative(initiativeId);
+    if (!initiative || initiative.deleted) throw new AppError(404, 'Initiative not found.');
+    S.assertInitiative(actor, initiative);
+    const { records } = await S.rawInitiativeData(initiativeId);
+    const ctx = await S.accessCtx(actor, initiativeId);
+    const out = {};
+    let sensitiveSeen = 0;
+    for (const [type, rows] of Object.entries(records)) {
+      if (!ENTITIES[type]) continue;
+      if (['notification', 'apiClient', 'webhook'].includes(type)) continue;
+      const list = [];
+      for (const r of rows) {
+        if (type === 'user') { list.push(publicUser(r)); continue; }
+        if (!actor.system && !can(actor, 'R', type, r, ctx)) continue;
+        const red = await S.redactFor(actor, type, r, ctx);
+        if (!red._redacted?.length && sensitiveKeys(type, await S.getConfig()).some((k) => !isEmpty(r[k]))) sensitiveSeen++;
+        list.push(red);
+      }
+      out[type] = list;
+    }
+    if (sensitiveSeen && !actor.system) await S.audit(actor, { action: 'sensitiveRead', type: 'initiative', recordId: initiativeId, initiativeId, summary: `Viewed sensitive fields on ${sensitiveSeen} records` });
+    return { initiative: await S.redactFor(actor, 'initiative', initiative, ctx), records: out, seq: await driver.currentSeq() };
+  };
+
+  S.changes = async (actor, initiativeId, since) => {
+    S.assertInitiative(actor, await S.initiative(initiativeId));
+    const ctx = await S.accessCtx(actor, initiativeId);
+    const { seq, records } = await driver.changesSince(Number(since) || 0, initiativeId);
+    const out = [];
+    for (const r of records) {
+      if (!ENTITIES[r.type] || r.type === 'notification' || r.type === 'apiClient' || r.type === 'webhook') continue;
+      if (r.deleted) { out.push({ id: r.id, type: r.type, deleted: true }); continue; }
+      if (r.type === 'user') { out.push(publicUser(r)); continue; }
+      if (!can(actor, 'R', r.type, r, ctx)) continue;
+      out.push(await S.redactFor(actor, r.type, r, ctx));
+    }
+    return { seq, records: out };
+  };
+
+  const publicUser = (u) => ({ id: u.id, type: 'user', name: u.name, email: u.email, roles: u.roles, status: u.status, stakeholderId: u.stakeholderId, initiativeIds: u.initiativeIds, timeZone: u.timeZone, version: u.version, code: u.code });
+  S.publicUser = publicUser;
+
+  // Session bootstrap: configuration, the user's initiatives and directory data.
+  S.bootstrap = async (actor) => {
+    const config = await S.getConfig();
+    const initiatives = (await driver.list('initiative')).filter((i) => initiativeAccess(actor, i.id));
+    const users = (await driver.list('user')).map(publicUser);
+    const templates = await driver.list('template');
+    const notifications = (await driver.list('notification')).filter((n) => n.userId === actor.id);
+    return {
+      user: publicUser(actor),
+      config,
+      roles: ROLES,
+      initiatives: sortBy(initiatives, 'name'),
+      containers: await driver.list('container'),
+      users,
+      templates: templates.filter((t) => t.state !== 'retired'),
+      notifications: sortBy(notifications, '-createdAt').slice(0, 100),
+      mode: env.mode || 'server',
+      features: { ai: !!env.aiAvailable && config.settings.ai?.enabled !== false, email: !!env.emailAvailable, sso: !!env.ssoAvailable },
+    };
+  };
+
+  // Global search across records the user may view (WFL-006).
+  S.search = async (actor, q, { limit = 40 } = {}) => {
+    const words = String(q || '').toLowerCase().split(/\s+/).filter(Boolean);
+    if (!words.length) return [];
+    const hits = [];
+    const initiatives = (await driver.list('initiative')).filter((i) => initiativeAccess(actor, i.id));
+    const titleOf = (r) => { try { return entity(r.type).title(r) || r.code; } catch { return r.code; } };
+    const consider = async (r, ctx) => {
+      if (!ENTITIES[r.type] || ['notification', 'apiClient', 'webhook', 'membership', 'savedView', 'measureValue', 'surveyResponse'].includes(r.type)) return;
+      if (!can(actor, 'R', r.type, r, ctx)) return;
+      const keys = fieldsOf(r.type).filter((f) => ['text', 'textarea', 'richtext', 'email'].includes(f.type) && !f.sensitive).map((f) => f.key);
+      const hay = [r.code, ...keys.map((k) => r[k])].join(' ').toLowerCase().replace(/<[^>]+>/g, ' ');
+      if (words.every((w) => hay.includes(w))) hits.push({ id: r.id, type: r.type, code: r.code, title: r.type === 'stakeholder' ? personName(r) : titleOf(r), initiativeId: r.initiativeId || null });
+    };
+    for (const s of await driver.list('stakeholder')) if (!s.mergedInto) await consider(s, {});
+    for (const i of initiatives) {
+      await consider(i, {});
+      const ctx = await S.accessCtx(actor, i.id);
+      for (const r of await driver.listInitiative(i.id)) {
+        if (hits.length >= limit) break;
+        await consider(r, ctx);
+      }
+    }
+    return hits.slice(0, limit);
+  };
+
+  // --- Operations registry (exposed as POST /api/v1/ops/{name}) ---------------------------------------------
+  S.op = (name, meta, fn) => {
+    S.ops[name] = fn;
+    S.opMeta[name] = meta;
+  };
+  S.runOp = async (actor, name, payload) => {
+    const fn = S.ops[name];
+    if (!fn) throw new AppError(404, `Unknown operation ${name}`);
+    return fn(actor, payload || {});
+  };
+
+  registerEngagementOps(S);
+  registerWorkflowOps(S);
+  registerStakeholderOps(S);
+  registerPlanningOps(S);
+  registerInitiativeOps(S);
+  registerAdminOps(S);
+  registerArtefactOps(S);
+  return S;
+}
+
+export { INITIATIVE_TYPES };

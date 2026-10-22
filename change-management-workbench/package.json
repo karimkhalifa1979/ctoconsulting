@@ -1,0 +1,36 @@
+{
+  "name": "change-management-workbench",
+  "private": true,
+  "version": "1.0.0",
+  "description": "CTO Consulting Change Management Workbench: an ADKAR-aligned platform for planning, running, tracking and reporting the people side of change",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "node --disable-warning=ExperimentalWarning server/index.mjs",
+    "seed": "node --disable-warning=ExperimentalWarning server/seed.mjs",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.1.0",
+    "@fontsource/inter": "^5.3.0",
+    "docx": "^9.13.0",
+    "exceljs": "^4.4.0",
+    "idb-keyval": "^6.3.0",
+    "jszip": "^3.10.2",
+    "nodemailer": "^10.2.0",
+    "openid-client": "^6.8.8",
+    "pdfkit": "^0.20.2",
+    "pptxgenjs": "^4.0.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.1.2",
+    "vite": "^8.3.5"
+  }
+}
