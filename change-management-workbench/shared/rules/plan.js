@@ -4,6 +4,7 @@ import { asArray, groupBy, mean, round } from '../util.js';
 import { NO_BARRIER } from './adkar.js';
 
 const OPEN = new Set(['notStarted', 'inProgress', 'onHold']);
+const possessive = (name) => (/s$/i.test(name) ? `${name}'` : `${name}'s`);
 const live = (a) => a.status !== 'cancelled';
 
 // Activities with no target groups apply to the whole organisation.
@@ -29,7 +30,7 @@ export function coverageWarnings(model) {
     // (c) current barrier point not addressed by an open activity (AC-11)
     const bp = g.barrierPoint;
     if (bp && bp !== NO_BARRIER && !gActs.some((a) => OPEN.has(a.status) && asArray(a.adkar).includes(bp))) {
-      out.push({ id: `barrier:${g.id}:${bp}`, kind: 'barrierUnaddressed', severity: 'high', groupId: g.id, element: bp, message: `${g.name}'s barrier point is ${adkarLabel(bp)}, but no open activity for the group addresses ${adkarLabel(bp)}.` });
+      out.push({ id: `barrier:${g.id}:${bp}`, kind: 'barrierUnaddressed', severity: 'high', groupId: g.id, element: bp, message: `${possessive(g.name)} barrier point is ${adkarLabel(bp)}, but no open activity for the group addresses ${adkarLabel(bp)}.` });
     }
   }
   // (d) priority stakeholder with no planned engagement

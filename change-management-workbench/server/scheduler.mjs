@@ -3,6 +3,7 @@
 // directory synchronisation (STK-049, INT-002) and the retention report (ADM-006).
 import fs from 'node:fs';
 import { asArray, parseCsv } from '../shared/util.js';
+import { cadenceKey, cadenceNotice, measureKey, measureNotice } from '../shared/service/notices.js';
 
 export function startScheduler(service, { log }) {
   let running = false;
@@ -25,18 +26,18 @@ export function startScheduler(service, { log }) {
       // once per overdue episode.
       for (const p of m.profiles) {
         if (!p.cadence?.overdue) continue;
-        const key = `${p.id}:${p.lastEngaged || 'never'}`;
+        const key = cadenceKey(p);
         if (notified[key]) continue;
         notified[key] = today;
-        await service.notify([p.relationshipOwnerId, p.delegateId], { kind: 'cadence', initiativeId: ini.id, title: `Overdue for engagement: ${p.name}`, body: p.lastEngaged ? `Last engaged ${p.lastEngaged}; required every ${p.cadenceDays} days (RUL-06).` : `Not yet engaged; required every ${p.cadenceDays} days (RUL-06).`, link: { type: 'profile', id: p.id } });
+        await service.notify([p.relationshipOwnerId, p.delegateId], cadenceNotice(ini, p));
       }
       // MEA-006: measures below threshold.
       for (const x of m.measures) {
         if (!x.belowThreshold) continue;
-        const key = `${x.id}:${x.latestDate}`;
+        const key = measureKey(x);
         if (measureNotified[key]) continue;
         measureNotified[key] = today;
-        await service.notify([x.ownerId, ini.changeLeadId], { kind: 'measure', initiativeId: ini.id, title: `Measure below threshold: ${x.name}`, body: `Latest ${x.latest}${x.unit || ''}; threshold ${x.threshold}${x.unit || ''}.`, link: { type: 'measure', id: x.id } });
+        await service.notify([x.ownerId, ini.changeLeadId], measureNotice(ini, x));
       }
       // Surveys past their closing date are closed and aggregated.
       for (const s of m.surveys) if (s.status === 'open' && s.closesAt && s.closesAt < today) await service.ops.closeSurvey(service.SYSTEM, { id: s.id });

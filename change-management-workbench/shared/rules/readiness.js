@@ -11,6 +11,8 @@ export function readinessIndex({ adkarMean, trainingPct, criteriaPct, sentimentM
     criteria: criteriaPct,
     sentiment: sentimentMean != null ? round(((sentimentMean + 2) / 4) * 100) : null,
   };
+  // Sentiment alone is not evidence of readiness.
+  if (parts.adkar == null && parts.training == null && parts.criteria == null) return { index: null, components: parts };
   let num = 0, den = 0;
   for (const [k, v] of Object.entries(parts)) {
     if (v == null) continue;

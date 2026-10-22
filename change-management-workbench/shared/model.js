@@ -17,7 +17,7 @@ import { computeAlerts } from './rules/alerts.js';
 
 export function mergeSettings(s = {}) {
   const out = { ...DEFAULT_SETTINGS, ...s };
-  for (const k of ['adkar', 'impact', 'risk', 'cadenceDays', 'load', 'alerts', 'priorityWeights', 'readinessWeights', 'rag', 'saturation', 'agentCoverage', 'privacy', 'attachments', 'ai', 'classification', 'artefacts', 'retention', 'sensitiveFields']) {
+  for (const k of ['adkar', 'impact', 'risk', 'cadenceDays', 'cadenceGroupCredit', 'load', 'alerts', 'priorityWeights', 'readinessWeights', 'rag', 'saturation', 'agentCoverage', 'privacy', 'attachments', 'ai', 'classification', 'artefacts', 'retention', 'sensitiveFields']) {
     out[k] = { ...(DEFAULT_SETTINGS[k] || {}), ...(s[k] || {}) };
   }
   return out;
@@ -52,6 +52,16 @@ export function buildModel(data, { config = {}, today } = {}) {
   // Stakeholder → stakeholder groups they belong to (for group-targeted engagements).
   const groupsOfStakeholder = {};
   for (const g of stakeholderGroups) for (const sid of membersOf(g.id)) (groupsOfStakeholder[sid] ||= new Set()).add(g.id);
+  // Group → itself and its descendant groups, so engagements with a team count for its branch profile.
+  const childrenOf = groupBy(stakeholderGroups.filter((g) => g.parentId), 'parentId');
+  const familyCache = {};
+  const familyOf = (gid) => {
+    if (familyCache[gid]) return familyCache[gid];
+    const out = new Set([gid]);
+    const stack = [gid];
+    while (stack.length) for (const c of childrenOf[stack.pop()] || []) if (!out.has(c.id)) { out.add(c.id); stack.push(c.id); }
+    return (familyCache[gid] = out);
+  };
 
   // --- Engagements ---------------------------------------------------------------------------------
   const engagements = sortBy(R('engagement'), (e) => e.actualDate || e.plannedDate || '9999', 'plannedTime').map((e) => {
@@ -68,12 +78,21 @@ export function buildModel(data, { config = {}, today } = {}) {
     };
   });
   const engByStakeholder = {};
+  const reachedByStakeholder = {};
   const plannedByStakeholder = {};
   const engByGroup = {};
   for (const e of engagements) {
-    const direct = new Set([...asArray(e.stakeholderIds), ...asArray(e.attendance).filter((a) => a.status === 'attended').map((a) => a.stakeholderId)]);
+    const attendance = asArray(e.attendance);
+    const direct = new Set([...asArray(e.stakeholderIds), ...attendance.filter((a) => a.status === 'attended').map((a) => a.stakeholderId)]);
     for (const sid of direct) (engByStakeholder[sid] ||= []).push(e);
     for (const gid of asArray(e.groupIds)) (engByGroup[gid] ||= []).push(e);
+    // Communications and group sessions without attendance records reach every member of the targeted
+    // groups; they appear in members' histories and count towards cadence where configured.
+    if (e.done && asArray(e.groupIds).length && !attendance.length) {
+      const reached = new Set();
+      for (const gid of asArray(e.groupIds)) for (const sid of membersOf(gid)) if (!direct.has(sid)) reached.add(sid);
+      for (const sid of reached) (reachedByStakeholder[sid] ||= []).push(e);
+    }
     if (e.open) {
       const audience = new Set(asArray(e.stakeholderIds));
       for (const gid of asArray(e.groupIds)) for (const sid of membersOf(gid)) audience.add(sid);
@@ -84,17 +103,16 @@ export function buildModel(data, { config = {}, today } = {}) {
   // --- Impacted groups --------------------------------------------------------------------------------
   const impactsByGroup = groupBy(R('impact'), 'impactedGroupId');
   const assessments = R('assessment');
-  const enrolmentsDone = {};
-  const enrolled = {};
   const interventions = R('trainingIntervention');
   const sessions = R('trainingSession');
+  // Stakeholder → interventions enrolled in and completed.
+  const enrolledIn = {};
+  const completedIn = {};
   for (const s of sessions) {
-    const iv = byId.trainingIntervention[s.interventionId];
+    if (s.status === 'cancelled') continue;
     for (const en of asArray(s.enrolments)) {
-      for (const gid of asArray(iv?.audienceGroupIds)) {
-        (enrolled[gid] ||= new Set()).add(en.stakeholderId);
-        if (en.completed) (enrolmentsDone[gid] ||= new Set()).add(en.stakeholderId);
-      }
+      (enrolledIn[en.stakeholderId] ||= new Set()).add(s.interventionId);
+      if (en.completed) (completedIn[en.stakeholderId] ||= new Set()).add(s.interventionId);
     }
   }
   const checklists = sortBy(R('readinessChecklist'), 'date');
@@ -104,6 +122,33 @@ export function buildModel(data, { config = {}, today } = {}) {
   const feedback = R('feedback');
   const sentimentWindowStart = addDays(today, -90);
 
+  // TRN-008: completion of the interventions aimed at a group, across its recorded members (or, where no
+  // members are recorded, across the people enrolled). Not applicable when no intervention targets the group.
+  function trainingCompletion(groupId, memberIds) {
+    const required = interventions.filter((iv) => asArray(iv.audienceGroupIds).includes(groupId));
+    if (!required.length) return { applicable: false, required: 0, pct: null, completed: 0, enrolled: 0, denominator: 0, byIntervention: [] };
+    const ids = required.map((iv) => iv.id);
+    const people = memberIds.size ? [...memberIds] : Object.keys(enrolledIn).filter((sid) => ids.some((id) => enrolledIn[sid].has(id)));
+    let done = 0;
+    let all = 0;
+    let anyEnrolled = 0;
+    for (const sid of people) {
+      const c = ids.filter((id) => completedIn[sid]?.has(id)).length;
+      done += c;
+      if (c === ids.length) all++;
+      if (ids.some((id) => enrolledIn[sid]?.has(id))) anyEnrolled++;
+    }
+    const byIntervention = required.map((iv) => ({
+      interventionId: iv.id, title: iv.title, target: iv.targetCompletion ?? null,
+      enrolled: people.filter((sid) => enrolledIn[sid]?.has(iv.id)).length,
+      completed: people.filter((sid) => completedIn[sid]?.has(iv.id)).length,
+      pct: people.length ? round((people.filter((sid) => completedIn[sid]?.has(iv.id)).length / people.length) * 100) : null,
+    }));
+    return { applicable: true, required: ids.length, pct: people.length ? round((done / (people.length * ids.length)) * 100) : null, completed: all, enrolled: anyEnrolled, denominator: people.length, byIntervention };
+  }
+
+  // Change agent coverage applies when the Change Agent Network Plan is part of the approach.
+  const agentsInScope = !asArray(initiative.selectedPlans).length || asArray(initiative.selectedPlans).includes('changeAgent');
   const groups = sortBy(R('impactedGroup'), 'name').map((g) => {
     const impacts = impactsByGroup[g.id] || [];
     const oi = overallImpact(impacts, settings.impact);
@@ -113,9 +158,8 @@ export function buildModel(data, { config = {}, today } = {}) {
     const prev = previousResult(results);
     const curMean = cur ? mean(ADKAR_IDS.map((el) => cur.scores[el])) : null;
     const memberCount = memberIds.size;
-    const done = enrolmentsDone[g.id]?.size || 0;
-    const denom = memberCount || enrolled[g.id]?.size || 0;
-    const trainingPct = denom ? round((done / denom) * 100) : null;
+    const training = trainingCompletion(g.id, memberIds);
+    const trainingPct = training.pct;
     const sentiments = [];
     for (const e of engagements) {
       if (!e.done || !e.actualDate || e.actualDate < sentimentWindowStart) continue;
@@ -130,7 +174,10 @@ export function buildModel(data, { config = {}, today } = {}) {
     const sentimentMean = sentiments.length ? round(mean(sentiments), 2) : null;
     const readiness = readinessIndex({ adkarMean: curMean, trainingPct, criteriaPct, sentimentMean }, settings.readinessWeights);
     const gAgents = agents.filter((a) => a.status !== 'inactive' && asArray(a.groupIds).includes(g.id));
-    const target = Math.max(settings.agentCoverage.minPerGroup || 1, Math.ceil((Number(g.headcount) || 0) / (settings.agentCoverage.headcountPerAgent || 50)));
+    const activeAgents = gAgents.filter((a) => a.status !== 'onLeave');
+    const ac = settings.agentCoverage;
+    const ratioTarget = Math.min(ac.maxPerGroup || Infinity, Math.max(ac.minPerGroup || 1, Math.ceil((Number(g.headcount) || 0) / (ac.headcountPerAgent || 50))));
+    const target = !agentsInScope ? 0 : g.agentTarget != null && g.agentTarget !== '' ? Number(g.agentTarget) : ratioTarget;
     return {
       ...g,
       impacts,
@@ -144,13 +191,14 @@ export function buildModel(data, { config = {}, today } = {}) {
       adkarPrev: prev,
       adkarMean: curMean != null ? round(curMean, 2) : null,
       barrierPoint: cur?.barrierPoint || null,
-      barrierChanged: !!(cur && prev && cur.barrierPoint !== prev.barrierPoint) || !!(cur && !prev && cur.barrierPoint && cur.barrierPoint !== NO_BARRIER),
-      training: { completed: done, enrolled: enrolled[g.id]?.size || 0, denominator: denom, pct: trainingPct },
+      // New or changed barrier points are alerted for a period after the result that changed them (STK-044).
+      barrierChanged: !!(cur && cur.date && cur.date >= addDays(today, -(settings.alerts?.barrierChangeDays ?? 30))) && (!!(cur && prev && cur.barrierPoint !== prev.barrierPoint) || !!(cur && !prev && cur.barrierPoint && cur.barrierPoint !== NO_BARRIER)),
+      training,
       sentimentMean,
       readiness,
       rag: ragOf(readiness.index, settings.rag),
       agents: gAgents,
-      agentCoverage: { count: gAgents.length, target, gap: Math.max(0, target - gAgents.length) },
+      agentCoverage: { count: activeAgents.length, onLeave: gAgents.length - activeAgents.length, target, gap: Math.max(0, target - activeAgents.length), applicable: target > 0, fromRatio: g.agentTarget == null || g.agentTarget === '' },
     };
   });
   const groupsById = indexBy(groups);
@@ -171,12 +219,25 @@ export function buildModel(data, { config = {}, today } = {}) {
     const q = quadrant(p.influence, p.interest);
     const gap = engagementGap(p.currentEngagement, p.desiredEngagement);
     const subjectId = person ? p.stakeholderId : p.groupId;
-    const history = person ? sortBy(engByStakeholder[p.stakeholderId] || [], 'date') : sortBy(engByGroup[p.groupId] || [], 'date');
-    const completed = history.filter((e) => e.done && e.actualDate);
+    const groupEngs = () => {
+      const fam = familyOf(p.groupId);
+      const seen = new Set();
+      const out = [];
+      for (const gid of fam) for (const e of engByGroup[gid] || []) if (!seen.has(e.id)) { seen.add(e.id); out.push(e); }
+      return out;
+    };
+    const direct = person ? engByStakeholder[p.stakeholderId] || [] : groupEngs();
+    const reached = person ? (reachedByStakeholder[p.stakeholderId] || []).filter((e) => !direct.includes(e)) : [];
+    const history = sortBy([...direct, ...reached.map((e) => ({ ...e, viaGroup: true }))], 'date');
+    const completed = direct.filter((e) => e.done && e.actualDate).sort((a, b) => a.actualDate.localeCompare(b.actualDate));
     const lastEngaged = completed.length ? completed[completed.length - 1].actualDate : null;
-    const upcoming = sortBy((person ? plannedByStakeholder[p.stakeholderId] : engByGroup[p.groupId]?.filter((e) => e.open)) || [], 'plannedDate').filter((e) => e.plannedDate && e.plannedDate >= today);
+    const reachedDates = reached.filter((e) => e.actualDate).map((e) => e.actualDate).sort();
+    const lastReached = reachedDates.length ? reachedDates[reachedDates.length - 1] : null;
+    const upcoming = sortBy((person ? plannedByStakeholder[p.stakeholderId] : direct.filter((e) => e.open)) || [], 'plannedDate').filter((e) => e.plannedDate && e.plannedDate >= today);
     const nextPlanned = upcoming[0]?.plannedDate || null;
     const cadenceDays = requiredCadence(q, settings, p.cadenceOverrideDays);
+    const groupCredit = !!(q && settings.cadenceGroupCredit?.[q]);
+    const cadenceBasis = groupCredit && lastReached && (!lastEngaged || lastReached > lastEngaged) ? lastReached : lastEngaged;
     const sentiments = [];
     for (const e of completed) for (const se of asArray(e.sentiments)) if (se.subjectId === subjectId) sentiments.push({ date: e.actualDate, sentiment: se.sentiment, value: sentimentValue(se.sentiment), engagementId: e.id });
     const trend = sentimentTrend(sentiments);
@@ -207,8 +268,11 @@ export function buildModel(data, { config = {}, today } = {}) {
       isPriority: gap.priority || (priority != null && priority >= priorityThreshold),
       cadenceDays,
       lastEngaged,
+      lastReached,
+      cadenceBasis,
+      groupCredit,
       nextPlanned,
-      cadence: cadenceStatus(lastEngaged, cadenceDays, today),
+      cadence: cadenceStatus(cadenceBasis, cadenceDays, today, { since: p.createdAt ? String(p.createdAt).slice(0, 10) : null }),
       history,
       sentiments,
       sentimentTrend: trend,
@@ -238,7 +302,8 @@ export function buildModel(data, { config = {}, today } = {}) {
   const pct = pctScores(latestOf(assessments, 'pct'));
   const strategy = R('strategy')[0] || null;
   const recommended = recommendedApproach(risk.profile);
-  const sponsorAssessment = latestOf(assessments, 'sponsor');
+  const sponsorAssessments = sortBy(assessments.filter((a) => a.kind === 'sponsor'), 'date', 'createdAt');
+  const sponsorAssessment = [...sponsorAssessments].reverse().find((a) => a.subjectId === initiative.primarySponsorId) || sponsorAssessments[sponsorAssessments.length - 1] || null;
   const risks = R('risk').map((r) => ({ ...r, rating: riskRating(r.likelihood, r.consequence, settings.riskMatrix) }));
 
   // --- Measures ----------------------------------------------------------------------------------------
@@ -304,6 +369,8 @@ export function buildModel(data, { config = {}, today } = {}) {
     planItems: R('engagementPlanItem'),
     engagements,
     engByStakeholder,
+    reachedByStakeholder,
+    familyOf,
     feedback,
     surveys,
     responses,

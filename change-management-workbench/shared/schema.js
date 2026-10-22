@@ -259,6 +259,7 @@ export const ENTITIES = {
       f('headcount', 'Estimated headcount', 'int', { required: true, grid: true, group: 'Group' }),
       f('locations', 'Locations', 'text', { group: 'Group' }),
       ref('managerStakeholderId', 'Accountable people leader', 'stakeholder', { group: 'Group' }),
+      f('agentTarget', 'Change agents required', 'int', { min: 0, group: 'Group', help: 'Leave blank to use the configured ratio (one agent per 50 people by default). Enter 0 where change agents do not apply, for example customers.' }),
       text('adoptionChallenge', 'Adoption challenge', { group: "Adoption, WIIFM and concerns", help: 'The obstacles to adoption that are expected (IMP-007).' }),
       text('wiifm', "What's in it for me", { group: "Adoption, WIIFM and concerns" }),
       text('concerns', 'Anticipated concerns', { group: "Adoption, WIIFM and concerns" }),

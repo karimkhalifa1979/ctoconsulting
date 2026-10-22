@@ -66,7 +66,7 @@ export const PEOPLE = [
   ['jennifer', 'Jennifer', 'Wu', 'Senior Assistant Ombudsman', null, null, 'Canberra', { organisation: 'Commonwealth Ombudsman', employmentType: 'external' }],
   ['marcus', 'Marcus', 'Bell', 'Delivery Director', null, null, 'Sydney', { organisation: 'Meridian Case Systems', employmentType: 'contractor' }],
   ['ruth', 'Ruth', 'Anderson', 'Chair, Participant Advisory Council', 'pan', null, 'Adelaide', { organisation: 'Participant Advisory Council', employmentType: 'external' }],
-  ['tim', 'Tim', 'Robertson', 'Executive Officer, Disability Advocacy Network', 'pan', null, 'Melbourne', { organisation: 'Disability Advocacy Network', employmentType: 'external' }],
+  ['tim', 'Tim', 'Robertson', 'Executive Officer, Disability Advocacy Network', null, null, 'Melbourne', { organisation: 'Disability Advocacy Network', employmentType: 'external' }],
   ['grace_s', 'Grace', 'Okafor', 'Director, Internal Communications', 'csd', 'kathryn', 'Canberra'],
   ['liam_s', 'Liam', 'Walsh', 'Director, Learning and Capability', 'csd', 'kathryn', 'Canberra'],
   ['hannah_s', 'Hannah', 'Brooks', 'Project Director, Case Management Replacement', 'psd', 'margaret', 'Canberra'],

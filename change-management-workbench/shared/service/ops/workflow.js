@@ -1,6 +1,7 @@
 // Workflow operations: approvals (WFL-001, STR-006, PLN-007, COM-005, ART-014), coverage acknowledgement
 // (RUL-15), tasks, comments, notifications (WFL-002 to WFL-004) and attachments (WFL-005, SEC-10).
 import { AppError, asArray, uid, clone, base64ToBytes } from '../../util.js';
+import { approvalNotice } from '../notices.js';
 import { entity } from '../../schema.js';
 import { can } from '../../access.js';
 
@@ -67,6 +68,7 @@ export function registerWorkflowOps(S) {
     if (subjectType === 'communication') await S.update(S.SYSTEM, 'activity', rec.id, { commsStatus: 'inReview' }, { system: true, skipValidation: true });
     for (const a of approval.approvers) {
       await S.create(S.SYSTEM, 'task', { initiativeId, title: `Review and approve: ${label}`, assigneeId: a.userId, priority: 'high', status: 'open', recordType: 'approval', recordId: approval.id, description: note || '' }, { system: true });
+      await S.notify([a.userId], approvalNotice(approval, a.name));
     }
     await S.audit(actor, { action: 'submit', type: 'approval', recordId: approval.id, initiativeId, summary: `Submitted ${label} for approval` });
     return approval;

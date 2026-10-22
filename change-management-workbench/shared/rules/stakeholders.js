@@ -38,9 +38,13 @@ export function requiredCadence(q, settings = {}, override) {
   return q ? days[q] ?? null : null;
 }
 
-export function cadenceStatus(lastEngaged, cadence, today) {
+// A stakeholder never engaged is measured from the date they were added to the initiative (`since`).
+export function cadenceStatus(lastEngaged, cadence, today, { since } = {}) {
   if (!cadence) return { overdue: false, daysSince: lastEngaged ? diffDays(lastEngaged, today) : null };
-  if (!lastEngaged) return { overdue: true, daysSince: null, neverEngaged: true };
+  if (!lastEngaged) {
+    const daysAdded = since ? diffDays(since, today) : null;
+    return { overdue: daysAdded == null || daysAdded > cadence, daysSince: null, neverEngaged: true, dueIn: daysAdded == null ? null : cadence - daysAdded };
+  }
   const daysSince = diffDays(lastEngaged, today);
   return { overdue: daysSince > cadence, daysSince, dueIn: cadence - daysSince };
 }
