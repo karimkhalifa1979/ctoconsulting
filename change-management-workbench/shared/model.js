@@ -2,7 +2,7 @@
 // figures always agree (Section 8.8). Pure: it takes records and configuration and returns a model.
 import { DEFAULT_SETTINGS, PLAN_TYPES, ADKAR_IDS } from './refdata.js';
 import { asArray, groupBy, indexBy, mean, personName, round, sortBy, uniq } from './util.js';
-import { addDays, defaultHolidays, todayIso } from './dates.js';
+import { addDays, defaultHolidays, todayIso, fmtDate } from './dates.js';
 import { listLabel } from './schema.js';
 import { groupResults, currentResult, previousResult, stakeholderResults, NO_BARRIER } from './rules/adkar.js';
 import { quadrant, engagementGap, requiredCadence, cadenceStatus, priorityScore, sentimentTrend, sentimentValue, resistanceEscalation, levelIndex } from './rules/stakeholders.js';
@@ -249,7 +249,7 @@ export function buildModel(data, { config = {}, today } = {}) {
     const levelChanges = asArray(p.ratingHistory).filter((h) => h.field === 'currentEngagement');
     const lastChange = levelChanges[levelChanges.length - 1];
     const levelDropped = lastChange && levelIndex(lastChange.to) != null && levelIndex(lastChange.from) != null && levelIndex(lastChange.to) < levelIndex(lastChange.from) && lastChange.at >= addDays(today, -60)
-      ? `Moved from ${listLabel('engagementLevel', lastChange.from, config)} to ${listLabel('engagementLevel', lastChange.to, config)} on ${String(lastChange.at).slice(0, 10)}.` : null;
+      ? `Moved from ${listLabel('engagementLevel', lastChange.from, config)} to ${listLabel('engagementLevel', lastChange.to, config)} on ${fmtDate(String(lastChange.at).slice(0, 10))}.` : null;
     return {
       ...p,
       person,
