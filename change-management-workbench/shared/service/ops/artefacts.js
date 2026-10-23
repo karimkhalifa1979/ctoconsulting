@@ -25,6 +25,13 @@ export function registerArtefactOps(S) {
       || null;
   }
 
+  // The tagged Word template file, when the template has one, read for rendering.
+  async function withFiles(t) {
+    if (!t?.docxTemplateId) return t;
+    const blob = await S.driver.getBlob(t.docxTemplateId);
+    return blob ? { ...t, docxBytes: blob.bytes } : t;
+  }
+
   // Template content as it was at a given version (ART-026).
   function templateAt(t, version) {
     if (!t || !version || version === t.templateVersion) return t;
@@ -64,7 +71,7 @@ export function registerArtefactOps(S) {
     const template = await resolveTemplate(artefactType, params);
     const snapshot = e.buildSnapshot(model, { ...params, artefactType }, { includeSensitive: !!params.includeSensitive });
     const docControl = docControlFor(model.initiative, artefactType, params, { version: 'Preview', status: 'Draft', generatedBy: actor.name, snapshotAt: snapshot.takenAt });
-    return { html: e.renderHtml(snapshot, { artefactType, params, template, docControl }), gaps: e.completeness(model, artefactType, params) };
+    return { html: await e.renderHtml(snapshot, { artefactType, params, template, docControl }), gaps: e.completeness(model, artefactType, params) };
   });
 
   function docControlFor(initiative, artefactType, params, { version, status, generatedBy, snapshotAt, approvals = [], generatedAt }) {
@@ -106,7 +113,7 @@ export function registerArtefactOps(S) {
     if (blocking.length && !proceed) return { needsDecision: true, gaps };
     const formats = asArray(params.formats).length ? asArray(params.formats).filter((f) => entry.formats.includes(f)) : entry.defaultFormats;
     if (!formats.length) throw new AppError(422, `Choose at least one of: ${entry.formats.join(', ')}.`);
-    const template = await resolveTemplate(artefactType, params);
+    const template = await withFiles(await resolveTemplate(artefactType, params));
     const snapshot = e.buildSnapshot(model, params, { includeSensitive: !!params.includeSensitive });
     snapshot.gaps = gaps;
     const scopeKey = e.scopeKey(params);
@@ -134,7 +141,7 @@ export function registerArtefactOps(S) {
     const config = await S.getConfig();
     const blob = await S.driver.getBlob(a.snapshotId);
     const snapshot = JSON.parse(new TextDecoder().decode(blob.bytes));
-    const t = templateAt(a.templateId ? await S.driver.get('template', a.templateId) : null, a.templateVersion);
+    const t = await withFiles(templateAt(a.templateId ? await S.driver.get('template', a.templateId) : null, a.templateVersion));
     const docControl = { ...a.docControl, version: a.versionLabel, status: 'Approved', approvals: [...asArray(a.docControl?.approvals), ...asArray(a.approvalHistory).map((h) => ({ ...h, version: a.versionLabel }))] };
     const files = await e.render(snapshot, { artefactType: a.artefactType, formats: asArray(a.files).map((f) => f.format), template: t, docControl, params: a.params, settings: config.settings });
     for (const f of asArray(a.files)) await S.driver.deleteBlob(f.blobId);
@@ -151,7 +158,7 @@ export function registerArtefactOps(S) {
     const blob = await S.driver.getBlob(a.snapshotId);
     if (!blob) throw new AppError(410, 'The data snapshot for this artefact is no longer held (retention).');
     const snapshot = JSON.parse(new TextDecoder().decode(blob.bytes));
-    const t = templateAt(a.templateId ? await S.driver.get('template', a.templateId) : null, a.templateVersion);
+    const t = await withFiles(templateAt(a.templateId ? await S.driver.get('template', a.templateId) : null, a.templateVersion));
     const files = await e.render(snapshot, { artefactType: a.artefactType, formats: asArray(a.files).map((f) => f.format), template: t, docControl: a.docControl, params: a.params, settings: config.settings });
     const comparison = asArray(a.files).map((f) => {
       const again = files.find((x) => x.format === f.format);
@@ -283,14 +290,15 @@ export function registerArtefactOps(S) {
     if (!t) throw new AppError(404, 'Template not found.');
     const e = await engine();
     const config = await S.getConfig();
-    const sample = e.sampleSnapshot();
     const type = t.artefactType === '*' ? 'strategy' : t.artefactType;
+    const sample = e.sampleSnapshot({ artefactType: type });
     const entry = catalogueEntry(type);
     const docControl = { title: `${entry.title} (template test)`, initiative: sample.initiative.name, version: 'Test', status: 'Draft', generatedAt: S.nowIso(), generatedBy: actor.name, snapshotAt: sample.takenAt, classification: 'UNOFFICIAL', approvals: [] };
-    const files = await e.render(sample, { artefactType: type, formats: asArray(formats).length ? formats : entry.defaultFormats, template: t, docControl, params: { watermark: true }, settings: config.settings });
+    const files = await e.render(sample, { artefactType: type, formats: asArray(formats).length ? formats : entry.defaultFormats, template: await withFiles(t), docControl, params: { watermark: true }, settings: config.settings });
     const stored = await storeFiles(files, { kind: 'templateTest', templateId });
+    const problems = files.flatMap((f) => asArray(f.problems));
     if (t.state === 'draft') await S.update(actor, 'template', templateId, { state: 'test' }, { skipValidation: true });
-    return { files: stored };
+    return { files: stored, problems };
   });
 
   S.op('copyTemplate', { area: 'templates', summary: 'Copy a template (ART-027)' }, async (actor, { templateId, name, variant, businessUnit }) => {
