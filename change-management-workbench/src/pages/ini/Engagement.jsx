@@ -527,7 +527,7 @@ export function LogEngagement({ engagement, defaults = {}, onClose }) {
           <label className="field span-2"><span>Purpose</span><textarea rows={2} value={d.purpose} onChange={(e) => set('purpose', e.target.value)} /></label>
           <label className="field span-2"><span>ADKAR elements addressed</span><AdkarPicker value={asArray(d.adkar)} onChange={(v) => set('adkar', v)} /></label>
           <label className="field span-2"><span>Key messages delivered</span>{ctl('keyMessageIds')}</label>
-          <label className="field span-2"><span>Discussion summary<em className="req">*</em></span><RichText value={d.summary} onChange={(v) => set('summary', v)} /></label>
+          <label className="field span-2"><span>Discussion summary<em className="req">*</em></span><RichText ariaLabel="Discussion summary" value={d.summary} onChange={(v) => set('summary', v)} /></label>
           <label className="field span-2"><span>Questions asked</span><textarea rows={2} value={d.questions} onChange={(e) => set('questions', e.target.value)} /></label>
         </div>
         {members.length > 0 && (

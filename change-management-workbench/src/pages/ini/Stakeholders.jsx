@@ -186,7 +186,7 @@ function NetworkView() {
         {nodes.length ? <NetworkGraph nodes={nodes} edges={edges} onSelect={(n) => navigate(`${base}/stakeholders/${n.id}`)} /> : <Empty icon="network" title="No relationships recorded">Record relationships on stakeholder records.</Empty>}
       </Card>
       <Card title="Relationships" flush>
-        <div style={{ maxHeight: 520, overflowY: 'auto' }}>
+        <div style={{ maxHeight: 520, overflowY: 'auto' }} tabIndex={0} role="region" aria-label="Recorded relationships">
           <table className="tbl tbl-compact">
             <tbody>{rels.map((r) => <tr key={r.id}><td className="small"><strong>{m.stakeholderName(r.fromId)}</strong> {label('relationshipType', r.relType, config).toLowerCase()} <strong>{m.stakeholderName(r.toId)}</strong><div className="tiny muted">{label('strength', r.strength) || r.strength}{r.notes ? ` · ${r.notes}` : ''}</div></td></tr>)}</tbody>
           </table>
@@ -212,7 +212,7 @@ function SentimentView() {
         {series.length ? <LineChart series={series} yMin={-2} yMax={2} threshold={0} thresholdLabel="Neutral" format={(v) => (v > 0 ? `+${v}` : String(v))} ariaLabel="Sentiment trend" /> : <Empty title="Choose stakeholders to compare" />}
       </Card>
       <Card title="Stakeholders with recorded sentiment" flush>
-        <div style={{ maxHeight: 520, overflowY: 'auto' }}>
+        <div style={{ maxHeight: 520, overflowY: 'auto' }} tabIndex={0} role="region" aria-label="Stakeholders with recorded sentiment">
           <table className="tbl tbl-compact">
             <thead><tr><th>Compare</th><th>Stakeholder</th><th>Latest</th><th>Trend</th></tr></thead>
             <tbody>{withData.map((p) => (

@@ -23,14 +23,15 @@ export function selectOptions(fd, { config, model } = {}) {
   }
 }
 
-export function FieldControl({ fd, value, onChange, lookups, config, model, disabled, invalid, id, autoFocus }) {
-  const common = { id, disabled, 'aria-invalid': invalid || undefined, className: invalid ? 'invalid' : undefined, autoFocus };
+// `ariaLabel` names a control that has no visible label of its own, such as a cell in a table field.
+export function FieldControl({ fd, value, onChange, lookups, config, model, disabled, invalid, id, autoFocus, ariaLabel }) {
+  const common = { id, disabled, 'aria-invalid': invalid || undefined, 'aria-label': ariaLabel, className: invalid ? 'invalid' : undefined, autoFocus };
   const set = (v) => onChange(v);
   switch (fd.type) {
     case 'textarea':
       return <textarea {...common} rows={fd.rows || 3} value={value ?? ''} onChange={(e) => set(e.target.value)} />;
     case 'richtext':
-      return <RichText id={id} value={value || ''} onChange={set} disabled={disabled} />;
+      return <RichText id={id} ariaLabel={ariaLabel || fd.label} value={value || ''} onChange={set} disabled={disabled} />;
     case 'int':
     case 'number':
     case 'money':
@@ -42,7 +43,7 @@ export function FieldControl({ fd, value, onChange, lookups, config, model, disa
     case 'datetime':
       return <input {...common} type="text" readOnly value={value ? fmtDateTime(value, config?.settings?.timeZone) : ''} />;
     case 'bool':
-      return <label className="check"><input type="checkbox" id={id} disabled={disabled} checked={!!value} onChange={(e) => set(e.target.checked)} /><span>{fd.checkLabel || 'Yes'}</span></label>;
+      return <label className="check"><input type="checkbox" id={id} aria-label={ariaLabel} disabled={disabled} checked={!!value} onChange={(e) => set(e.target.checked)} /><span>{fd.checkLabel || 'Yes'}</span></label>;
     case 'select': {
       // Values an administrator has retired are not offered for new entries but still show where used.
       const opts = selectOptions(fd, { config, model }).filter((o) => o.active !== false || o.id === value);
@@ -55,17 +56,17 @@ export function FieldControl({ fd, value, onChange, lookups, config, model, disa
       );
     }
     case 'multi':
-      return <MultiSelect id={id} options={selectOptions(fd, { config, model }).filter((o) => o.active !== false || asArray(value).includes(o.id))} value={asArray(value)} onChange={set} disabled={disabled} invalid={invalid} />;
+      return <MultiSelect id={id} ariaLabel={ariaLabel} options={selectOptions(fd, { config, model }).filter((o) => o.active !== false || asArray(value).includes(o.id))} value={asArray(value)} onChange={set} disabled={disabled} invalid={invalid} />;
     case 'adkar':
       return <AdkarPicker id={id} value={asArray(value)} onChange={set} disabled={disabled} />;
     case 'ref':
-      return <RefPicker id={id} options={lookups?.optionsFor(fd.ref) || []} search={lookups?.search?.[fd.ref]} value={value || null} onChange={set} disabled={disabled} invalid={invalid} />;
+      return <RefPicker id={id} ariaLabel={ariaLabel} options={lookups?.optionsFor(fd.ref) || []} search={lookups?.search?.[fd.ref]} value={value || null} onChange={set} disabled={disabled} invalid={invalid} />;
     case 'refs':
-      return <RefPicker id={id} multiple options={lookups?.optionsFor(fd.ref) || []} search={lookups?.search?.[fd.ref]} value={asArray(value)} onChange={set} disabled={disabled} invalid={invalid} />;
+      return <RefPicker id={id} ariaLabel={ariaLabel} multiple options={lookups?.optionsFor(fd.ref) || []} search={lookups?.search?.[fd.ref]} value={asArray(value)} onChange={set} disabled={disabled} invalid={invalid} />;
     case 'user':
-      return <RefPicker id={id} options={lookups?.optionsFor('user') || []} value={value || null} onChange={set} disabled={disabled} invalid={invalid} />;
+      return <RefPicker id={id} ariaLabel={ariaLabel} options={lookups?.optionsFor('user') || []} value={value || null} onChange={set} disabled={disabled} invalid={invalid} />;
     case 'users':
-      return <RefPicker id={id} multiple options={lookups?.optionsFor('user') || []} value={asArray(value)} onChange={set} disabled={disabled} invalid={invalid} />;
+      return <RefPicker id={id} ariaLabel={ariaLabel} multiple options={lookups?.optionsFor('user') || []} value={asArray(value)} onChange={set} disabled={disabled} invalid={invalid} />;
     case 'table':
       return <TableEditor fd={fd} value={asArray(value)} onChange={set} lookups={lookups} config={config} model={model} disabled={disabled} />;
     case 'json':
@@ -97,13 +98,13 @@ export function AdkarPicker({ value = [], onChange, disabled, id }) {
   );
 }
 
-export function MultiSelect({ options, value = [], onChange, disabled, id }) {
-  return <RefPicker id={id} multiple options={options.map((o) => ({ id: o.id, label: o.label }))} value={value} onChange={onChange} disabled={disabled} />;
+export function MultiSelect({ options, value = [], onChange, disabled, id, ariaLabel }) {
+  return <RefPicker id={id} ariaLabel={ariaLabel} multiple options={options.map((o) => ({ id: o.id, label: o.label }))} value={value} onChange={onChange} disabled={disabled} />;
 }
 
 // Combobox for single or multiple references with type-ahead (USE-02: keyboard operable).
 // `search`, when given, finds further options on the server as the user types (a large stakeholder master).
-export function RefPicker({ options = [], value, onChange, multiple = false, disabled, placeholder = 'Search…', id, invalid, allowCreate, search }) {
+export function RefPicker({ options = [], value, onChange, multiple = false, disabled, placeholder = 'Search…', id, invalid, allowCreate, search, ariaLabel }) {
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
@@ -156,7 +157,7 @@ export function RefPicker({ options = [], value, onChange, multiple = false, dis
           <span key={sid} className="chip">{byId[sid]?.label || sid}{!disabled && <button type="button" aria-label={`Remove ${byId[sid]?.label || sid}`} onClick={(e) => { e.stopPropagation(); onChange(selected.filter((x) => x !== sid)); }}>×</button>}</span>
         ))}
         <input
-          id={id} type="text" role="combobox" aria-expanded={open} aria-controls={listId} aria-autocomplete="list" disabled={disabled}
+          id={id} type="text" role="combobox" aria-label={ariaLabel} aria-expanded={open} aria-controls={listId} aria-autocomplete="list" disabled={disabled}
           value={open || !single ? q : single.label} placeholder={single ? single.label : selected.length ? '' : placeholder}
           onFocus={() => { setOpen(true); setQ(''); }} onChange={(e) => { setQ(e.target.value); setOpen(true); setActive(0); }} onKeyDown={onKey}
         />
@@ -178,7 +179,7 @@ export function RefPicker({ options = [], value, onChange, multiple = false, dis
 }
 
 // Minimal rich-text editor (bold, italic, lists, links). Output is sanitised on save by the service.
-export function RichText({ value, onChange, disabled, id, minHeight }) {
+export function RichText({ value, onChange, disabled, id, minHeight, ariaLabel }) {
   const ref = useRef(null);
   const last = useRef(value);
   useEffect(() => {
@@ -207,7 +208,7 @@ export function RichText({ value, onChange, disabled, id, minHeight }) {
           <button type="button" title="Link" aria-label="Insert link" onMouseDown={(e) => e.preventDefault()} onClick={() => { const url = window.prompt('Link address (https://…)'); if (url && /^https?:\/\//.test(url)) cmd('createLink', url); }}><Icon name="link" size={14} /></button>
         </div>
       )}
-      <div id={id} ref={ref} className="rte-body prose" contentEditable={!disabled} suppressContentEditableWarning role="textbox" aria-multiline="true" onInput={emit} onBlur={emit} style={minHeight ? { minHeight } : undefined} />
+      <div id={id} ref={ref} className="rte-body prose" contentEditable={!disabled} suppressContentEditableWarning role="textbox" aria-label={ariaLabel} aria-multiline="true" onInput={emit} onBlur={emit} style={minHeight ? { minHeight } : undefined} />
     </div>
   );
 }
@@ -225,7 +226,7 @@ export function TableEditor({ fd, value = [], onChange, lookups, config, model, 
               <tr key={i}>
                 {cols.map((c) => (
                   <td key={c.key} style={{ minWidth: c.type === 'bool' ? 60 : 140 }}>
-                    <FieldControl fd={c} value={row?.[c.key]} onChange={(v) => update(i, c.key, v)} lookups={lookups} config={config} model={model} disabled={disabled || c.readOnly} />
+                    <FieldControl fd={c} ariaLabel={`${c.label}, row ${i + 1}`} value={row?.[c.key]} onChange={(v) => update(i, c.key, v)} lookups={lookups} config={config} model={model} disabled={disabled || c.readOnly} />
                   </td>
                 ))}
                 {!disabled && <td><button type="button" className="icon-btn" aria-label={`Remove row ${i + 1}`} onClick={() => onChange(value.filter((_, j) => j !== i))}><Icon name="trash" /></button></td>}

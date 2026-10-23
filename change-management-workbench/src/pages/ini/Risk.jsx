@@ -299,7 +299,7 @@ function Risks() {
                 const rating = riskRating(l, c, matrix);
                 const n = open.filter((r) => Number(r.likelihood) === l && Number(r.consequence) === c).length;
                 const bg = { low: 'var(--st-good-soft)', medium: 'var(--st-warning-soft)', high: 'var(--st-serious-soft)', extreme: 'var(--st-critical-soft)' }[rating];
-                return <td key={c} className="cell" style={{ background: bg, color: 'var(--ink)' }} title={`${rating}: ${n} open`}>{n || ''}<div className="tiny" style={{ fontWeight: 400, color: 'var(--ink-3)' }}>{rating}</div></td>;
+                return <td key={c} className="cell" style={{ background: bg, color: 'var(--ink)' }} title={`${rating}: ${n} open`}>{n || ''}<div className="tiny" style={{ fontWeight: 400, color: 'var(--ink-2)' }}>{rating}</div></td>;
               })}</tr>
             ))}</tbody>
           </table>

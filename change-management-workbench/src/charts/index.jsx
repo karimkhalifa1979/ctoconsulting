@@ -115,7 +115,7 @@ export function BarChart({ data = [], max, unit = '', color = 'var(--series-1)',
   const x = (v) => (Number(v) / m) * plotW;
   return (
     <div className="chart" ref={tip.ref}>
-      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={ariaLabel || 'Bar chart'}>
+      <svg viewBox={`0 0 ${width} ${height}`} role="group" aria-label={ariaLabel || 'Bar chart'}>
         {ticks(m).map((t) => <line key={t} className="gridline" x1={labelWidth + x(t)} x2={labelWidth + x(t)} y1={0} y2={height - 16} />)}
         {ticks(m).map((t) => <text key={`t${t}`} x={labelWidth + x(t)} y={height - 3} textAnchor="middle">{compact(t)}{unit}</text>)}
         {threshold != null && <g><line x1={labelWidth + x(threshold)} x2={labelWidth + x(threshold)} y1={14} y2={height - 16} stroke="var(--ink-3)" strokeWidth="1.5" strokeDasharray="4 3" /><text x={labelWidth + x(threshold)} y={11} textAnchor={x(threshold) > plotW - 60 ? 'end' : 'middle'} className="label-2">Target {threshold}{unit}</text></g>}
@@ -152,7 +152,7 @@ export function StackedBars({ rows = [], series = [], labelWidth = 170, ariaLabe
   const sx = (v) => (v / m) * plotW;
   return (
     <div className="chart" ref={tip.ref}>
-      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={ariaLabel || 'Stacked bar chart'}>
+      <svg viewBox={`0 0 ${width} ${height}`} role="group" aria-label={ariaLabel || 'Stacked bar chart'}>
         {ticks(m).map((t) => <line key={t} className="gridline" x1={labelWidth + sx(t)} x2={labelWidth + sx(t)} y1={0} y2={height - 16} />)}
         {ticks(m).map((t) => <text key={`t${t}`} x={labelWidth + sx(t)} y={height - 3} textAnchor="middle">{compact(t)}</text>)}
         {rows.map((r, i) => {
@@ -196,7 +196,7 @@ export function ColumnChart({ periods = [], series = [], height = 220, ariaLabel
   const y = (v) => top + plotH - (v / max) * plotH;
   return (
     <div className="chart" ref={tip.ref}>
-      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={ariaLabel || 'Column chart'}>
+      <svg viewBox={`0 0 ${width} ${height}`} role="group" aria-label={ariaLabel || 'Column chart'}>
         {ticks(max).map((t) => <g key={t}><line className="gridline" x1={left} x2={width} y1={y(t)} y2={y(t)} /><text x={left - 6} y={y(t) + 4} textAnchor="end">{compact(t)}</text></g>)}
         {periods.map((p, i) => {
           const cx = left + i * band + band / 2;
@@ -311,7 +311,7 @@ export function AdkarProfile({ scores = {}, barrier, threshold = 3, height = 170
   const y = (v) => top + plotH - ((Number(v) - 0) / 5) * plotH;
   return (
     <div className="chart" ref={tip.ref}>
-      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`ADKAR profile: ${ADKAR.map((a) => `${a.label} ${scores[a.id] ?? 'not rated'}`).join(', ')}${barrier && barrier !== 'none' ? `; barrier point ${adkarLabel(barrier)}` : ''}`}>
+      <svg viewBox={`0 0 ${width} ${height}`} role="group" aria-label={`ADKAR profile: ${ADKAR.map((a) => `${a.label} ${scores[a.id] ?? 'not rated'}`).join(', ')}${barrier && barrier !== 'none' ? `; barrier point ${adkarLabel(barrier)}` : ''}`}>
         {[1, 2, 3, 4, 5].map((t) => <g key={t}><line className="gridline" x1={left} x2={width} y1={y(t)} y2={y(t)} /><text x={left - 6} y={y(t) + 4} textAnchor="end">{t}</text></g>)}
         <line x1={left} x2={width} y1={y(threshold)} y2={y(threshold)} stroke="var(--ink-3)" strokeWidth="1.5" />
         {ADKAR.map((a, i) => {
@@ -439,7 +439,7 @@ export function GapChart({ profiles = [], onSelect, labelWidth = 170 }) {
   if (!rows.length) return <div className="muted small">No engagement levels recorded.</div>;
   return (
     <div className="chart" ref={tip.ref}>
-      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Engagement gap chart">
+      <svg viewBox={`0 0 ${width} ${height}`} role="group" aria-label="Engagement gap chart">
         {ENG_LEVELS.map((l) => <g key={l}><line className="gridline" x1={x(l)} x2={x(l)} y1={top - 4} y2={height} /><text x={x(l)} y={12} textAnchor="middle">{ENG_LABEL[l]}</text></g>)}
         {rows.map((p, i) => {
           const y = top + i * rowH + rowH / 2;
@@ -501,7 +501,7 @@ export function NetworkGraph({ nodes = [], edges = [], onSelect, height = 460 })
   const groups = [...new Set(nodes.map((n) => n.group))];
   return (
     <div className="chart" ref={tip.ref}>
-      <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Influence network">
+      <svg viewBox={`0 0 ${width} ${height}`} role="group" aria-label="Influence network">
         <defs><marker id="arrow" viewBox="0 0 10 10" refX="14" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--line-strong)" /></marker></defs>
         {layout.links.map((l, i) => {
           const a = layout.pos[layout.idx[l.from]], b = layout.pos[layout.idx[l.to]];
@@ -584,20 +584,26 @@ export function MonthCalendar({ month, events = [], today, onSelect, blackout })
   const days = Array.from({ length: 42 }, (_, i) => addDays(startD, i));
   const byDay = {};
   for (const e of events) (byDay[e.date] ||= []).push(e);
+  const weeks = Array.from({ length: 6 }, (_, w) => days.slice(w * 7, w * 7 + 7));
+  // Rows keep the grid semantics; they take no space in the layout (display: contents).
   return (
     <div className="cal" role="grid" aria-label={`Calendar for ${new Date(`${first}T00:00:00Z`).toLocaleDateString('en-AU', { month: 'long', year: 'numeric', timeZone: 'UTC' })}`}>
-      {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => <div key={d} className="cal-head" role="columnheader">{d}</div>)}
-      {days.map((d) => {
-        const evs = byDay[d] || [];
-        const other = d.slice(0, 7) !== month;
-        return (
-          <div key={d} role="gridcell" className={`cal-day ${other ? 'other' : ''} ${d === today ? 'today' : ''} ${blackout?.(d) ? 'blackout' : ''}`} aria-label={`${fmtDate(d)}: ${evs.length} item(s)`}>
-            <div className="cal-num">{Number(d.slice(8))}</div>
-            {evs.slice(0, 5).map((e) => <button key={e.id} type="button" className={`cal-ev ${e.cls || ''}`} title={`${e.time ? `${e.time} ` : ''}${e.label}`} onClick={() => onSelect?.(e)}>{e.time && <b>{e.time} </b>}{e.label}</button>)}
-            {evs.length > 5 && <div className="tiny muted">+{evs.length - 5} more</div>}
-          </div>
-        );
-      })}
+      <div className="cal-row" role="row">{['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => <div key={d} className="cal-head" role="columnheader">{d}</div>)}</div>
+      {weeks.map((week) => (
+        <div key={week[0]} className="cal-row" role="row">
+          {week.map((d) => {
+            const evs = byDay[d] || [];
+            const other = d.slice(0, 7) !== month;
+            return (
+              <div key={d} role="gridcell" className={`cal-day ${other ? 'other' : ''} ${d === today ? 'today' : ''} ${blackout?.(d) ? 'blackout' : ''}`} aria-label={`${fmtDate(d)}: ${evs.length} item(s)`}>
+                <div className="cal-num">{Number(d.slice(8))}</div>
+                {evs.slice(0, 5).map((e) => <button key={e.id} type="button" className={`cal-ev ${e.cls || ''}`} title={`${e.time ? `${e.time} ` : ''}${e.label}`} onClick={() => onSelect?.(e)}>{e.time && <b>{e.time} </b>}{e.label}</button>)}
+                {evs.length > 5 && <div className="tiny muted">+{evs.length - 5} more</div>}
+              </div>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 }

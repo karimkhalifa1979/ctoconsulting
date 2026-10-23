@@ -259,8 +259,8 @@ function NewInitiative({ initial, initiatives, onClose }) {
     <Modal title="New change initiative" wide onClose={onClose} footer={<><button type="button" className="btn" onClick={onClose}>Cancel</button><button type="button" className="btn btn-primary" disabled={!valid || busy} onClick={submit}>{busy ? 'Creating…' : 'Create initiative'}</button></>}>
       <div className="stack">
         <div className="seg" role="radiogroup" aria-label="Start from">
-          <button type="button" role="radio" aria-checked={mode === 'blank'} aria-pressed={mode === 'blank'} onClick={() => setMode('blank')}>Start from scratch</button>
-          <button type="button" role="radio" aria-checked={mode === 'copy'} aria-pressed={mode === 'copy'} onClick={() => setMode('copy')} disabled={!initiatives.length}>Copy an existing initiative</button>
+          <button type="button" role="radio" aria-checked={mode === 'blank'} onClick={() => setMode('blank')}>Start from scratch</button>
+          <button type="button" role="radio" aria-checked={mode === 'copy'} onClick={() => setMode('copy')} disabled={!initiatives.length}>Copy an existing initiative</button>
         </div>
         <div className="form-grid">
           <label className="field" style={{ gridColumn: '1 / -1' }}><span>Name <span aria-hidden="true">*</span></span><input value={d.name} onChange={(e) => set('name', e.target.value)} required aria-required="true" placeholder="For example: Participant Case Management Replacement" /></label>
