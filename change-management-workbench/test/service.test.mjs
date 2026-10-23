@@ -11,6 +11,8 @@ import { seedDemo } from '../shared/seed/demo.js';
 import { nextRun } from '../shared/service/ops/artefacts.js';
 import { runReport, datasetFields } from '../shared/reportBuilder.js';
 import { addDays } from '../shared/dates.js';
+import fs from 'node:fs';
+import { masterArtwork } from '../shared/artefacts/render/pptx.js';
 
 let S;
 let ini;
@@ -210,4 +212,23 @@ test('ADK-007: a scheduled campaign opens with its link emailed to its groups, a
   const reminded = await M.ops.sendSurveyReminder(lead, { id });
   assert.equal(reminded.emailed, withEmail.size);
   assert.ok(sent.slice(-reminded.emailed).every((x) => x.subject.startsWith('Reminder: ')));
+});
+
+test("ART-005: decks use an uploaded PowerPoint template's master artwork, theme and title colours", async () => {
+  const bytes = new Uint8Array(fs.readFileSync(new URL('./fixtures/corporate-template.pptx', import.meta.url)));
+  const art = await masterArtwork(bytes);
+  assert.ok(art.title.bg?.data?.startsWith('image/png'), 'title background image');
+  assert.equal(art.title.titleColour, 'FFFFFF');
+  assert.equal(art.content.pictures.length, 2, 'logo and band from the master');
+  const admin = byRole('admin');
+  const t = await S.create(admin, 'template', { name: 'Corporate', artefactType: 'steeringPack', variant: 'full', state: 'test', branding: {} }, { raw: true });
+  const up = await S.ops.uploadTemplateFile(admin, { templateId: t.id, filename: 'corporate.pptx', data: bytes });
+  assert.equal(up.theme.primary, '#7A1E48');
+  const g = await S.ops.generateArtefact(who('Priya Raman'), { initiativeId: ini.id, artefactType: 'steeringPack', params: { formats: ['pptx'], templateId: t.id }, proceed: true });
+  const zip = await JSZip.loadAsync((await S.driver.getBlob(g.artefact.files[0].blobId)).bytes);
+  const names = Object.keys(zip.files);
+  assert.ok(names.filter((n) => /^ppt\/media\//.test(n)).length >= 3, 'the artwork is carried into the deck');
+  assert.ok(names.some((n) => /^ppt\/charts\/chart\d+\.xml$/.test(n)), 'charts stay native');
+  const theme = await zip.file(names.find((n) => /^ppt\/theme\/theme\d+\.xml$/.test(n))).async('string');
+  assert.match(theme, /typeface="Arial"/);
 });

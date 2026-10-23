@@ -49,7 +49,7 @@ export default function Templates() {
           { key: 'state', label: 'State', render: (t) => <Badge tone={STATE_TONE[t.state]}>{STATE_LABEL[t.state] || t.state}</Badge>, value: (t) => t.state },
           { key: 'version', label: 'Version', align: 'num', render: (t) => t.templateVersion || 1, value: (t) => t.templateVersion || 1 },
           { key: 'word', label: 'Word template', render: (t) => (t.docxTemplateId ? (t.docxValidation?.ok === false ? <Badge tone="critical" icon="alert">Errors</Badge> : asArray(t.docxValidation?.warnings).length ? <Badge tone="warning">Warnings</Badge> : <Badge tone="good" icon="checkCircle">Valid</Badge>) : <span className="muted small">Built-in layout</span>), value: (t) => (t.docxTemplateId ? 1 : 0) },
-          { key: 'theme', label: 'PowerPoint theme', render: (t) => (t.pptxThemeId ? <Badge tone="info">Uploaded</Badge> : <span className="muted small">Colours only</span>), value: (t) => (t.pptxThemeId ? 1 : 0), hidden: true },
+          { key: 'theme', label: 'PowerPoint design', render: (t) => (t.pptxThemeId ? <Badge tone="info">Organisation template</Badge> : <span className="muted small">Colours only</span>), value: (t) => (t.pptxThemeId ? 1 : 0), hidden: true },
           { key: 'updated', label: 'Updated', render: (t) => fmtDate(String(t.updatedAt || '').slice(0, 10)), value: (t) => t.updatedAt || '', hidden: true },
         ]}
         facets={[{ key: 'state', label: 'State', options: Object.entries(STATE_LABEL).map(([id, l]) => ({ id, label: l })), value: (t) => t.state }]}
@@ -148,9 +148,9 @@ function TemplateDetail({ id, rows, onClose, onChanged, onOpen }) {
           )}
         </div>
         <div className="form-section">
-          <h3>PowerPoint theme</h3>
-          <p className="small muted" style={{ marginTop: 0 }}>Upload a presentation or theme (.pptx) to take its colours and fonts for generated presentations.</p>
-          <label className="btn btn-sm file-btn"><Icon name="upload" />{t.pptxThemeId ? 'Replace the theme' : 'Upload a theme'}<input type="file" accept=".pptx" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) upload(f); }} /></label>
+          <h3>PowerPoint design</h3>
+          <p className="small muted" style={{ marginTop: 0 }}>Upload the organisation's PowerPoint template (.pptx). Generated presentations use its slide master and layout artwork (backgrounds, logos and bands), theme colours, fonts and title colours; their text, tables and charts stay native and editable (ART-005).</p>
+          <label className="btn btn-sm file-btn"><Icon name="upload" />{t.pptxThemeId ? 'Replace the PowerPoint template' : 'Upload a PowerPoint template'}<input type="file" accept=".pptx" onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) upload(f); }} /></label>
         </div>
         <div className="form-section">
           <h3>Test with sample data</h3>

@@ -3,6 +3,7 @@
 // slide titles in title placeholders for screen readers, alternative text on charts, and speaker notes.
 import PptxGenJS from 'pptxgenjs';
 import { hex, fmtDate, INK, INK2, LINE, STATUS } from '../ir.js';
+import { asArray } from '../../util.js';
 
 const W = 13.333, H = 7.5;
 const BOX = { x: 0.5, y: 1.25, w: W - 1, h: 5.6 };
@@ -123,31 +124,42 @@ export async function renderPptx(deck, ctx) {
   const fontBody = br.fontBody || 'Calibri';
   pptx.theme = { headFontFace: fontHead, bodyFontFace: fontBody };
   const primary = hex(br.primary), accent = hex(br.accent, '0FA3B1');
+  // The organisation's own master artwork, when its PowerPoint template was uploaded (ART-005).
+  const art = ctx.pptxMaster ? await masterArtwork(ctx.pptxMaster).catch(() => null) : null;
+  const light = (c) => { const n = parseInt(c, 16); return (0.2126 * (n >> 16) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255)) / 255 > 0.6; };
+  const titleBg = art?.title.bg || { color: primary };
+  const titleInk = art?.title.titleColour || (titleBg.color && light(titleBg.color) ? primary : 'FFFFFF');
+  const titleSub = light(titleInk) ? 'DDE6F0' : INK2;
+  const pictures = (list) => list.map((p) => ({ image: { x: p.x, y: p.y, w: p.w, h: p.h, data: p.data } }));
+  // The footer and slide titles stop short of the template's pictures in those bands (a logo, say).
+  const clearOf = (y1, y2, fallback) => Math.min(fallback, ...asArray(art?.content.pictures).filter((p) => p.w < W * 0.6 && p.y < y2 && p.y + p.h > y1 && p.x > W / 2).map((p) => p.x - 0.15));
+  const footEnd = clearOf(H - 0.6, H - 0.2, W - 0.5);
+  const titleEnd = clearOf(0.38, 1.13, W - 0.5);
   const cls = (dc.classification || '').toUpperCase();
   const footer = `${br.footer || br.organisation || s.organisation || ''} · ${dc.title || ''} · Version ${dc.version || ''} ${dc.status || ''} · ${fmtDate(dc.generatedAt)}`;
   const marking = cls ? [{ text: { text: cls, options: { x: 0, y: 0.1, w: W, h: 0.25, align: 'center', fontFace: fontBody, fontSize: 9, bold: true, color: 'A32626' } } }, { text: { text: cls, options: { x: 0, y: H - 0.3, w: W, h: 0.25, align: 'center', fontFace: fontBody, fontSize: 9, bold: true, color: 'A32626' } } }] : [];
   const watermark = ctx.watermark ? [{ text: { text: dc.status === 'Approved' ? 'COPY' : 'DRAFT', options: { x: 2.2, y: 2.4, w: 9, h: 2.6, align: 'center', fontFace: fontHead, fontSize: 120, bold: true, color: 'B9C0CA', transparency: 82, rotate: -20 } } }] : [];
   pptx.defineSlideMaster({
-    title: 'CMW_TITLE', background: { color: primary },
-    objects: [{ rect: { x: 0, y: H - 0.14, w: W, h: 0.14, fill: { color: accent } } }, ...marking.map((m) => ({ text: { ...m.text, options: { ...m.text.options, color: 'F3B2AB' } } })), ...watermark,
-      { placeholder: { options: { name: 'title', type: 'title', x: 0.8, y: 2.3, w: W - 1.6, h: 1.4, fontFace: fontHead, fontSize: 38, bold: true, color: 'FFFFFF', align: 'left', valign: 'bottom', margin: 0 }, text: 'Title' } }],
+    title: 'CMW_TITLE', background: titleBg,
+    objects: [...(art ? pictures(art.title.pictures) : [{ rect: { x: 0, y: H - 0.14, w: W, h: 0.14, fill: { color: accent } } }]), ...marking.map((m) => ({ text: { ...m.text, options: { ...m.text.options, color: light(titleInk) ? 'F3B2AB' : 'A32626' } } })), ...watermark,
+      { placeholder: { options: { name: 'title', type: 'title', x: 0.8, y: 2.3, w: W - 1.6, h: 1.4, fontFace: fontHead, fontSize: 38, bold: true, color: titleInk, align: 'left', valign: 'bottom', margin: 0 }, text: 'Title' } }],
   });
   pptx.defineSlideMaster({
-    title: 'CMW_CONTENT', background: { color: 'FFFFFF' },
-    objects: [{ rect: { x: 0, y: 0, w: W, h: 0.07, fill: { color: accent } } }, ...marking, ...watermark,
-      { line: { x: 0.5, y: H - 0.55, w: W - 1, h: 0, line: { color: LINE, width: 0.75 } } },
-      { text: { text: footer, options: { x: 0.5, y: H - 0.52, w: W - 2.2, h: 0.24, fontFace: fontBody, fontSize: 9, color: INK2, margin: 0 } } },
-      { placeholder: { options: { name: 'title', type: 'title', x: 0.5, y: 0.38, w: W - 1, h: 0.75, fontFace: fontHead, fontSize: 26, bold: true, color: primary, align: 'left', valign: 'middle', margin: 0 }, text: 'Title' } }],
-    slideNumber: { x: W - 1.2, y: H - 0.52, w: 0.7, h: 0.24, fontFace: fontBody, fontSize: 9, color: INK2, align: 'right' },
+    title: 'CMW_CONTENT', background: art?.content.bg || { color: 'FFFFFF' },
+    objects: [...(art ? pictures(art.content.pictures) : [{ rect: { x: 0, y: 0, w: W, h: 0.07, fill: { color: accent } } }]), ...marking, ...watermark,
+      { line: { x: 0.5, y: H - 0.55, w: footEnd - 0.5, h: 0, line: { color: LINE, width: 0.75 } } },
+      { text: { text: footer, options: { x: 0.5, y: H - 0.52, w: footEnd - 1.3, h: 0.24, fontFace: fontBody, fontSize: 9, color: INK2, margin: 0 } } },
+      { placeholder: { options: { name: 'title', type: 'title', x: 0.5, y: 0.38, w: titleEnd - 0.5, h: 0.75, fontFace: fontHead, fontSize: 26, bold: true, color: art?.content.titleColour || primary, align: 'left', valign: 'middle', margin: 0 }, text: 'Title' } }],
+    slideNumber: { x: footEnd - 0.7, y: H - 0.52, w: 0.7, h: 0.24, fontFace: fontBody, fontSize: 9, color: INK2, align: 'right' },
   });
   const lctx = { primary, fontBody };
   for (const sl of deck.slides) {
     if (sl.layout === 'title' || sl.layout === 'section') {
       const slide = pptx.addSlide({ masterName: 'CMW_TITLE' });
       slide.addText(sl.title, { placeholder: 'title' });
-      if (sl.subtitle) slide.addText(sl.subtitle, { x: 0.8, y: 3.85, w: W - 1.6, h: 0.6, fontFace: fontBody, fontSize: 18, color: 'DDE6F0', margin: 0 });
-      if (sl.layout === 'title') slide.addText([br.organisation || s.organisation, fmtDate(dc.generatedAt), `Version ${dc.version || ''} ${dc.status || ''}`].filter(Boolean).join(' · '), { x: 0.8, y: 5.9, w: W - 1.6, h: 0.4, fontFace: fontBody, fontSize: 12, color: 'DDE6F0', margin: 0 });
-      if (ctx.caveat && sl.layout === 'title') slide.addText(`Handling caveat: ${ctx.caveat}`, { x: 0.8, y: 6.35, w: W - 1.6, h: 0.5, fontFace: fontBody, fontSize: 10, color: 'F3B2AB', margin: 0 });
+      if (sl.subtitle) slide.addText(sl.subtitle, { x: 0.8, y: 3.85, w: W - 1.6, h: 0.6, fontFace: fontBody, fontSize: 18, color: titleSub, margin: 0 });
+      if (sl.layout === 'title') slide.addText([br.organisation || s.organisation, fmtDate(dc.generatedAt), `Version ${dc.version || ''} ${dc.status || ''}`].filter(Boolean).join(' · '), { x: 0.8, y: 5.9, w: W - 1.6, h: 0.4, fontFace: fontBody, fontSize: 12, color: titleSub, margin: 0 });
+      if (ctx.caveat && sl.layout === 'title') slide.addText(`Handling caveat: ${ctx.caveat}`, { x: 0.8, y: 6.35, w: W - 1.6, h: 0.5, fontFace: fontBody, fontSize: 10, color: light(titleInk) ? 'F3B2AB' : 'A32626', margin: 0 });
       if (sl.notes) slide.addNotes(sl.notes);
       continue;
     }
@@ -172,6 +184,80 @@ async function titlesAsTitlePlaceholders(bytes) {
     if (fixed !== xml) zip.file(f, fixed);
   }
   return zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE', mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' });
+}
+
+// The artwork of an uploaded PowerPoint template (ART-005): the background and pictures (logos, bands,
+// imagery) of its slide master and its title and content layouts, scaled to the generated slide size, and
+// the colour its title slide uses for titles. Generated slides keep native, editable text, tables and
+// charts on top. Picture types PowerPoint can show but a browser cannot (EMF, WMF) are left out.
+const EMU = 914400;
+const IMAGE_TYPES = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', svg: 'image/svg+xml' };
+export async function masterArtwork(bytes) {
+  const { default: JSZip } = await import('jszip');
+  const zip = await JSZip.loadAsync(bytes);
+  const read = (p) => zip.file(p)?.async('string') ?? Promise.resolve(null);
+  const pres = await read('ppt/presentation.xml');
+  const size = /<p:sldSz[^>]*\bcx="(\d+)"[^>]*\bcy="(\d+)"/.exec(pres || '');
+  const sx = size ? W / (Number(size[1]) / EMU) : 1, sy = size ? H / (Number(size[2]) / EMU) : 1;
+  const rels = async (part) => {
+    const dir = part.slice(0, part.lastIndexOf('/'));
+    const xml = await read(`${dir}/_rels/${part.slice(dir.length + 1)}.rels`);
+    const out = {};
+    for (const m of (xml || '').matchAll(/<Relationship\b[^>]*>/g)) {
+      const id = /Id="([^"]+)"/.exec(m[0])?.[1], target = /Target="([^"]+)"/.exec(m[0])?.[1];
+      if (id && target) out[id] = target.startsWith('/') ? target.slice(1) : new URL(target, `http://x/${dir}/`).pathname.slice(1);
+    }
+    return out;
+  };
+  const media = async (path) => {
+    const ext = path.split('.').pop().toLowerCase();
+    if (!IMAGE_TYPES[ext] || !zip.file(path)) return null;
+    return `${IMAGE_TYPES[ext]};base64,${await zip.file(path).async('base64')}`;
+  };
+  const theme = await read(Object.keys(zip.files).find((f) => /^ppt\/theme\/theme\d+\.xml$/.test(f)) || '');
+  const scheme = (name) => new RegExp(`<a:${name}>\\s*<a:(?:srgbClr val|sysClr[^>]*lastClr)="([0-9A-Fa-f]{6})"`).exec(theme || '')?.[1] || null;
+  const SCHEME = { tx1: 'dk1', bg1: 'lt1', tx2: 'dk2', bg2: 'lt2' };
+  const colourOf = (xml) => {
+    const m = /<a:solidFill>\s*<a:(srgbClr|schemeClr) val="([^"]+)"/.exec(xml || '');
+    if (!m) return null;
+    return m[1] === 'srgbClr' ? m[2].toUpperCase() : scheme(SCHEME[m[2]] || m[2]);
+  };
+  const partArt = async (part) => {
+    const xml = await read(part);
+    if (!xml) return null;
+    const r = await rels(part);
+    const bgXml = /<p:bg>([\s\S]*?)<\/p:bg>/.exec(xml)?.[1] || '';
+    const blip = /<a:blip\b[^>]*r:embed="([^"]+)"/.exec(bgXml)?.[1];
+    const bg = blip && r[blip] ? { data: await media(r[blip]) } : colourOf(bgXml) ? { color: colourOf(bgXml) } : null;
+    const pictures = [];
+    for (const m of xml.matchAll(/<p:pic>([\s\S]*?)<\/p:pic>/g)) {
+      if (/<p:ph\b/.test(m[1])) continue;
+      const id = /<a:blip\b[^>]*r:embed="([^"]+)"/.exec(m[1])?.[1];
+      const off = /<a:off x="(-?\d+)" y="(-?\d+)"/.exec(m[1]), ext = /<a:ext cx="(\d+)" cy="(\d+)"/.exec(m[1]);
+      const data = id && r[id] ? await media(r[id]) : null;
+      if (data && off && ext) pictures.push({ x: (off[1] / EMU) * sx, y: (off[2] / EMU) * sy, w: (ext[1] / EMU) * sx, h: (ext[2] / EMU) * sy, data });
+    }
+    const titleSp = /<p:sp>(?:(?!<\/p:sp>)[\s\S])*?<p:ph type="(?:ctrTitle|title)"[\s\S]*?<\/p:sp>/.exec(xml)?.[0];
+    return { bg: bg?.data === null ? null : bg, pictures, hidesMaster: /showMasterSp="0"/.test(xml), titleColour: colourOf(/<a:defRPr[\s\S]*?<\/a:defRPr>|<a:rPr[\s\S]*?<\/a:rPr>/.exec(titleSp || '')?.[0]) };
+  };
+  const masterPart = Object.keys(zip.files).find((f) => /^ppt\/slideMasters\/slideMaster\d+\.xml$/.test(f));
+  if (!masterPart) return null;
+  const master = await partArt(masterPart);
+  const masterXml = await read(masterPart);
+  master.titleColour ||= colourOf(/<p:titleStyle>[\s\S]*?<\/a:lvl1pPr>/.exec(masterXml || '')?.[0]);
+  const layouts = [];
+  for (const f of Object.keys(zip.files).filter((x) => /^ppt\/slideLayouts\/slideLayout\d+\.xml$/.test(x)).sort((a, b) => Number(a.match(/(\d+)\.xml$/)[1]) - Number(b.match(/(\d+)\.xml$/)[1]))) {
+    const type = /<p:sldLayout\b[^>]*\btype="([^"]+)"/.exec((await read(f)) || '')?.[1] || '';
+    layouts.push({ type, part: f });
+  }
+  const layoutArt = async (types) => { const l = layouts.find((x) => types.includes(x.type)) || null; return l ? partArt(l.part) : null; };
+  const combine = (layout) => ({
+    bg: layout?.bg || master.bg,
+    pictures: [...(layout?.hidesMaster ? [] : master.pictures), ...(layout?.pictures || [])],
+    titleColour: layout?.titleColour || master.titleColour,
+  });
+  const art = { title: combine(await layoutArt(['title'])), content: combine(await layoutArt(['obj', 'tx', 'titleOnly'])) };
+  return art.title.bg || art.title.pictures.length || art.content.bg || art.content.pictures.length ? art : null;
 }
 
 // Colours and fonts of an uploaded PowerPoint template's theme, applied to the generated slide master.

@@ -44,6 +44,7 @@ function context(snapshot, { template, docControl = {}, params = {} }) {
     aiNotice: snapshot.aiUnreviewed ? AI_NOTICE : null,
     watermark: params.watermark ?? docControl.status !== 'Approved',
     pdfa: !!params.pdfa,
+    pptxMaster: template?.pptxBytes || null,
   };
 }
 

@@ -75,3 +75,7 @@ src/lib/exporters.js        Excel, Word, CSV and iCalendar exports
 src/pages/                  Application screens
 server/index.mjs            Static server and optional Claude API endpoints
 ```
+
+## Also in this repository
+
+[`change-management-workbench/`](change-management-workbench/) holds the **Change Management Workbench**, a separate application for running ADKAR-aligned change management on projects of any size. See [its README](change-management-workbench/README.md).

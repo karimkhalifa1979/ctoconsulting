@@ -26,11 +26,12 @@ export function registerArtefactOps(S) {
       || null;
   }
 
-  // The tagged Word template file, when the template has one, read for rendering.
+  // The tagged Word template and the organisation's PowerPoint template, when the template has them.
   async function withFiles(t) {
-    if (!t?.docxTemplateId) return t;
-    const blob = await S.driver.getBlob(t.docxTemplateId);
-    return blob ? { ...t, docxBytes: blob.bytes } : t;
+    if (!t?.docxTemplateId && !t?.pptxThemeId) return t;
+    const docx = t.docxTemplateId ? await S.driver.getBlob(t.docxTemplateId) : null;
+    const pptx = t.pptxThemeId ? await S.driver.getBlob(t.pptxThemeId) : null;
+    return { ...t, ...(docx ? { docxBytes: docx.bytes } : {}), ...(pptx ? { pptxBytes: pptx.bytes } : {}) };
   }
 
   // Template content as it was at a given version (ART-026).
