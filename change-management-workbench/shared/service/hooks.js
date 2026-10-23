@@ -4,6 +4,7 @@ import { canTransition, transitionRequirements, completionGaps } from '../rules/
 import { findDuplicates, isNegative } from '../rules/stakeholders.js';
 import { makeCalendar, addDays, diffDays } from '../dates.js';
 import { holidaysOf } from '../model.js';
+import { nextRun } from './ops/artefacts.js';
 
 const ANALYSIS_FIELDS = ['influence', 'interest', 'impactOverride', 'currentEngagement', 'desiredEngagement', 'priorityOverride', 'salience'];
 const PERSON_RATINGS = ['influence', 'interest', 'currentEngagement', 'desiredEngagement', 'priorityOverride'];
@@ -263,6 +264,16 @@ export const HOOKS = {
   artefact: {
     beforeUpdate: async (S, { cur, opts }) => {
       if (cur.status === 'approved' && !opts.system) throw new AppError(409, 'Approved artefacts cannot be changed (ART-014). Generate a new version instead.');
+    },
+  },
+
+  // ART-015: the next run is worked out whenever a schedule is saved, in the organisation's time zone.
+  schedule: {
+    beforeCreate: async (S, { data, config }) => ({ ...data, nextRunAt: data.active === false ? null : nextRun(data, S.now(), config.settings?.timeZone) }),
+    beforeUpdate: async (S, { cur, next, config }) => {
+      const timing = ['frequency', 'dayOfWeek', 'dayOfMonth', 'time', 'active'].some((k) => next[k] !== cur[k]);
+      if (timing || (!next.nextRunAt && next.active !== false)) next.nextRunAt = next.active === false ? null : nextRun(next, S.now(), config.settings?.timeZone);
+      return next;
     },
   },
 

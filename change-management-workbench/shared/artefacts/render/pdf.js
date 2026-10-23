@@ -19,8 +19,10 @@ async function createDoc(ctx, size) {
   const fonts = await loadFonts();
   const dc = ctx.docControl || {};
   const created = new Date(dc.generatedAt || ctx.s?.takenAt || Date.now());
+  // font: null stops pdfkit loading its built-in Helvetica, which is not embedded (and not available in
+  // the browser build); every glyph is drawn with the embedded Inter faces.
   const doc = new PDFDocument({
-    size, margins: size === 'A4' ? M : { top: 0, bottom: 0, left: 0, right: 0 }, autoFirstPage: false, bufferPages: true, compress: true,
+    font: null, size, margins: size === 'A4' ? M : { top: 0, bottom: 0, left: 0, right: 0 }, autoFirstPage: false, bufferPages: true, compress: true,
     pdfVersion: '1.7', tagged: true, displayTitle: true, lang: 'en-AU', ...(ctx.pdfa ? { subset: 'PDF/A-2a' } : {}),
     info: { Title: dc.title || 'Document', Author: dc.generatedBy || 'Change Management Workbench', Subject: ctx.s?.initiative?.name || '', Keywords: [dc.classification, dc.status, `Version ${dc.version}`].filter(Boolean).join('; '), Creator: 'Change Management Workbench', Producer: 'Change Management Workbench', CreationDate: created, ModDate: created },
   });

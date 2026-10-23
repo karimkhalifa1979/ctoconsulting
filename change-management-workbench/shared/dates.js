@@ -206,6 +206,27 @@ export function fmtDateTime(ts, timeZone) {
   }
 }
 
+// Minutes a time zone is ahead of UTC at an instant (600 for Sydney in winter, 660 in summer).
+function zoneOffset(timeZone, at) {
+  try {
+    const parts = Object.fromEntries(new Intl.DateTimeFormat('en-AU', { timeZone, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).formatToParts(at).map((p) => [p.type, p.value]));
+    return (Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute, +parts.second) - Math.floor(at.getTime() / 1000) * 1000) / 60000;
+  } catch {
+    return 0;
+  }
+}
+
+// The instant a wall-clock date and time ('YYYY-MM-DD', 'HH:MM') occurs in a time zone, allowing for
+// daylight saving.
+export function zonedInstant(iso, time, timeZone) {
+  const [y, mo, d] = iso.split('-').map(Number);
+  const [hh, mm] = String(time || '00:00').split(':').map(Number);
+  const wall = Date.UTC(y, mo - 1, d, hh || 0, mm || 0);
+  let at = new Date(wall - zoneOffset(timeZone, new Date(wall)) * 60000);
+  at = new Date(wall - zoneOffset(timeZone, at) * 60000);
+  return at;
+}
+
 // Today's calendar date in a given IANA time zone (defaults to Australia/Sydney).
 export function todayIso(timeZone = 'Australia/Sydney', now = new Date()) {
   try {

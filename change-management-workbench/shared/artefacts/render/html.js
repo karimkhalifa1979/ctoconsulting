@@ -23,7 +23,8 @@ body { margin: 0; font: 15px/1.55 ${b.fontBody ? `"${b.fontBody}", ` : ''}"Segoe
 .meta b { display: block; color: var(--ink); font-weight: 600; }
 nav.toc { border: 1px solid var(--line); border-radius: 8px; padding: 12px 18px; margin: 18px 0; }
 nav.toc h2 { font-size: 15px; margin: 0 0 6px; color: var(--primary); }
-nav.toc ol { margin: 0; padding-left: 18px; columns: 2; column-gap: 32px; font-size: 13.5px; }
+nav.toc ul { margin: 0; padding: 0; list-style: none; columns: 2; column-gap: 32px; font-size: 13.5px; }
+nav.toc li { margin: 0 0 3px; break-inside: avoid; }
 nav.toc a { color: var(--primary); text-decoration: none; }
 h2 { color: var(--primary); font-size: 22px; margin: 34px 0 10px; padding-top: 8px; border-top: 1px solid var(--line); }
 h3 { color: var(--primary); font-size: 17px; margin: 22px 0 8px; }
@@ -182,7 +183,7 @@ ${cls ? `<div class="marking">${esc(cls)}</div>` : ''}
 
 export function renderHtmlDocument(doc, ctx) {
   const counters = { table: 0, figure: 0 };
-  const toc = doc.meta.toc ? `<nav class="toc" aria-label="Contents"><h2>Contents</h2><ol>${doc.sections.map((sec, i) => `<li><a href="#s${i + 1}">${esc(sec.title)}</a></li>`).join('')}</ol></nav>` : '';
+  const toc = doc.meta.toc ? `<nav class="toc" aria-label="Contents"><h2>Contents</h2><ul>${doc.sections.map((sec, i) => `<li><a href="#s${i + 1}">${esc(sec.title)}</a></li>`).join('')}</ul></nav>` : '';
   const body = `${toc}${doc.sections.map((sec, i) => `<section aria-labelledby="s${i + 1}"><h2 id="s${i + 1}">${esc(sec.title)}</h2>${blocksHtml(sec.blocks, counters, 2)}</section>`).join('\n')}`;
   return shell({ ...ctx, title: doc.meta.title, subtitle: doc.meta.subtitle, body });
 }
