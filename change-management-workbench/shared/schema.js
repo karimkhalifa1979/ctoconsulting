@@ -3,6 +3,10 @@
 // templates, exports, the template field catalogue and the OpenAPI document.
 import { personName } from './util.js';
 import { DEFAULT_LISTS, ADKAR } from './refdata.js';
+import { fmtDate } from './dates.js';
+
+const ASSESSMENT_KINDS = { adkar: 'ADKAR assessment', changeCharacteristics: 'Change characteristics', orgAttributes: 'Organisational attributes', pct: 'PCT health', sponsor: 'Sponsor assessment' };
+const ASSESSMENT_SUBJECTS = { group: 'impacted group', stakeholder: 'individual', team: 'team' };
 
 const f = (key, label, type = 'text', opts = {}) => ({ key, label, type, ...opts });
 const sel = (key, label, list, opts = {}) => f(key, label, 'select', { list, ...opts });
@@ -294,11 +298,12 @@ export const ENTITIES = {
   // --- Risk, readiness and PCT (RSK) ---------------------------------------------------------------
   assessment: {
     label: 'Assessment', plural: 'Assessments', module: 'RSK', scope: 'initiative', area: 'assessment', prefix: 'ASM',
-    title: (r) => `${r.kind} ${r.date || ''}`,
+    title: (r) => [ASSESSMENT_KINDS[r.kind] || 'Assessment', ASSESSMENT_SUBJECTS[r.subjectType], r.date && fmtDate(r.date)].filter(Boolean).join(' · '),
     fields: [
       f('kind', 'Assessment', 'select', { options: [{ id: 'adkar', label: 'ADKAR' }, { id: 'changeCharacteristics', label: 'Change characteristics' }, { id: 'orgAttributes', label: 'Organisational attributes' }, { id: 'pct', label: 'PCT health' }, { id: 'sponsor', label: 'Sponsor assessment' }], required: true, grid: true }),
       f('subjectType', 'Subject type', 'select', { options: [{ id: 'initiative', label: 'Initiative' }, { id: 'group', label: 'Impacted group' }, { id: 'stakeholder', label: 'Individual' }, { id: 'team', label: 'Team' }], required: true, grid: true }),
-      f('subjectId', 'Subject', 'text', { grid: true }),
+      // Set by the assessment screens, which name the group, team or person; an identifier means nothing in a form.
+      f('subjectId', 'Subject', 'text', { grid: true, hidden: true }),
       sel('round', 'Round', 'assessmentRound', { grid: true, default: 'baseline' }),
       sel('method', 'Method', 'assessmentMethod', { grid: true, default: 'practitioner' }),
       f('date', 'Date', 'date', { required: true, grid: true }),

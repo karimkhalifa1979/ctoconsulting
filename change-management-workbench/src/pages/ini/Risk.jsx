@@ -292,7 +292,7 @@ function Risks() {
           append={[{ key: 'rating', label: 'Rating', render: (r) => <RiskBadge rating={r.rating} />, value: (r) => ({ extreme: 4, high: 3, medium: 2, low: 1 })[r.rating] || 0 }]}
           rows={m.risks} bulkFields={['status', 'ownerId', 'dueDate']} defaultSort={{ key: 'rating', dir: 'desc' }} />
         <Card title="Risk matrix" sub="Open risks and issues by likelihood and consequence">
-          <table className="heat" aria-label="Risk matrix">
+          <table className="heat heat-matrix" aria-label="Risk matrix">
             <thead><tr><th>Likelihood ↓ / consequence →</th>{[1, 2, 3, 4, 5].map((c) => <th key={c} className="col">{c}</th>)}</tr></thead>
             <tbody>{[5, 4, 3, 2, 1].map((l) => (
               <tr key={l}><th scope="row">{label('likelihood', String(l), config)}</th>{[1, 2, 3, 4, 5].map((c) => {

@@ -58,7 +58,7 @@ function Health() {
   return (
     <Card title="Health" sub="Storage, the audit trail and the service version." actions={<button type="button" className="btn btn-sm" onClick={load}><Icon name="refresh" />Check again</button>}>
       <KV items={[
-        ['Mode', h.mode === 'server' ? 'Server' : store?.workspace === 'own' ? 'Offline workbench (browser only)' : 'Browser-only demonstration'],
+        ['Mode', h.mode === 'server' ? 'Server' : store?.workspace === 'own' ? 'Offline workbench (browser only)' : store?.offline ? 'Offline demonstration (browser only)' : 'Browser-only demonstration'],
         ['Storage', h.mode === 'server' ? h.storage || 'Unknown' : store?.persistent === false ? 'Memory only: this browser does not keep the data' : 'This browser (IndexedDB)'],
         ['Version', h.version],
         ['Checked', fmtDateTime(h.time)],

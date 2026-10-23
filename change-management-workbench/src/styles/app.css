@@ -342,6 +342,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 .menu button, .menu a { display: flex; width: 100%; align-items: center; gap: 8px; padding: 7px 10px; border: 0; background: none; border-radius: 6px; cursor: pointer; text-align: left; color: var(--ink); text-decoration: none; font-size: 13.5px; }
 .menu .menu-item { display: flex; width: 100%; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 6px; cursor: pointer; color: var(--ink); font-size: 13.5px; }
 .menu button:hover, .menu a:hover, .menu .menu-item:hover { background: var(--surface-3); text-decoration: none; }
+.menu button svg, .menu a svg, .menu .menu-item svg { width: 16px; height: 16px; flex: none; }
 .menu hr { border: 0; border-top: 1px solid var(--line); margin: 6px 0; }
 .menu .menu-head { padding: 6px 10px 8px; font-size: 12px; color: var(--ink-3); }
 .pop-wrap { position: relative; }
@@ -421,6 +422,12 @@ a.kpi:hover { border-color: var(--brand-teal); text-decoration: none; }
 .heat td.cell { text-align: center; border-radius: 5px; padding: 6px 4px; font-weight: 600; min-width: 34px; font-variant-numeric: tabular-nums; cursor: default; }
 .heat td.cell:focus-visible { outline-offset: 0; }
 .heat td.cell.empty { background: var(--surface-2); color: var(--ink-3); font-weight: 400; }
+/* The risk matrix sits in a side column: a fixed layout keeps all five consequence columns inside it. */
+.heat-matrix { table-layout: fixed; }
+.heat-matrix th { white-space: normal; overflow-wrap: anywhere; font-size: 11px; }
+.heat-matrix thead th:first-child { width: 30%; }
+.heat-matrix td.cell { min-width: 0; padding: 5px 1px; }
+.heat-matrix td.cell .tiny { font-size: 9.5px; }
 .heat-scale { display: inline-flex; gap: 2px; align-items: center; font-size: 11px; color: var(--ink-3); }
 .heat-scale i { width: 22px; height: 12px; border-radius: 3px; display: inline-block; }
 .quad { position: relative; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 3px; aspect-ratio: 1.45 / 1; min-height: 300px; }
@@ -551,7 +558,7 @@ a.kpi:hover { border-color: var(--brand-teal); text-decoration: none; }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
-@media (max-width: 640px) { .hide-sm { display: none; } }
+@media (max-width: 640px) { .hide-sm { display: none; } .mode-banner { padding: 6px 12px; gap: 6px 8px; } }
 
 /* Scrollable regions inside modals and cards */
 .scroll-y { overflow-y: auto; overscroll-behavior: contain; }

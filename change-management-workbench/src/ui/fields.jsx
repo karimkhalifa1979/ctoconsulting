@@ -7,7 +7,7 @@ import { ADKAR, PLAN_TYPES } from '../../shared/refdata.js';
 import { ROLES } from '../../shared/access.js';
 import { CATALOGUE, NARRATIVE_KEYS } from '../../shared/artefacts/catalogue.js';
 import { asArray, sanitiseHtml } from '../../shared/util.js';
-import { fmtDateTime } from '../lib/format.js';
+import { fmtDate, fmtDateTime } from '../lib/format.js';
 
 // Options for select and multi fields.
 export function selectOptions(fd, { config, model } = {}) {
@@ -24,7 +24,7 @@ export function selectOptions(fd, { config, model } = {}) {
 }
 
 // `ariaLabel` names a control that has no visible label of its own, such as a cell in a table field.
-export function FieldControl({ fd, value, onChange, lookups, config, model, disabled, invalid, id, autoFocus, ariaLabel }) {
+export function FieldControl({ fd, value, onChange, lookups, config, model, disabled, readOnly, invalid, id, autoFocus, ariaLabel }) {
   const common = { id, disabled, 'aria-invalid': invalid || undefined, 'aria-label': ariaLabel, className: invalid ? 'invalid' : undefined, autoFocus };
   const set = (v) => onChange(v);
   switch (fd.type) {
@@ -70,7 +70,7 @@ export function FieldControl({ fd, value, onChange, lookups, config, model, disa
     case 'table':
       return <TableEditor fd={fd} value={asArray(value)} onChange={set} lookups={lookups} config={config} model={model} disabled={disabled} />;
     case 'json':
-      return <JsonEditor id={id} value={value} onChange={set} disabled={disabled} />;
+      return readOnly || fd.readOnly ? <JsonView id={id} ariaLabel={ariaLabel} value={value} lookups={lookups} /> : <JsonEditor id={id} value={value} onChange={set} disabled={disabled} />;
     case 'email':
       return <input {...common} type="email" autoComplete="off" value={value ?? ''} onChange={(e) => set(e.target.value)} />;
     case 'phone':
@@ -239,6 +239,44 @@ export function TableEditor({ fd, value = [], onChange, lookups, config, model, 
       {!disabled && <div style={{ padding: 8 }}><button type="button" className="btn btn-sm" onClick={() => onChange([...value, {}])}><Icon name="plus" />Add row</button></div>}
     </div>
   );
+}
+
+// Structured values kept by the system (status and rating histories, reminders sent, snapshots) are
+// shown as a readable list, with dates and people named, rather than as JSON.
+const JSON_LABELS = { at: 'When', ts: 'When', by: 'By', userId: 'By', from: 'From', to: 'To' };
+const humanKey = (k) => JSON_LABELS[k] || String(k).replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase().replace(/^./, (c) => c.toUpperCase());
+const PEOPLE_KEYS = new Set(['by', 'userId', 'ownerId', 'actorId', 'approverId']);
+function jsonText(v, key, lookups) {
+  if (v == null || v === '') return '—';
+  if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+  if (typeof v === 'number') return v.toLocaleString('en-AU');
+  if (Array.isArray(v)) return v.length ? v.map((x) => jsonText(x, key, lookups)).join(', ') : '—';
+  if (typeof v === 'object') return Object.entries(v).map(([k, x]) => `${humanKey(k)}: ${jsonText(x, k, lookups)}`).join('; ');
+  const t = String(v);
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(t)) return fmtDateTime(t);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(t)) return fmtDate(t);
+  if (PEOPLE_KEYS.has(key)) return t === 'system' ? 'System' : lookups?.optionsFor?.('user')?.find((o) => o.id === t)?.label || t;
+  if (['from', 'to', 'status'].includes(key) && /^[a-z][a-zA-Z]*$/.test(t)) return humanKey(t);
+  return t;
+}
+// Named like the control it replaces: by the caller's label, or by the record form's label for this id.
+function JsonView({ value, lookups, id, ariaLabel }) {
+  const list = Array.isArray(value) ? value : null;
+  const label = { role: 'group', ...(ariaLabel ? { 'aria-label': ariaLabel } : id ? { 'aria-labelledby': `${id}-label` } : {}), id };
+  if (value == null || (list && !list.length) || (!list && typeof value === 'object' && !Object.keys(value).length)) return <div {...label} className="small muted">None</div>;
+  if (list && list.every((x) => x && typeof x === 'object' && !Array.isArray(x))) {
+    const keys = [...new Set(list.slice(0, 50).flatMap((x) => Object.keys(x)))].filter((k) => k !== 'id').slice(0, 6);
+    return (
+      <div {...label} className="table-wrap">
+        <table className="tbl tbl-compact small">
+          <thead><tr>{keys.map((k) => <th key={k} scope="col">{humanKey(k)}</th>)}</tr></thead>
+          <tbody>{list.map((x, i) => <tr key={i}>{keys.map((k) => <td key={k}>{jsonText(x[k], k, lookups)}</td>)}</tr>)}</tbody>
+        </table>
+      </div>
+    );
+  }
+  if (list || typeof value !== 'object') return <div {...label} className="small">{jsonText(value, '', lookups)}</div>;
+  return <div {...label}><dl className="kv">{Object.entries(value).map(([k, v]) => [<dt key={`k-${k}`}>{humanKey(k)}</dt>, <dd key={`v-${k}`}>{jsonText(v, k, lookups)}</dd>])}</dl></div>;
 }
 
 function JsonEditor({ value, onChange, disabled, id }) {

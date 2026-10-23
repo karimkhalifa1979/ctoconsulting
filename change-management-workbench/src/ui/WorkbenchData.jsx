@@ -142,14 +142,15 @@ export function WorkbenchBanner() {
   return (
     <div className={`mode-banner no-print ${atRisk ? 'warn' : ''}`} role="note">
       <Icon name={atRisk ? 'alert' : 'info'} size={15} />
+      {/* On a phone the banner keeps to its title, any warning and the backup; the rest is on the sign-in screen. */}
       {own ? (
-        <span><strong>Offline workbench.</strong> Your data is kept in this browser on this computer.{risk}{!atRisk && (status.lastBackupAt ? ` Last backed up ${fmtDateTime(status.lastBackupAt)}.` : ' Not backed up yet.')}</span>
+        <span><strong>Offline workbench.</strong><span className="hide-sm"> Your data is kept in this browser on this computer.</span>{risk}{!atRisk && (status.lastBackupAt ? ` Last backed up ${fmtDateTime(status.lastBackupAt)}.` : ' Not backed up yet.')}</span>
       ) : (
-        <span><strong>{status.offline ? 'Offline demonstration.' : 'Browser-only demonstration.'}</strong> Data is fictional and kept in this browser. Changes you make stay on this device.{risk}</span>
+        <span><strong>{status.offline ? 'Offline demonstration.' : 'Browser-only demonstration.'}</strong><span className="hide-sm"> Data is fictional and kept in this browser. Changes you make stay on this device.</span>{risk}</span>
       )}
       {canBackUp(user) && (own || atRisk) && <BackupButton className="btn btn-xs" />}
-      {!own && <StartOwnButton className="btn btn-xs" />}
-      {!own && <LoadDemoButton className="btn btn-xs" label="Reset demonstration data" />}
+      {!own && <span className="hide-sm"><StartOwnButton className="btn btn-xs" /></span>}
+      {!own && <span className="hide-sm"><LoadDemoButton className="btn btn-xs" label="Reset demonstration data" /></span>}
     </div>
   );
 }

@@ -124,7 +124,7 @@ export default function RecordForm({ type, record, defaults = {}, include, exclu
               const ro = readOnly || f.readOnly || (f.key === 'code');
               return (
                 <div className={`field ${wide ? 'span-2' : ''}`} key={f.key}>
-                  <label htmlFor={id} className="field-label">
+                  <label htmlFor={id} id={`${id}-label`} className="field-label">
                     {f.label}{f.required && !ro && <em className="req" aria-hidden="true">*</em>}
                     {f.sensitive && <span className="badge" title="Sensitive field: visible only to authorised roles (STK-048)"><Icon name="lock" />Restricted</span>}
                     {f.help && <Help text={f.help} term={f.label} />}
@@ -132,7 +132,7 @@ export default function RecordForm({ type, record, defaults = {}, include, exclu
                   {restricted ? (
                     <div className="muted small"><Icon name="eyeOff" size={14} /> You do not have access to this field.</div>
                   ) : (
-                    <FieldControl fd={f} id={id} value={data[f.key]} onChange={(v) => set(f.key, v)} lookups={lookups} config={config} model={ini?.model} disabled={ro || saving} invalid={!!errors[f.key]} />
+                    <FieldControl fd={f} id={id} value={data[f.key]} onChange={(v) => set(f.key, v)} lookups={lookups} config={config} model={ini?.model} disabled={ro || saving} readOnly={ro} invalid={!!errors[f.key]} />
                   )}
                   {errors[f.key] && <span className="err" role="alert">{errors[f.key]}</span>}
                 </div>

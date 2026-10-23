@@ -21,6 +21,8 @@ Prosci® and ADKAR® are registered trademarks of Prosci, Inc. This application 
 
 [docs/requirements-coverage.md](docs/requirements-coverage.md) maps every requirement, rule, use case and acceptance criterion in the specification to what was built.
 
+[docs/Change_Management_Workbench_Screen_Tour.pdf](docs/Change_Management_Workbench_Screen_Tour.pdf) is a screen tour: 163 screens from every part of the application, captured from the offline workbench with the demonstration data.
+
 ## Try it
 
 ### Offline workbench: one file, nothing to install
