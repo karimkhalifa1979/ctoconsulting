@@ -63,8 +63,10 @@ export function cell(v) {
   if (typeof v === 'object' && !Array.isArray(v)) return { ...v, text: v.text == null ? '' : String(v.text) };
   return { text: Array.isArray(v) ? v.join(', ') : String(v) };
 }
-// Two-column label/value table.
-export const kv = (rows, { caption } = {}) => ({ t: 'kv', caption: caption || '', rows: rows.filter((r) => r && r[1] != null && r[1] !== '').map(([k, v]) => [String(k), Array.isArray(v) ? v.join(', ') : String(v)]) });
+// Two-column label/value table. A value made with missing() is shown highlighted, like a placeholder.
+export const kv = (rows, { caption } = {}) => ({ t: 'kv', caption: caption || '', rows: rows.filter((r) => r && r[1] != null && r[1] !== '').map(([k, v]) => [String(k), v?.placeholder ? v : Array.isArray(v) ? v.join(', ') : String(v)]) });
+// A value still to be completed, for a key/value row (ART-010, AC-07).
+export const missing = (text) => ({ placeholder: `[To be completed: ${text}]` });
 
 // A native chart: bar (horizontal), column, stacked (horizontal stacked bars) or line.
 export function chart(kind, { title, categories, series, unit = '', max, min, alt, height, legend, threshold, numberFormat }) {

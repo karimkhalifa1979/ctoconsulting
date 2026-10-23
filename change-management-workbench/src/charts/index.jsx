@@ -43,7 +43,7 @@ const ticks = (max) => {
   const p = 10 ** Math.floor(Math.log10(max / 6));
   for (const k of [1, 2, 2.5, 5, 10, 20, 25, 50]) {
     const step = k * p;
-    if (Number.isInteger(max) && max >= 2 && !Number.isInteger(+step.toFixed(6))) continue;
+    if (Number.isInteger(max) && max >= 1 && !Number.isInteger(+step.toFixed(6))) continue;
     const n = max / step;
     if (n <= 6 + 1e-9 && Math.abs(n - Math.round(n)) < 1e-6) return Array.from({ length: Math.round(n) + 1 }, (_, i) => +(i * step).toFixed(6));
   }

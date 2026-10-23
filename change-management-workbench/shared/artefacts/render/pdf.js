@@ -223,18 +223,21 @@ class Flow {
     if (!b.rows.length) return;
     const w1 = CW * 0.3, w2 = CW * 0.7, pad = 3.4, size = SIZES.table;
     const tbl = this.struct('Table');
-    for (const [k, v] of b.rows) {
-      const h = Math.max(textHeight(doc, k, { font: 'Semi', size, width: w1 - 2 * pad }), textHeight(doc, v, { size, width: w2 - 2 * pad })) + 2 * pad;
+    for (const [k, value] of b.rows) {
+      const ph = value?.placeholder;
+      const v = ph || value;
+      const h = Math.max(textHeight(doc, k, { font: 'Semi', size, width: w1 - 2 * pad }), textHeight(doc, v, { font: ph ? 'Italic' : 'Body', size, width: w2 - 2 * pad })) + 2 * pad;
       if (doc.y + h > this.bottom) this.newPage();
       const y = doc.y;
       artifact(doc, () => {
         doc.rect(M.left, y, w1, h).fill('#F0F3F7');
+        if (ph) doc.rect(M.left + w1, y, w2, h).fill('#FFF4C2');
         doc.moveTo(M.left, y + h).lineTo(M.left + CW, y + h).lineWidth(0.4).strokeColor(col(LINE)).stroke();
       });
       const tr = doc.struct('TR');
       tbl.add(tr);
       tr.add(doc.struct('TH', { scope: 'Row' }, () => doc.font('Semi').fontSize(size).fillColor(col(INK)).text(doc.safe(k), M.left + pad, y + pad, { width: w1 - 2 * pad, lineGap: 0.6 })));
-      tr.add(doc.struct('TD', () => doc.font('Body').fontSize(size).fillColor(col(INK)).text(doc.safe(v), M.left + w1 + pad, y + pad, { width: w2 - 2 * pad, lineGap: 0.6 })));
+      tr.add(doc.struct('TD', () => doc.font(ph ? 'Italic' : 'Body').fontSize(size).fillColor(ph ? '#7A5300' : col(INK)).text(doc.safe(v), M.left + w1 + pad, y + pad, { width: w2 - 2 * pad, lineGap: 0.6 })));
       tr.end();
       doc.y = y + h;
     }

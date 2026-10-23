@@ -41,6 +41,21 @@ export function managersOf(m) {
 
 const pick = (o, keys) => Object.fromEntries(keys.filter((k) => o?.[k] !== undefined && o?.[k] !== null && o?.[k] !== '').map((k) => [k, o[k]]));
 
+// Initiative custom fields available to templates, keyed cf_….
+function mergeableCustom(cfg, sensitive) {
+  return asArray(cfg?.customFields?.initiative).filter((cf) => cf.mergeField !== false && (sensitive || !cf.sensitive)).map((cf) => ({ ...cf, key: cf.key.startsWith('cf_') ? cf.key : `cf_${cf.key}` }));
+}
+function customValue(cf, v, cfg) {
+  if (v == null || v === '') return '';
+  const opts = cf.list ? listOptions(cf.list, cfg) : asArray(cf.options);
+  const lab = (x) => opts.find((o) => o.id === x)?.label || String(x);
+  if (cf.type === 'bool') return v ? 'Yes' : 'No';
+  if (cf.type === 'select') return lab(v);
+  if (cf.type === 'multi') return asArray(v).map(lab).join(', ');
+  if (cf.type === 'date' && /^\d{4}-\d{2}-\d{2}/.test(String(v))) return `${String(v).slice(8, 10)}/${String(v).slice(5, 7)}/${String(v).slice(0, 4)}`;
+  return stripHtml(String(v));
+}
+
 export function buildSnapshot(model, params = {}, { includeSensitive = false, takenAt } = {}) {
   const m = model;
   const cfg = m.config;
@@ -82,6 +97,9 @@ export function buildSnapshot(model, params = {}, { includeSensitive = false, ta
     businessOwner: sName(i.businessOwnerId), businessOwnerPosition: m.byId.stakeholder[i.businessOwnerId]?.positionTitle || '',
     changeLead: userName(i.changeLeadId), projectManager: userName(i.projectManagerId),
     selectedPlans: m.selectedPlans, planRationale: i.planRationale || '', closedAt: i.closedAt || null,
+    // Administrator-defined fields offered as template merge fields (ADM-002); sensitive ones only when
+    // sensitive fields are included.
+    custom: Object.fromEntries(mergeableCustom(cfg, sensitive).map((cf) => [cf.key, customValue(cf, i[cf.key], cfg)])),
   };
 
   const plans = m.planTypes.map((p) => ({ id: p.id, label: p.label, category: p.category, purpose: p.purpose || '', adkar: asArray(p.adkar), selected: m.selectedPlans.includes(p.id), custom: !!p.custom }));
@@ -287,6 +305,7 @@ export function buildSnapshot(model, params = {}, { includeSensitive = false, ta
     organisation: settings.organisationName || '',
     settings: { adkarThreshold: settings.adkar?.threshold ?? 3, readinessThreshold: settings.readinessThreshold ?? 70, rag: settings.rag, timeZone: settings.timeZone || 'Australia/Sydney', groupMaxCommsPer7Days: settings.load?.groupMaxCommsPer7Days ?? 5, agentHeadcountRatio: settings.agentCoverage?.headcountPerAgent ?? 50 },
     lists,
+    customFieldDefs: { initiative: mergeableCustom(cfg, sensitive).map((cf) => ({ key: cf.key, label: cf.label })) },
     initiative, plans, milestones, objectives, measures, groups, impacts, profiles, stakeholders, engagements, planItems,
     blueprints, individualAdkar, surveys, risk, risks, readiness, strategy: strat, coalition,
     activities, keyMessages, faqs, toolkit, interventions, sessions, tnas, proficiency, supports,

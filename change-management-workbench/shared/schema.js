@@ -1019,12 +1019,12 @@ export const ENTITIES = {
   apiClient: {
     label: 'API client', plural: 'API clients', module: 'INT', scope: 'enterprise', area: 'users', prefix: 'API',
     title: (r) => r.name,
-    fields: [f('name', 'Name', 'text', { required: true, grid: true }), f('clientId', 'Client ID', 'text', { readOnly: true, grid: true }), f('secretHash', 'Secret', 'text', { hidden: true }), multi('scopes', 'Scopes', null, { options: [{ id: 'read', label: 'Read' }, { id: 'write', label: 'Write' }, { id: 'reporting', label: 'Reporting feed' }], grid: true }), f('roles', 'Acts with roles', 'json'), f('active', 'Active', 'bool', { default: true, grid: true }), f('lastUsedAt', 'Last used', 'datetime', { readOnly: true, grid: true })],
+    fields: [f('name', 'Name', 'text', { required: true, grid: true }), f('clientId', 'Client ID', 'text', { readOnly: true, grid: true }), f('secretHash', 'Secret', 'text', { hidden: true, readOnly: true, secret: true }), multi('scopes', 'Scopes', null, { options: [{ id: 'read', label: 'Read' }, { id: 'write', label: 'Write' }, { id: 'reporting', label: 'Reporting feed' }], grid: true }), f('roles', 'Acts with roles', 'json'), f('active', 'Active', 'bool', { default: true, grid: true }), f('lastUsedAt', 'Last used', 'datetime', { readOnly: true, grid: true })],
   },
   webhook: {
     label: 'Webhook', plural: 'Webhooks', module: 'INT', scope: 'enterprise', area: 'users', prefix: 'WH',
     title: (r) => r.url,
-    fields: [f('url', 'URL', 'url', { required: true, grid: true }), multi('events', 'Events', null, { options: [{ id: 'engagement.completed', label: 'Engagement completed' }, { id: 'barrierPoint.changed', label: 'Barrier point changed' }, { id: 'plan.approved', label: 'Plan approved' }, { id: 'artefact.approved', label: 'Artefact approved' }, { id: 'strategy.approved', label: 'Strategy approved' }], grid: true }), f('secret', 'Signing secret', 'text', { hidden: true }), f('active', 'Active', 'bool', { default: true, grid: true }), f('lastStatus', 'Last delivery', 'text', { readOnly: true, grid: true })],
+    fields: [f('url', 'URL', 'url', { required: true, grid: true }), multi('events', 'Events', null, { options: [{ id: 'engagement.completed', label: 'Engagement completed' }, { id: 'barrierPoint.changed', label: 'Barrier point changed' }, { id: 'plan.approved', label: 'Plan approved' }, { id: 'artefact.approved', label: 'Artefact approved' }, { id: 'strategy.approved', label: 'Strategy approved' }], grid: true }), f('secret', 'Signing secret', 'text', { hidden: true, readOnly: true, secret: true }), f('active', 'Active', 'bool', { default: true, grid: true }), f('lastStatus', 'Last delivery', 'text', { readOnly: true, grid: true })],
   },
 };
 

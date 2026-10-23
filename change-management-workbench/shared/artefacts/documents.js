@@ -4,7 +4,7 @@
 import { ADKAR, ADKAR_IDS, adkarLabel } from '../refdata.js';
 import { addDays, addMonths, periodRange, monthKey } from '../dates.js';
 import { asArray, sortBy, sum, round, uniq, truncate } from '../util.js';
-import { h, p, bullets, table, kv, chart, callout, placeholder, rich, plain, fmtDate, fmtNum, fmtPct, adkarName, adkarList, score, SERIES, STATUS, RAG, adkarFill, adkarInk, impactFill, impactInk } from './ir.js';
+import { h, p, bullets, table, kv, missing, chart, callout, placeholder, rich, plain, fmtDate, fmtNum, fmtPct, adkarName, adkarList, score, SERIES, STATUS, RAG, adkarFill, adkarInk, impactFill, impactInk } from './ir.js';
 import * as X from './sections.js';
 
 const cap = X.cap;
@@ -21,7 +21,7 @@ function strategy(s, c) {
   const sections = [
     X.documentControl(s, { docControl: c.docControl, history: asArray(s.approvals.strategy).filter((a) => a.status !== 'pending').map((a) => ({ at: a.requestedAt, status: a.status, approvers: a.approvers, comment: a.approvers.map((y) => y.comment).filter(Boolean).join('; ') })) }),
     X.executiveSummary(s, x),
-    section('summary', 'Summary of the change', [...(st?.summary ? rich(st.summary) : [p(plain(s.initiative.description))]), kv([['Primary sponsor', s.initiative.primarySponsor], ['Business owner', s.initiative.businessOwner], ['Change management lead', s.initiative.changeLead], ['Project manager', s.initiative.projectManager], ['Delivery approach', x.L('deliveryApproach', s.initiative.deliveryApproach)], ['Timeframe', s.initiative.startDate ? `${fmtDate(s.initiative.startDate)} to ${fmtDate(s.initiative.endDate)}` : '']])]),
+    section('summary', 'Summary of the change', [...(st?.summary ? rich(st.summary) : [p(plain(s.initiative.description))]), kv([['Primary sponsor', s.initiative.primarySponsor || missing('primary sponsor')], ['Business owner', s.initiative.businessOwner], ['Change management lead', s.initiative.changeLead], ['Project manager', s.initiative.projectManager], ['Delivery approach', x.L('deliveryApproach', s.initiative.deliveryApproach)], ['Timeframe', s.initiative.startDate ? `${fmtDate(s.initiative.startDate)} to ${fmtDate(s.initiative.endDate)}` : '']])]),
     X.caseForChange(s),
     X.definitionOfSuccess(s, x),
     section('riskAssessment', 'Change risk assessment', riskAssessmentBlocks(s)),

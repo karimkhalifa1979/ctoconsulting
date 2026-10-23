@@ -4,6 +4,7 @@ import { AppError, asArray, uid, sortBy, canonicalJson, sha256Hex, personName } 
 import { can, canSeeSensitive, hasRole } from '../../access.js';
 import { CATALOGUE, catalogueEntry } from '../../artefacts/catalogue.js';
 import { nextDraftVersion } from './workflow.js';
+import { runReport, summariseReport } from '../../reportBuilder.js';
 import { fmtDate, todayIso, zonedInstant, addDays, addMonths, maxIso, dayOfWeek } from '../../dates.js';
 
 const engine = () => import('../../artefacts/engine.js');
@@ -221,6 +222,21 @@ export function registerArtefactOps(S) {
   });
 
   // ART-015 / RPT-006: scheduled generation and distribution.
+  // RPT-006: a saved report run on a schedule, as the person who scheduled it, so it shows only what they
+  // may see; recipients who can read the initiative are told it is ready, with a summary of the figures.
+  async function runReportSchedule(sch) {
+    const def = sch.reportId ? await S.driver.get('reportDefinition', sch.reportId) : null;
+    if (!def || def.deleted) throw new AppError(404, 'The scheduled report no longer exists.');
+    const owner = await S.driver.get('user', sch.createdBy);
+    if (!owner || owner.status !== 'active') throw new AppError(409, 'The person who scheduled this report is no longer active; ask someone else to schedule it again.');
+    const feed = await S.reportingFeed(owner, def.definition?.dataset, { initiativeId: sch.initiativeId || undefined });
+    const result = runReport(feed.rows, def.definition || {});
+    const users = await S.driver.list('user');
+    const allowed = asArray(sch.recipients).filter((id) => { const u = users.find((x) => x.id === id); return u && u.status === 'active' && can(u, 'R', 'reportDefinition', def) && (!sch.initiativeId || u.roles?.includes('portfolio') || asArray(u.initiativeIds).includes(sch.initiativeId)); });
+    await S.notify(allowed, { kind: 'report', initiativeId: sch.initiativeId, title: `${def.name} is ready`, body: summariseReport(result, def.name), link: { type: 'reportDefinition', id: def.id } });
+    return { schedule: sch.name, reportId: def.id, rows: result.total, recipients: allowed.length };
+  }
+
   // ART-015: scheduled generation. The scheduler runs this as the system; a person may run one of their
   // initiative's schedules now. Scheduled artefacts never include sensitive fields, because they are
   // distributed to recipients whose access to those fields has not been checked.
@@ -240,6 +256,12 @@ export function registerArtefactOps(S) {
       const due = force || !sch.nextRunAt || sch.nextRunAt <= now.toISOString();
       if (!due) continue;
       try {
+        if (sch.kind === 'report') {
+          results.push(await runReportSchedule(sch));
+          const ran = { ...sch, lastRunAt: now.toISOString() };
+          await S.driver.put({ ...ran, nextRunAt: nextRun(ran, now, tz), version: sch.version + 1 });
+          continue;
+        }
         const res = await S.ops.generateArtefact({ ...S.SYSTEM, name: `Schedule: ${sch.name}` }, { initiativeId: sch.initiativeId, artefactType: sch.artefactType, params: { ...(sch.params || {}), includeSensitive: false, scheduleId: sch.id }, proceed: true });
         if (sch.publishTo) await S.ops.publishArtefact(S.SYSTEM, { id: res.artefact.id, destination: sch.publishTo });
         // Distribution respects access rights: recipients must be able to read artefacts in the initiative.

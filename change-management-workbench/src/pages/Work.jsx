@@ -280,6 +280,7 @@ const MUTABLE = [
   { id: 'reschedule', label: 'Engagements moved because a milestone date changed' },
   { id: 'measure', label: 'Success measure values due' },
   { id: 'artefact', label: 'Scheduled artefacts ready' },
+  { id: 'report', label: 'Scheduled reports ready' },
 ];
 const ESSENTIAL = ['Approval requests and decisions', 'Tasks assigned to you', '@mentions', 'Leavers with future engagements', 'Resistance escalations'];
 

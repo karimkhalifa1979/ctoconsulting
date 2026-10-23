@@ -95,7 +95,7 @@ function kvEl(b) {
     borders: { top: { style: BorderStyle.SINGLE, size: 4, color: LINE }, bottom: { style: BorderStyle.SINGLE, size: 4, color: LINE }, insideHorizontal: { style: BorderStyle.SINGLE, size: 4, color: LINE }, left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' }, insideVertical: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' } },
     rows: b.rows.map(([k, v]) => new TableRow({ cantSplit: true, children: [
       new TableCell({ width: { size: widths[0], type: WidthType.DXA }, shading: { type: ShadingType.CLEAR, color: 'auto', fill: 'F0F3F7' }, children: [new Paragraph({ style: 'TableText', children: [new TextRun({ text: k, bold: true })] })] }),
-      new TableCell({ width: { size: widths[1], type: WidthType.DXA }, children: [new Paragraph({ style: 'TableText', children: textRuns(v) })] }),
+      new TableCell({ width: { size: widths[1], type: WidthType.DXA }, children: [new Paragraph({ style: 'TableText', children: v?.placeholder ? [new TextRun({ text: v.placeholder, italics: true, color: '7A5300', highlight: 'yellow' })] : textRuns(v) })] }),
     ] })),
   });
 }

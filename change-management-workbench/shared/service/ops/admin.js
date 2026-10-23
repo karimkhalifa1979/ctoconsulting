@@ -1,7 +1,7 @@
 // Administration operations: configuration (ADM-001 to ADM-010), audit (SEC-05, PRV-07), retention and
 // disposal (ADM-006, PRV-06, REC-02, Section 10.5).
 import { AppError, asArray, canonicalJson, sha256Hex, clone } from '../../util.js';
-import { hasRole } from '../../access.js';
+import { hasRole, initiativeAccess } from '../../access.js';
 import { addMonths, diffDays } from '../../dates.js';
 
 const CONFIG_KEYS = ['settings', 'lists', 'customFields', 'interventions', 'questionSets', 'readinessChecklists', 'focusRules', 'riskMatrix'];
@@ -53,7 +53,10 @@ export function registerAdminOps(S) {
   // SEC-05 / PRV-07: audit trail queries, verification of the hash chain and export to a SIEM.
   S.op('auditQuery', { area: 'audit', summary: 'Search the audit trail' }, async (actor, filter = {}) => {
     if (!actor.system && !hasRole(actor, 'admin', 'auditor', 'changeLead')) throw new AppError(403, 'You cannot view the audit trail.');
-    if (hasRole(actor, 'changeLead') && !hasRole(actor, 'admin', 'auditor') && !filter.initiativeId) throw new AppError(422, 'Choose an initiative.');
+    if (hasRole(actor, 'changeLead') && !hasRole(actor, 'admin', 'auditor')) {
+      if (!filter.initiativeId) throw new AppError(422, 'Choose an initiative.');
+      if (!initiativeAccess(actor, filter.initiativeId)) throw new AppError(403, 'You are not assigned to this initiative.');
+    }
     return S.driver.queryAudit(filter);
   });
 
@@ -143,7 +146,7 @@ export function registerAdminOps(S) {
 
   S.op('userDirectory', { area: 'users', summary: 'Users with roles and assignments (administrators)' }, async (actor) => {
     requireAdmin(actor);
-    return (await S.driver.list('user')).map((u) => ({ ...clone(u) }));
+    return (await S.driver.list('user')).map(({ passwordHash, ...u }) => clone(u));
   });
 
   S.op('aiLog', { area: 'audit', summary: 'AI prompts and outputs logged for audit (AIA-006)' }, async (actor, { limit = 200 } = {}) => {

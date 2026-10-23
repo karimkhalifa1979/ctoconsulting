@@ -666,3 +666,51 @@ a.kpi:hover { border-color: var(--brand-teal); text-decoration: none; }
 .dup-side h4 { margin: 2px 0 4px; font-size: 14px; }
 .dup-arrow { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: var(--ink-3); font-size: 12px; }
 @media (max-width: 800px) { .dup-pair { grid-template-columns: 1fr; } }
+
+/* Report builder */
+.report-builder { display: grid; grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 1000px) { .report-builder { grid-template-columns: 1fr; } }
+.col-picker { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 4px 12px; max-height: 220px; overflow-y: auto; padding: 2px; }
+.col-picker .check { display: flex; }
+.filter-row { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1.2fr) auto; gap: 6px; align-items: center; }
+.filter-row > select, .filter-row > input { width: 100%; min-width: 0; }
+.tbl tr.selected td { background: var(--brand-teal-soft); }
+
+/* Help */
+.glossary { margin: 0; }
+.glossary > div { padding: 10px 16px; border-top: 1px solid var(--line); }
+.glossary > div:first-child { border-top: 0; }
+.glossary dt { font-weight: 600; }
+.glossary dd { margin: 2px 0 0; color: var(--ink-2); font-size: 13px; }
+.tag-btn { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 5px; padding: 2px 6px; margin: 2px 4px 2px 0; color: var(--ink); cursor: pointer; }
+.tag-btn:hover { border-color: var(--brand-teal); }
+.tag-list { list-style: none; margin: 0; padding: 6px 12px 10px; display: flex; flex-direction: column; gap: 4px; }
+.tag-list li { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; padding: 1px 6px; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 4px; background: var(--surface-2); white-space: nowrap; }
+.help-body p { line-height: 1.55; }
+
+/* Administration */
+.admin-layout .report-nav a { display: flex; align-items: center; gap: 8px; text-align: left; padding: 7px 10px; border-radius: 6px; font-size: 13px; color: var(--ink-2); text-decoration: none; }
+.admin-layout .report-nav a svg { width: 15px; height: 15px; flex: none; }
+.admin-layout .report-nav a:hover { background: var(--surface-2); color: var(--ink); }
+.admin-layout .report-nav a.active { background: var(--brand-teal-soft); color: var(--ink); font-weight: 600; }
+.list-nav { max-height: calc(100vh - 120px); overflow-y: auto; }
+.list-nav input[type=search] { width: 100%; margin-bottom: 4px; }
+.dot-changed { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--brand-teal); margin-left: 6px; vertical-align: middle; }
+.settings-check { align-self: end; padding-bottom: 6px; }
+.lib-group { padding: 10px 16px; border-top: 1px solid var(--line); }
+.lib-group:first-child { border-top: 0; }
+.lib-group h3 { font-size: 13px; margin: 0 0 6px; }
+.brand-preview { display: grid; grid-template-columns: 1fr; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; max-width: 420px; }
+.brand-preview > div { padding: 10px 14px; display: flex; flex-direction: column; gap: 2px; }
+.risk-matrix td { padding: 4px; }
+.risk-matrix td select { width: 100%; font-weight: 600; }
+.risk-matrix td.rm-low select { background: var(--st-good-soft); }
+.risk-matrix td.rm-medium select { background: var(--st-warning-soft); }
+.risk-matrix td.rm-high select { background: var(--st-serious-soft); }
+.risk-matrix td.rm-extreme select { background: var(--st-critical-soft); }
+.audit-filters { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px 12px; }
+.audit-changes { margin: 6px 0 0; padding-left: 18px; font-size: 12px; overflow-wrap: anywhere; }
+.ai-pre { white-space: pre-wrap; max-height: 240px; overflow: auto; background: var(--surface-2); border-radius: 6px; padding: 8px; font-size: 11.5px; margin: 6px 0 0; }
+.perm-matrix th[scope=row] { white-space: normal; min-width: 180px; font-weight: 500; }
+.perm-matrix code { font-size: 11.5px; }

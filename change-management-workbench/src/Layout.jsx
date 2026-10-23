@@ -28,13 +28,29 @@ export function recordPath(type, id, initiativeId) {
   if (type === 'initiative') return `/i/${id}`;
   if (type === 'approval') return '/work?tab=approvals';
   if (type === 'task') return `/work?open=task:${id}`;
+  if (type === 'reportDefinition') return `/reports?tab=builder&report=${id}`;
   if (!initiativeId) return '/work';
   if (type === 'artefact') return `/i/${initiativeId}/artefacts?tab=library&artefact=${id}`;
   const page = TYPE_PAGE[type] ?? '';
   return `/i/${initiativeId}${page ? `/${page}` : ''}?open=${type}:${id}`;
 }
 
-function useNav(user, ini) {
+// Screen names in the navigation; administrators can rename them (ADM-003, terminology key screen.<id>).
+export const SCREEN_LABELS = {
+  home: 'Home', work: 'My work', initiatives: 'Initiatives', portfolio: 'Portfolio', stakeholders: 'Stakeholders', lessons: 'Lessons learned', reports: 'Reports',
+  overview: 'Overview', dashboards: 'Dashboards', setup: 'Definition and success', impact: 'Change impact', risk: 'Risk and readiness', strategy: 'Strategy',
+  plan: 'Master plan', adkar: 'ADKAR', engagement: 'Engagement', sponsor: 'Sponsorship', managers: 'People managers', comms: 'Communications', training: 'Training',
+  resistance: 'Resistance', agents: 'Change agents', measures: 'Measurement', sustain: 'Sustainment and closeout', artefacts: 'Artefacts',
+};
+const screenKey = (to) => (to === '/' ? 'home' : /^\/i\/[^/]+$/.test(to) ? 'overview' : to.replace(/^\/i\/[^/]+\//, '').replace(/^\//, ''));
+
+function useNav(user, ini, terms = {}) {
+  const nav = buildNav(user, ini);
+  const rename = (it) => ({ ...it, label: terms[`screen.${screenKey(it.to)}`] || it.label });
+  return { global: nav.global.map(rename), sections: nav.sections.map((sec) => ({ ...sec, items: sec.items.map(rename) })) };
+}
+
+function buildNav(user, ini) {
   const iid = ini?.id;
   const base = `/i/${iid}`;
   const r = (type) => can(user, 'R', type, null);
@@ -84,7 +100,7 @@ export default function Layout({ children, initiativeId }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [navOpen, setNavOpen] = useState(false);
-  const nav = useNav(user, initiativeId ? ini : null);
+  const nav = useNav(user, initiativeId ? ini : null, app.settings?.terminology);
   useEffect(() => { setNavOpen(false); }, [location.pathname]);
   useOpenParam();
 

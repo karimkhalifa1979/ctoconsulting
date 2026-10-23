@@ -114,10 +114,17 @@ export function createService({ driver, env = {} }) {
     if (initiative.status === 'closed' && !POST_CLOSE_TYPES.has(type)) throw new AppError(409, 'This initiative is closed and read-only (SUS-007).');
   };
 
+  // Secrets (API client secret hashes, webhook signing secrets, password hashes) never leave the service.
+  const SECRET_KEYS = Object.fromEntries(Object.entries(ENTITIES).map(([t, e]) => [t, e.fields.filter((f) => f.secret).map((f) => f.key)]).filter(([, ks]) => ks.length));
   S.redactFor = async (actor, type, rec, ctx) => {
     if (!rec || actor?.system) return rec;
     const config = await S.getConfig();
     let out = redact(actor, type, rec, config, ctx);
+    if (SECRET_KEYS[type] || type === 'user') {
+      out = { ...out };
+      for (const k of SECRET_KEYS[type] || []) delete out[k];
+      if (type === 'user') delete out.passwordHash;
+    }
     if (type === 'profile' && out._redacted?.length) {
       const sens = new Set(sensitiveKeys('profile', config));
       out = { ...out, ratingHistory: asArray(out.ratingHistory).filter((h) => !sens.has(h.field)) };
@@ -233,7 +240,7 @@ export function createService({ driver, env = {} }) {
     }
     const changes = maskedChanges(type, cur, stored, config);
     if (!opts.noAudit && changes.length) await S.audit(actor, { action: opts.auditAction || 'update', type, recordId: id, initiativeId: cur.initiativeId, summary: `${meta.label} ${cur.code || ''} changed`, changes, reason: opts.reason });
-    S.touch(cur.initiativeId);
+    S.touch(type === 'initiative' ? cur.id : cur.initiativeId);
     if (hooks.afterUpdate) await hooks.afterUpdate(S, { actor, cur, rec: stored, initiative, config, opts });
     return opts.raw ? stored : S.redactFor(actor, type, stored, ctx);
   };
@@ -253,7 +260,7 @@ export function createService({ driver, env = {} }) {
     if (hooks.beforeRemove) await hooks.beforeRemove(S, { actor, cur, initiative, opts });
     const stored = await driver.put({ ...cur, deleted: true, version: cur.version + 1, updatedAt: nowIso(), updatedBy: actor.id }, { expectedVersion: cur.version });
     await S.audit(actor, { action: 'delete', type, recordId: id, initiativeId: cur.initiativeId, summary: `${meta.label} ${cur.code || ''} deleted`, reason: opts.reason });
-    S.touch(cur.initiativeId);
+    S.touch(type === 'initiative' ? cur.id : cur.initiativeId);
     return { id, deleted: true, version: stored.version };
   };
 
@@ -310,9 +317,13 @@ export function createService({ driver, env = {} }) {
 
   // --- Initiative data (client working set) and model ----------------------------------------------------------
   const versions = new Map();
+  // Enterprise records (and an initiative's own record, which has no initiativeId) appear in every model, so a
+  // change without an initiative clears them all.
   S.touch = (initiativeId) => {
-    if (initiativeId) versions.set(initiativeId, (versions.get(initiativeId) || 0) + 1);
-    modelCache.delete(initiativeId);
+    if (initiativeId) {
+      versions.set(initiativeId, (versions.get(initiativeId) || 0) + 1);
+      modelCache.delete(initiativeId);
+    } else modelCache.clear();
     ctxCache.clear();
   };
 

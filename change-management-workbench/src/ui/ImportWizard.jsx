@@ -14,6 +14,32 @@ import { asArray, parseCsv } from '../../shared/util.js';
 const MAX_ROWS = 5000;
 const norm = (s) => String(s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
+// Headings other systems' exports commonly use for the same fields.
+const SYNONYMS = {
+  firstname: 'givenName', forename: 'givenName', givennames: 'givenName', surname: 'familyName', lastname: 'familyName',
+  email: 'email', emailaddress: 'email', position: 'positionTitle', jobtitle: 'positionTitle', title: 'positionTitle',
+  organization: 'organisation', agency: 'organisation', department: 'businessUnit', division: 'businessUnit', team: 'businessUnit',
+  mobile: 'phone', telephone: 'phone', phonenumber: 'phone', reportsto: 'managerId', linemanager: 'managerId', supervisor: 'managerId',
+  employeeid: 'sourceId', employeenumber: 'sourceId', staffid: 'sourceId',
+};
+
+// Matches each column heading to a field: exactly by label or key first, then by a common synonym, then
+// by the start of a single field's label ("Position" for "Position title"). A looser match never takes a
+// field that another column already names.
+export function matchColumns(headers, fields) {
+  const exact = headers.map((h) => fields.find((f) => norm(h) && (norm(f.label) === norm(h) || norm(f.key) === norm(h)))?.key || '');
+  const taken = new Set(exact.filter(Boolean));
+  return headers.map((h, i) => {
+    if (exact[i]) return exact[i];
+    const n = norm(h);
+    if (!n) return '';
+    const starts = n.length >= 4 ? fields.filter((f) => norm(f.label).startsWith(n)) : [];
+    const f = [fields.find((x) => x.key === SYNONYMS[n]), starts.length === 1 ? starts[0] : null].find((c) => c && !taken.has(c.key));
+    if (f) taken.add(f.key);
+    return f?.key || '';
+  });
+}
+
 // The fields a spreadsheet can fill (the same rule the service applies).
 export function importFields(type, config) {
   return fieldsOf(type, config).filter((f) => !f.system && !f.readOnly && !f.hidden && !['json', 'table', 'richtext'].includes(f.type) && f.key !== 'initiativeId');
@@ -151,7 +177,7 @@ export default function ImportWizard({ type, initiativeId, onDone }) {
       if (kept.length > MAX_ROWS) throw new Error(`The file has ${kept.length} rows; import at most ${MAX_ROWS} at a time.`);
       setFile(f);
       setTable({ headers: t.headers, rows: kept.map((x) => x.r), rowNumbers: kept.map((x) => x.n) });
-      setMapping(t.headers.map((h) => fields.find((fd) => norm(fd.label) === norm(h) || norm(fd.key) === norm(h))?.key || ''));
+      setMapping(matchColumns(t.headers, fields));
     } catch (e) { setError(e.message); } finally { setBusy(''); }
   };
   const missing = fields.filter((f) => f.required && !mapping.includes(f.key));
@@ -222,7 +248,7 @@ export default function ImportWizard({ type, initiativeId, onDone }) {
         <Card title="Validation" sub="Nothing has been saved yet." flush>
           <div className="card-pad row" style={{ gap: 8 }}>
             <Badge tone="good" icon="checkCircle">{report.summary.ok} ready</Badge>
-            {report.summary.duplicates > 0 && <Badge tone="warning" icon="copy">{report.summary.duplicates} possible duplicates</Badge>}
+            {report.summary.duplicates > 0 && <Badge tone="warning" icon="copy">{report.summary.duplicates} possible duplicate{report.summary.duplicates === 1 ? '' : 's'}</Badge>}
             {report.summary.errors > 0 && <Badge tone="critical" icon="alert">{report.summary.errors} with errors (not imported)</Badge>}
           </div>
           {report.report.some((r) => r.status !== 'ok') ? (

@@ -55,7 +55,7 @@ export async function renderDocxFromTemplate(templateBytes, doc, ctx) {
   // Tags present after the repeating and conditional sections were expanded.
   const tags = new Set();
   for (const part of parts) for (const m of (await zip.file(part).async('string')).matchAll(/\{\{([^{}]+)\}\}/g)) tags.add(m[1].trim());
-  const catalogue = fieldCatalogue();
+  const catalogue = fieldCatalogue({ customFields: s.customFieldDefs || {} });
   const x = X.helpers(s);
   const lctx = { primary: hex(branding.primary), staticCaptions: true, counters: {} };
   const patches = {};

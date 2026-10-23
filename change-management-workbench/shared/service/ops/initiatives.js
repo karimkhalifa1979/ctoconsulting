@@ -141,11 +141,12 @@ export function registerInitiativeOps(S) {
 
   // SUS-004 / PRT-005: lessons learned searchable across initiatives.
   S.op('searchLessons', { area: 'lessons', summary: 'Search lessons learned across initiatives' }, async (actor, { q = '', category } = {}) => {
+    S.assertCan(actor, 'R', 'lesson', null);
     const initiatives = await S.driver.list('initiative');
     const names = Object.fromEntries(initiatives.map((i) => [i.id, i.name]));
     const words = String(q).toLowerCase().split(/\s+/).filter(Boolean);
     return (await S.driver.list('lesson')).filter((l) => (!category || l.category === category) && words.every((w) => [l.title, l.whatWorked, l.whatDidNot, l.recommendation, l.tags].join(' ').toLowerCase().includes(w)))
-      .map((l) => ({ ...l, initiativeName: names[l.initiativeId] || '' }));
+      .map((l) => ({ ...l, initiativeName: names[l.initiativeId] || '', canOpen: actor.system || initiativeAccess(actor, l.initiativeId) }));
   });
 
   // PRT-005: enterprise reuse of key messages across initiatives.

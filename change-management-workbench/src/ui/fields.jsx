@@ -44,7 +44,8 @@ export function FieldControl({ fd, value, onChange, lookups, config, model, disa
     case 'bool':
       return <label className="check"><input type="checkbox" id={id} disabled={disabled} checked={!!value} onChange={(e) => set(e.target.checked)} /><span>{fd.checkLabel || 'Yes'}</span></label>;
     case 'select': {
-      const opts = selectOptions(fd, { config, model });
+      // Values an administrator has retired are not offered for new entries but still show where used.
+      const opts = selectOptions(fd, { config, model }).filter((o) => o.active !== false || o.id === value);
       return (
         <select {...common} value={value ?? ''} onChange={(e) => set(e.target.value || null)}>
           <option value="">{fd.required ? 'Choose…' : '—'}</option>
@@ -54,7 +55,7 @@ export function FieldControl({ fd, value, onChange, lookups, config, model, disa
       );
     }
     case 'multi':
-      return <MultiSelect id={id} options={selectOptions(fd, { config, model })} value={asArray(value)} onChange={set} disabled={disabled} invalid={invalid} />;
+      return <MultiSelect id={id} options={selectOptions(fd, { config, model }).filter((o) => o.active !== false || asArray(value).includes(o.id))} value={asArray(value)} onChange={set} disabled={disabled} invalid={invalid} />;
     case 'adkar':
       return <AdkarPicker id={id} value={asArray(value)} onChange={set} disabled={disabled} />;
     case 'ref':

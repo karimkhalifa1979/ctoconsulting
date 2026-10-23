@@ -227,8 +227,8 @@ function ReuseView() {
   const libraries = [
     { to: '/stakeholders', icon: 'users', title: 'Stakeholder master', text: 'One record per person and group, reused by every initiative, with duplicate checks on entry and import.' },
     { to: '/lessons', icon: 'lightbulb', title: 'Lessons learned', text: 'Lessons from every initiative, searchable by category, phase and keyword.' },
-    { to: user.roles?.includes('admin') ? '/admin/templates' : '/help#templates', icon: 'file', title: `Artefact templates (${published.length} published)`, text: 'Organisation templates for every artefact in the catalogue, with branding, sections and tagged Word templates.' },
-    { to: user.roles?.includes('admin') ? '/admin/library' : '/help', icon: 'target', title: `Intervention library (${asArray(config?.interventions).length})`, text: 'Interventions for each ADKAR element, suggested when a group\'s barrier point is identified.' },
+    { to: user.roles?.includes('admin') ? '/admin/templates' : '/help?section=templates', icon: 'file', title: `Artefact templates (${published.length} published)`, text: 'Organisation templates for every artefact in the catalogue, with branding, sections and tagged Word templates.' },
+    { to: user.roles?.includes('admin') ? '/admin/library' : '/help?section=adkar', icon: 'target', title: `Intervention library (${asArray(config?.interventions).length})`, text: 'Interventions for each ADKAR element, suggested when a group\'s barrier point is identified.' },
   ];
   return (
     <div className="stack">

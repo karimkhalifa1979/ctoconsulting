@@ -148,7 +148,7 @@ function blocksHtml(blocks, counters, level = 2) {
       case 'bullets': return `<ul>${b.items.map((i) => `<li>${text(i)}</li>`).join('')}</ul>`;
       case 'numbers': return `<ol>${b.items.map((i) => `<li>${text(i)}</li>`).join('')}</ol>`;
       case 'table': return tableHtml(b, ++counters.table);
-      case 'kv': return b.rows.length ? `<div class="tbl-wrap"><table class="kv">${b.caption ? `<caption>Table ${++counters.table}: ${esc(b.caption)}</caption>` : ''}<tbody>${b.rows.map(([k, v]) => `<tr><th scope="row">${esc(k)}</th><td>${text(v)}</td></tr>`).join('')}</tbody></table></div>` : '';
+      case 'kv': return b.rows.length ? `<div class="tbl-wrap"><table class="kv">${b.caption ? `<caption>Table ${++counters.table}: ${esc(b.caption)}</caption>` : ''}<tbody>${b.rows.map(([k, v]) => `<tr><th scope="row">${esc(k)}</th><td>${v?.placeholder ? `<mark class="ph">${esc(v.placeholder)}</mark>` : text(v)}</td></tr>`).join('')}</tbody></table></div>` : '';
       case 'chart': return chartHtml(b, ++counters.figure);
       case 'callout': { const [fill, edge] = CALLOUT[b.tone] || CALLOUT.info; return `<aside class="callout" role="note" style="background:#${fill};border-color:#${edge}">${b.title ? `<strong>${esc(b.title)}.</strong> ` : ''}${text(b.text)}</aside>`; }
       case 'placeholder': return `<mark class="ph">${esc(b.text)}</mark>`;

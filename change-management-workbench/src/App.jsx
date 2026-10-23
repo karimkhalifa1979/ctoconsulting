@@ -133,7 +133,7 @@ function InitiativeRoutes() {
               <Route path="sustain" element={<Sustain />} />
               <Route path="artefacts" element={<Artefacts />} />
               <Route path="dashboards" element={<Dashboards />} />
-              <Route path="*" element={<Navigate to="." replace />} />
+              <Route path="*" element={<Navigate to={`/i/${iid}`} replace />} />
             </Routes>
           </Suspense>
         </Layout>

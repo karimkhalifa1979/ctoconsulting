@@ -5,7 +5,7 @@ import { ADKAR, ADKAR_IDS, adkarLabel } from '../refdata.js';
 import { addMonths, periodRange, monthKey } from '../dates.js';
 import { asArray, sortBy, sum, uniq, truncate } from '../util.js';
 import {
-  h, p, bullets, table, kv, chart, callout, placeholder, rich, plain, fmtDate, fmtNum, fmtPct, fmtMoney, adkarName, adkarList, score, labeller,
+  h, p, bullets, table, kv, missing, chart, callout, placeholder, rich, plain, fmtDate, fmtNum, fmtPct, fmtMoney, adkarName, adkarList, score, labeller,
   impactFill, impactInk, adkarFill, adkarInk, RISK_COLOURS, SERIES, STATUS,
 } from './ir.js';
 
@@ -254,7 +254,7 @@ export function sponsorshipGovernance(s, x) {
     id: 'sponsorship', title: 'Sponsorship and governance',
     blocks: [
       h(2, 'Primary sponsor'),
-      kv([['Primary sponsor', s.initiative.primarySponsor ? `${s.initiative.primarySponsor}${s.initiative.primarySponsorPosition ? `, ${s.initiative.primarySponsorPosition}` : ''}` : '[To be completed: primary sponsor]'], ['Business owner', s.initiative.businessOwner], ['Sponsor assessment', s.risk.sponsorAssessed ? `Completed ${fmtDate(s.risk.sponsorAssessed)}${s.risk.sponsorScore != null ? `, ${s.risk.sponsorScore}/100` : ''}` : 'Not yet completed'], ['Sponsorship gaps', st?.sponsorshipGaps], ['Actions to address the gaps', st?.sponsorshipActions]]),
+      kv([['Primary sponsor', s.initiative.primarySponsor ? `${s.initiative.primarySponsor}${s.initiative.primarySponsorPosition ? `, ${s.initiative.primarySponsorPosition}` : ''}` : missing('primary sponsor')], ['Business owner', s.initiative.businessOwner], ['Sponsor assessment', s.risk.sponsorAssessed ? `Completed ${fmtDate(s.risk.sponsorAssessed)}${s.risk.sponsorScore != null ? `, ${s.risk.sponsorScore}/100` : ''}` : 'Not yet completed'], ['Sponsorship gaps', st?.sponsorshipGaps], ['Actions to address the gaps', st?.sponsorshipActions]]),
       h(2, 'Sponsor coalition'),
       table([{ label: 'Leader', w: 2 }, { label: 'Area of influence', w: 2 }, { label: 'Current support', w: 1.3 }, { label: 'Desired support', w: 1.3 }, { label: 'Alignment actions', w: 4 }],
         s.coalition.map((c) => [c.position ? `${c.name}, ${c.position}` : c.name, c.area, L('engagementLevel', c.current), L('engagementLevel', c.desired), c.actions]), { caption: 'Sponsor coalition', empty: 'No coalition members recorded.' }),
