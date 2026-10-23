@@ -39,7 +39,9 @@ export function startScheduler(service, { log }) {
         measureNotified[key] = today;
         await service.notify([x.ownerId, ini.changeLeadId], measureNotice(ini, x));
       }
-      // Surveys past their closing date are closed and aggregated.
+      // Scheduled surveys open (and are emailed) on their opening date; surveys past their closing date are
+      // closed and aggregated (ADK-007).
+      for (const s of m.surveys) if (s.status === 'scheduled' && s.opensAt && s.opensAt <= today) await service.ops.openSurvey(service.SYSTEM, { id: s.id });
       for (const s of m.surveys) if (s.status === 'open' && s.closesAt && s.closesAt < today) await service.ops.closeSurvey(service.SYSTEM, { id: s.id });
     }
     await service.driver.setConfig('jobState', { ...state, cadenceNotified: notified, measureNotified, lastDaily: today });

@@ -43,6 +43,9 @@ const service = createService({
     log,
     // Master size above which each initiative's working set holds only the stakeholders it uses (PER-04).
     ...(env.CMW_SCOPE_THRESHOLD ? { scopeThreshold: Number(env.CMW_SCOPE_THRESHOLD) } : {}),
+    // Survey invitations and reminders to stakeholders (ADK-007) need email and the public address.
+    publicUrl: env.PUBLIC_URL || null,
+    sendMail: mailer.enabled ? (to, subject, text) => mailer.send(to, subject, text) : null,
     aiAvailable,
     emailAvailable: mailer.enabled,
     ssoAvailable: Boolean(env.OIDC_ISSUER),

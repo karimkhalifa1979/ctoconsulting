@@ -10,6 +10,7 @@ import { createMemoryDriver } from '../shared/memoryDriver.js';
 import { seedDemo } from '../shared/seed/demo.js';
 import { nextRun } from '../shared/service/ops/artefacts.js';
 import { runReport, datasetFields } from '../shared/reportBuilder.js';
+import { addDays } from '../shared/dates.js';
 
 let S;
 let ini;
@@ -187,4 +188,26 @@ test('RUL-03: individual survey responses stay on the server; the client gets re
   const ch = await S.changes(lead, ini.id, d.seq);
   assert.ok(!ch.records.some((r) => r.type === 'surveyResponse'), 'no raw responses in the change feed');
   assert.equal(ch.records.find((r) => r.id === open.id)?.responseCount, open.responseCount + 1);
+});
+
+test('ADK-007: a scheduled campaign opens with its link emailed to its groups, and reminders are emailed', async () => {
+  const sent = [];
+  const M = createService({ driver: createMemoryDriver(), env: { mode: 'standalone', publicUrl: 'https://cmw.example.gov.au', sendMail: async (to, subject, text) => { sent.push({ to, subject, text }); } } });
+  await seedDemo(M, {});
+  const lead = (await M.driver.list('user')).find((u) => u.name === 'Priya Raman');
+  const target = (await M.driver.list('initiative')).find((i) => i.shortName === 'Case Management');
+  const m = await M.model(target.id);
+  const groups = m.groups.filter((g) => g.memberIds.size > 0).slice(0, 2);
+  const today = await M.today();
+  const created = await M.ops.createAdkarCampaign(lead, { initiativeId: target.id, title: 'Pulse check', round: 'adHoc', groupIds: groups.map((g) => g.id), opensAt: addDays(today, 3), closesAt: addDays(today, 17), anonymous: true });
+  const id = created.id || created.survey?.id;
+  assert.equal((await M.ops.scheduleSurvey(lead, { id })).status, 'scheduled');
+  assert.equal(sent.length, 0, 'nothing is sent until it opens');
+  const opened = await M.ops.openSurvey(lead, { id });
+  const withEmail = new Set(groups.flatMap((g) => [...g.memberIds]).filter((sid) => m.byId.stakeholder[sid]?.email && m.byId.stakeholder[sid].status !== 'left'));
+  assert.equal(opened.emailed, withEmail.size);
+  assert.ok(sent.every((x) => x.text.includes(`https://cmw.example.gov.au/#/survey/${opened.token}`)), 'everyone gets the same link');
+  const reminded = await M.ops.sendSurveyReminder(lead, { id });
+  assert.equal(reminded.emailed, withEmail.size);
+  assert.ok(sent.slice(-reminded.emailed).every((x) => x.subject.startsWith('Reminder: ')));
 });

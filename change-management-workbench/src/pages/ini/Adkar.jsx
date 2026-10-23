@@ -243,7 +243,8 @@ export function Surveys({ kinds = ['adkar'], intro, createLabel = 'New ADKAR cam
   const [results, setResults] = useState(null);
   const [translating, setTranslating] = useState(null);
   const link = (s) => `${location.origin}${location.pathname}#/survey/${s.token}`;
-  const act = async (name, payload, msg) => { await mut.op(name, payload); toast.success(msg); };
+  const act = async (name, payload, msg) => { const r = await mut.op(name, payload); toast.success(typeof msg === 'function' ? msg(r) : msg); };
+  const emailed = (r, sent, recorded) => (r?.emailed ? `${sent} ${r.emailed.toLocaleString('en-AU')} ${r.emailed === 1 ? 'person' : 'people'}` : recorded);
   const list = m.surveys.filter((s) => kinds.includes(s.kind || 'adkar'));
   return (
     <div className="stack">
@@ -254,7 +255,7 @@ export function Surveys({ kinds = ['adkar'], intro, createLabel = 'New ADKAR cam
       {!list.length && <Empty icon="chart" title="No campaigns yet" />}
       {sortBy(list, '-opensAt').map((s) => (
         <Card key={s.id} title={s.title} sub={`${s.kind && s.kind !== 'adkar' ? label('surveyKind', s.kind, config) : label('assessmentRound', s.round, config) || ''} · ${fmtDate(s.opensAt)} to ${fmtDate(s.closesAt)} · ${asArray(s.groupIds).map((g) => m.groupsById[g]?.name).filter(Boolean).join(', ')}`}
-          actions={<StatusBadge status={s.status === 'open' ? 'inProgress' : s.status === 'closed' ? 'complete' : 'draft'} labelText={label('surveyStatus', s.status, config)} />}>
+          actions={<StatusBadge status={s.status === 'open' ? 'inProgress' : s.status === 'closed' ? 'complete' : s.status === 'scheduled' ? 'scheduled' : 'draft'} labelText={label('surveyStatus', s.status, config)} />}>
           <div className="row-between">
             <div className="row small" style={{ gap: 16 }}>
               <span><strong>{s.responses}</strong> responses{s.invited ? ` of ${s.invited.toLocaleString('en-AU')} invited` : ''}</span>
@@ -262,12 +263,14 @@ export function Surveys({ kinds = ['adkar'], intro, createLabel = 'New ADKAR cam
               {asArray(s.reminders).length > 0 && <span>{s.reminders.length} reminder(s) sent</span>}
             </div>
             <div className="btn-row">
-              {s.status === 'draft' && canDo('U', 'survey') && <button type="button" className="btn btn-sm btn-primary" onClick={() => act('openSurvey', { id: s.id }, 'Survey opened')}>Open survey</button>}
+              {s.status === 'draft' && canDo('U', 'survey') && s.opensAt > today && <button type="button" className="btn btn-sm" onClick={() => act('scheduleSurvey', { id: s.id }, `Scheduled to open on ${fmtDate(s.opensAt)}`)}><Icon name="clock" />Schedule for {fmtDate(s.opensAt)}</button>}
+              {s.status === 'scheduled' && <span className="small muted">Opens {fmtDate(s.opensAt)}, when the link is emailed to the groups</span>}
+              {['draft', 'scheduled'].includes(s.status) && canDo('U', 'survey') && <button type="button" className="btn btn-sm btn-primary" onClick={() => act('openSurvey', { id: s.id }, (r) => emailed(r, 'Survey opened and emailed to', 'Survey opened'))}>{s.status === 'scheduled' ? 'Open now' : 'Open survey'}</button>}
               {s.status === 'open' && (
                 <>
                   <button type="button" className="btn btn-sm" onClick={() => { navigator.clipboard?.writeText(link(s)); toast.success('Survey link copied'); }}><Icon name="link" />Copy link</button>
                   <a className="btn btn-sm" href={link(s)} target="_blank" rel="noreferrer"><Icon name="external" />Open</a>
-                  {canDo('U', 'survey') && <button type="button" className="btn btn-sm" onClick={() => act('sendSurveyReminder', { id: s.id }, 'Reminder recorded')}>Send reminder</button>}
+                  {canDo('U', 'survey') && <button type="button" className="btn btn-sm" onClick={() => act('sendSurveyReminder', { id: s.id }, (r) => emailed(r, 'Reminder emailed to', 'Reminder recorded'))}>Send reminder</button>}
                   {canDo('U', 'survey') && <button type="button" className="btn btn-sm" onClick={async () => { const d = await dialog.prompt({ title: 'Extend the campaign', label: 'New closing date (YYYY-MM-DD)', multiline: false, defaultValue: addDays(s.closesAt || today, 7) }); if (d) act('extendSurvey', { id: s.id, closesAt: d }, 'Campaign extended'); }}>Extend</button>}
                   {canDo('U', 'survey') && <button type="button" className="btn btn-sm" onClick={async () => { if (await dialog.confirm({ title: 'Close and aggregate', message: 'Closing stops new responses and stores aggregated results for each group, suppressing small segments.' })) act('closeSurvey', { id: s.id }, 'Survey closed and results stored'); }}>Close</button>}
                 </>

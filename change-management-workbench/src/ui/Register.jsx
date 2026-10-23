@@ -51,6 +51,7 @@ export default function Register({
       )}
       <DataGrid id={id || `${type}`} type={type} title={title || meta.plural} rows={rows} columns={columns} facets={facets} onRowClick={open}
         selectable={editable && !!(bulkFields?.length || bulkActions?.length)} bulkFields={editable ? bulkFields : []} bulkActions={bulkActions} toolbar={toolbar}
+        inlineEdit={editable ? (r) => can(user, 'U', type, r) : false}
         defaultSort={defaultSort} empty={empty} exportName={`${ini.initiative?.shortName || ''} ${meta.plural}`.trim()} rowClass={rowClass} compact={compact} />
     </div>
   );

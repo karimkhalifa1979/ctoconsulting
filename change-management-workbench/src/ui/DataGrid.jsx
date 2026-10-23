@@ -1,6 +1,6 @@
-// Register grid (USE-05): search, facet filters, sorting, column choice, multi-select with bulk edit,
-// CSV and Excel export, and saved views that can be shared with others.
-import { useEffect, useMemo, useState } from 'react';
+// Register grid (USE-05): search, facet filters, sorting, column choice, inline editing of simple fields,
+// multi-select with bulk edit, CSV and Excel export, and saved views that can be shared with others.
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Icon from './Icon.jsx';
 import { AdkarTags, StatusBadge, Popover, Empty } from './core.jsx';
 import { FieldControl, selectOptions } from './fields.jsx';
@@ -10,6 +10,7 @@ import { fmtDate, fmtDateTime, fmtNum, fmtMoney } from '../lib/format.js';
 import { useApp, useDialog, useToast } from '../state/app.jsx';
 import { useMutator } from '../state/initiative.jsx';
 import { exportTable } from '../lib/export.js';
+import { useLookups } from './RecordForm.jsx';
 
 const STATUS_KEYS = new Set(['status', 'commsStatus', 'confirmationStatus', 'state', 'decision', 'result']);
 
@@ -70,9 +71,31 @@ function cmp(a, b) {
   return COLLATOR.compare(String(a), String(b));
 }
 
+// Field types that can be edited in place in a grid cell; longer or structured fields open the record.
+const INLINE_TYPES = new Set(['text', 'select', 'date', 'int', 'number', 'money', 'user', 'ref', 'bool']);
+const IMMEDIATE = new Set(['select', 'user', 'ref', 'bool']);
+
+// One cell being edited: Enter or leaving the cell saves, Escape cancels; choices save when made.
+function InlineEditor({ fd, value, onSave, onCancel }) {
+  const { config } = useApp();
+  const lookups = useLookups();
+  const [v, setV] = useState(value ?? (fd.type === 'bool' ? false : ''));
+  const box = useRef(null);
+  const immediate = IMMEDIATE.has(fd.type);
+  useEffect(() => { box.current?.querySelector('input, select')?.focus(); }, []);
+  const commit = (next) => onSave(next === '' ? null : ['int', 'number', 'money'].includes(fd.type) && next != null ? Number(next) : next);
+  return (
+    <div className="inline-editor" ref={box}
+      onKeyDown={(e) => { if (e.key === 'Escape') { e.stopPropagation(); onCancel(); } else if (e.key === 'Enter' && !immediate) { e.preventDefault(); commit(v); } }}
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) (immediate ? onCancel() : commit(v)); }}>
+      <FieldControl fd={fd} value={v} onChange={(nv) => { setV(nv); if (immediate) commit(nv); }} lookups={lookups} config={config} />
+    </div>
+  );
+}
+
 export default function DataGrid({
   id, type, rows = [], columns, onRowClick, selectable = false, bulkFields = [], bulkActions = [], facets = [], searchKeys,
-  defaultSort, pageSize = 50, exportName, toolbar, empty, title, savedViews = true, rowClass, initialFacets = {}, compact = false, onChanged,
+  defaultSort, pageSize = 50, exportName, toolbar, empty, title, savedViews = true, rowClass, initialFacets = {}, compact = false, onChanged, inlineEdit = false,
 }) {
   const { api, user, config } = useApp();
   const toast = useToast();
@@ -88,6 +111,14 @@ export default function DataGrid({
   const [selected, setSelected] = useState(new Set());
   const [page, setPage] = useState(0);
   const [views, setViews] = useState([]);
+  const [editing, setEditing] = useState(null);
+  const canInline = (c, r) => !!inlineEdit && !!type && !!c.field && INLINE_TYPES.has(c.field.type) && !c.field.readOnly && !c.field.system && !c.field.sensitive
+    && !r._redacted?.includes(c.key) && (typeof inlineEdit === 'function' ? inlineEdit(r) : true);
+  const saveCell = async (r, c, v) => {
+    setEditing(null);
+    if (JSON.stringify(v ?? null) === JSON.stringify(r[c.key] ?? null)) return;
+    try { await mut.update(type, r.id, { [c.key]: v }, { version: r.version }); onChanged?.(); } catch { /* the mutator reports the problem */ }
+  };
 
   useEffect(() => { try { localStorage.setItem(storeKey, JSON.stringify({ sort, hidden: [...hidden] })); } catch { /* storage unavailable */ } }, [storeKey, sort, hidden]);
   useEffect(() => { setPage(0); }, [q, facetVals]);
@@ -228,10 +259,19 @@ export default function DataGrid({
             <tbody>
               {shown.map((r) => (
                 <tr key={r.id} className={`${onRowClick ? 'clickable' : ''} ${selected.has(r.id) ? 'selected' : ''} ${rowClass?.(r) || ''}`}
-                  onClick={(e) => { if (onRowClick && !e.target.closest('button, a, input, select, label')) onRowClick(r); }}
+                  onClick={(e) => { if (onRowClick && !e.target.closest('button, a, input, select, label, .inline-editor')) onRowClick(r); }}
                   onKeyDown={(e) => { if (onRowClick && e.key === 'Enter' && e.target === e.currentTarget) onRowClick(r); }} tabIndex={onRowClick ? 0 : undefined}>
                   {selectable && <td className="cb"><input type="checkbox" aria-label={`Select ${r.code || r.id}`} checked={selected.has(r.id)} onChange={() => setSelected((s) => { const n = new Set(s); n.has(r.id) ? n.delete(r.id) : n.add(r.id); return n; })} /></td>}
-                  {visibleCols.map((c) => <td key={c.key} className={`${c.align || ''} ${c.wrap ? 'wrap' : ''}`}>{c.render ? c.render(r) : String(r[c.key] ?? '')}</td>)}
+                  {visibleCols.map((c) => {
+                    const inline = canInline(c, r);
+                    if (inline && editing?.id === r.id && editing.key === c.key) return <td key={c.key} className={c.align || ''}><InlineEditor fd={c.field} value={r[c.key]} onSave={(v) => saveCell(r, c, v)} onCancel={() => setEditing(null)} /></td>;
+                    return (
+                      <td key={c.key} className={`${c.align || ''} ${c.wrap ? 'wrap' : ''} ${inline ? 'cell-editable' : ''}`}>
+                        {c.render ? c.render(r) : String(r[c.key] ?? '')}
+                        {inline && <button type="button" className="cell-edit-btn" aria-label={`Edit ${c.label.toLowerCase()} for ${r.code || 'this record'}`} title={`Edit ${c.label.toLowerCase()}`} onClick={(e) => { e.stopPropagation(); setEditing({ id: r.id, key: c.key }); }}><Icon name="edit" size={13} /></button>}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>

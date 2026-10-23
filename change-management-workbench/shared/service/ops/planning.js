@@ -3,7 +3,7 @@
 import { AppError, asArray, uid, round } from '../../util.js';
 import { ADKAR_IDS, ADKAR_SURVEY_ITEMS, BARRIER_SIGNS, adkarLabel } from '../../refdata.js';
 import { aggregate, NO_BARRIER } from '../../rules/adkar.js';
-import { addDays, makeCalendar } from '../../dates.js';
+import { addDays, makeCalendar, fmtDate } from '../../dates.js';
 import { holidaysOf } from '../../model.js';
 
 export function registerPlanningOps(S) {
@@ -82,18 +82,53 @@ export function registerPlanningOps(S) {
     });
   });
 
-  S.op('openSurvey', { area: 'adkar', summary: 'Open a survey and issue its link' }, async (actor, { id }) => {
+  // ADK-007: email a campaign's link to the current members of its target groups, when the deployment can send
+  // email and knows its public address. Everyone receives the same link, so responses stay anonymous.
+  async function emailSurveyLink(s, { reminder = false, groupIds } = {}) {
+    if (!S.env.sendMail || !S.env.publicUrl) return { emailed: 0 };
+    const m = await S.model(s.initiativeId);
+    const targets = asArray(groupIds?.length ? groupIds : s.groupIds);
+    const people = new Set();
+    for (const g of m.groups.filter((x) => targets.includes(x.id))) for (const sid of g.memberIds) people.add(sid);
+    const link = `${String(S.env.publicUrl).replace(/\/$/, '')}/#/survey/${s.token}`;
+    const body = [
+      `${reminder ? 'A reminder: you are' : 'You are'} invited to take part in "${s.title}" for ${m.initiative.name}.`,
+      `It takes a few minutes${s.anonymous ? ', and your answers are anonymous' : ''}.`,
+      '', link, '', s.closesAt ? `The survey closes on ${fmtDate(s.closesAt)}.` : '',
+    ].join('\n');
+    let emailed = 0;
+    for (const sid of people) {
+      const st = m.byId.stakeholder[sid];
+      if (!st?.email || st.status === 'left' || st.deidentified) continue;
+      try { await S.env.sendMail(st.email, `${reminder ? 'Reminder: ' : ''}${s.title}`, body); emailed++; } catch { /* reported in the count */ }
+    }
+    return { emailed };
+  }
+
+  S.op('openSurvey', { area: 'adkar', summary: 'Open a survey, issue its link and email it to the target groups' }, async (actor, { id }) => {
     const s = await S.driver.get('survey', id);
     if (!s) throw new AppError(404, 'Survey not found.');
-    return S.update(actor, 'survey', id, { status: 'open', token: s.token || uid().slice(0, 16), opensAt: s.opensAt || S.nowIso().slice(0, 10) });
+    let rec = await S.update(actor, 'survey', id, { status: 'open', token: s.token || uid().slice(0, 16), opensAt: s.opensAt && s.opensAt <= (await S.today()) ? s.opensAt : await S.today() });
+    const { emailed } = await emailSurveyLink(rec);
+    if (emailed && !rec.invited) rec = await S.update(S.SYSTEM, 'survey', id, { invited: emailed }, { system: true, skipValidation: true, noAudit: true });
+    return { ...rec, emailed };
+  });
+
+  // Schedules a draft campaign to open, and be distributed, on its opening date (ADK-007).
+  S.op('scheduleSurvey', { area: 'adkar', summary: 'Schedule a survey to open on its opening date' }, async (actor, { id }) => {
+    const s = await S.driver.get('survey', id);
+    if (!s || s.status !== 'draft') throw new AppError(409, 'Only draft surveys can be scheduled.');
+    if (!s.opensAt || s.opensAt <= (await S.today())) return S.ops.openSurvey(actor, { id });
+    return S.update(actor, 'survey', id, { status: 'scheduled' }, { skipValidation: true });
   });
 
   S.op('sendSurveyReminder', { area: 'adkar', summary: 'Send a reminder to survey invitees' }, async (actor, { id, groupIds }) => {
     const s = await S.driver.get('survey', id);
     if (!s || s.status !== 'open') throw new AppError(409, 'Only open surveys can have reminders.');
-    const reminders = [...asArray(s.reminders), { at: S.nowIso(), by: actor.id, groupIds: groupIds || s.groupIds }];
-    await S.audit(actor, { action: 'reminder', type: 'survey', recordId: id, initiativeId: s.initiativeId, summary: `Reminder issued for ${s.title}` });
-    return S.update(actor, 'survey', id, { reminders }, { skipValidation: true });
+    const { emailed } = await emailSurveyLink(s, { reminder: true, groupIds });
+    const reminders = [...asArray(s.reminders), { at: S.nowIso(), by: actor.id, groupIds: groupIds || s.groupIds, emailed }];
+    await S.audit(actor, { action: 'reminder', type: 'survey', recordId: id, initiativeId: s.initiativeId, summary: `Reminder issued for ${s.title}${emailed ? ` and emailed to ${emailed} people` : ''}` });
+    return { ...(await S.update(actor, 'survey', id, { reminders }, { skipValidation: true })), emailed };
   });
 
   S.op('extendSurvey', { area: 'adkar', summary: 'Extend a survey closing date' }, async (actor, { id, closesAt }) => S.update(actor, 'survey', id, { closesAt }, { reason: 'Campaign extended' }));

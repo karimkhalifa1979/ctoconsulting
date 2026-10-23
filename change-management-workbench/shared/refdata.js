@@ -186,7 +186,7 @@ export const DEFAULT_LISTS = {
   feedbackTheme: L(['timing', 'Timing and workload'], ['training', 'Training and support'], ['system', 'System performance and usability'], ['process', 'Process clarity'], ['communication', 'Communication'], ['leadership', 'Leadership and sponsorship'], ['roles', 'Roles and job security'], ['customer', 'Customer or participant impact'], ['other', 'Other']),
   feedbackStatus: L(['new', 'New'], ['reviewed', 'Reviewed'], ['actioned', 'Actioned'], ['closed', 'Closed']),
   surveyKind: L(['adkar', 'ADKAR self-assessment'], ['readiness', 'Readiness'], ['sentiment', 'Sentiment pulse'], ['trainingEvaluation', 'Training evaluation'], ['custom', 'Custom']),
-  surveyStatus: L(['draft', 'Draft'], ['open', 'Open'], ['closed', 'Closed']),
+  surveyStatus: L(['draft', 'Draft'], ['scheduled', 'Scheduled'], ['open', 'Open'], ['closed', 'Closed']),
   assessmentMethod: L(['practitioner', 'Change practitioner assessment'], ['manager', 'People manager assessment'], ['self', 'Self-assessment survey'], ['inferred', 'Inferred from engagement observations']),
   assessmentRound: L(['baseline', 'Baseline'], ['preGoLive', 'Pre-go-live'], ['postGoLive', 'Post-go-live'], ['sustainment', 'Sustainment'], ['adHoc', 'Ad hoc']),
   readinessStatus: L(['met', 'Met', { value: 2 }], ['partlyMet', 'Partly met', { value: 1 }], ['notMet', 'Not met', { value: 0 }], ['notApplicable', 'Not applicable']),

@@ -739,3 +739,11 @@ kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fon
   .guide-steps { position: static; }
 }
 .survey-lang { max-width: 260px; margin: 4px 0 8px auto; }
+
+/* Inline editing in grids (USE-05) */
+.cell-edit-btn { opacity: 0; margin-left: 6px; padding: 2px; border: 0; border-radius: 4px; background: none; color: var(--ink-3); cursor: pointer; vertical-align: middle; line-height: 0; }
+.tbl tr:hover .cell-edit-btn, .cell-edit-btn:focus-visible { opacity: 1; }
+.cell-edit-btn:hover { background: var(--surface-3); color: var(--ink); }
+@media (hover: none) { .cell-edit-btn { opacity: .7; } }
+.inline-editor { min-width: 150px; }
+.inline-editor input:not([type=checkbox]), .inline-editor select { width: 100%; }
