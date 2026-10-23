@@ -23,6 +23,7 @@ const Admin = lazy(() => import('./pages/admin/Admin.jsx'));
 const Help = lazy(() => import('./pages/Help.jsx'));
 const Overview = lazy(() => import('./pages/ini/Overview.jsx'));
 const Setup = lazy(() => import('./pages/ini/Setup.jsx'));
+const Guide = lazy(() => import('./pages/ini/Guide.jsx'));
 const Impact = lazy(() => import('./pages/ini/Impact.jsx'));
 const Risk = lazy(() => import('./pages/ini/Risk.jsx'));
 const Strategy = lazy(() => import('./pages/ini/Strategy.jsx'));
@@ -114,6 +115,7 @@ function InitiativeRoutes() {
             <Routes>
               <Route index element={<Overview />} />
               <Route path="setup" element={<Setup />} />
+              <Route path="guide" element={<Guide />} />
               <Route path="impact" element={<Impact />} />
               <Route path="risk" element={<Risk />} />
               <Route path="strategy" element={<Strategy />} />

@@ -12,7 +12,7 @@ import { recordPath } from '../../Layout.jsx';
 import { overallRag, ragOf } from '../../../shared/model.js';
 import { ADKAR, PHASES, adkarLabel } from '../../../shared/refdata.js';
 import { ALERT_KINDS } from '../../../shared/rules/alerts.js';
-import { hasRole } from '../../../shared/access.js';
+import { can, hasRole } from '../../../shared/access.js';
 import { fmtDate, relative, label } from '../../lib/format.js';
 import { saveBlob } from '../../data/client.js';
 
@@ -158,6 +158,12 @@ export default function Overview() {
         <Kpi label="Open actions" value={k.openActions} sub={k.overdueActions ? <Badge tone="critical" icon="octagon">{k.overdueActions} overdue</Badge> : 'None overdue'} to="#/work" />
       </div>
 
+      {st.phases[0]?.status !== 'complete' && !ini.readOnly && can(user, 'U', 'initiative', i) && (
+        <div className="callout mb-4 guide-callout">
+          <span><strong>Phase 1 is not complete yet.</strong> The guided set-up takes you through the inputs the Change Management Strategy needs, one step at a time (INI-010).</span>
+          <Link className="btn btn-sm" to={`${base}/guide`}><Icon name="compass" />Guided set-up</Link>
+        </div>
+      )}
       <Card title="Progress through the 3-Phase Process" sub="Stages are complete when their mandatory inputs are captured and approvals recorded (RUL-18). Select a count to see what is missing." className="mb-4">
         <StageTracker stageStatus={st} base={base} />
       </Card>

@@ -251,7 +251,8 @@ function NewInitiative({ initial, initiatives, onClose }) {
       await refresh();
       const copied = Object.values(r.copied || {}).reduce((a, b) => a + b, 0);
       toast.success(`${r.initiative.name} created${copied ? ` with ${copied} records copied` : ''}`);
-      navigate(`/i/${r.initiative.id}/setup`);
+      // A new initiative starts with the guided set-up (INI-010); a copy already holds its inputs.
+      navigate(`/i/${r.initiative.id}/${mode === 'copy' && source ? 'setup' : 'guide'}`);
     } catch (e) { toast.error(e); setBusy(false); }
   };
   return (

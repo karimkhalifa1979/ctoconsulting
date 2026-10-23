@@ -1,7 +1,7 @@
 // Stakeholder data operations: duplicates and merge (STK-046), spreadsheet import with field mapping,
 // validation and an import report (STK-047, INT-009, TRA-01, AC-06), leavers and movers (RUL-19), and
 // privacy requests (STK-050, PRV-05, PRV-06).
-import { AppError, asArray, personName, uniq, isEmpty } from '../../util.js';
+import { AppError, asArray, personName, uniq, isEmpty, escapeHtml } from '../../util.js';
 import { ENTITIES, entity, fieldsOf, listOptions } from '../../schema.js';
 import { validateRecord, normalise } from '../../validate.js';
 import { findDuplicates, duplicateKey } from '../../rules/stakeholders.js';
@@ -205,6 +205,9 @@ export function registerStakeholderOps(S) {
           return Number.isNaN(Number(s)) ? { error: `${fd.label}: "${s}" is not a number` } : { value: Number(s) };
         case 'bool':
           return { value: /^(y|yes|true|1)$/i.test(s) };
+        case 'richtext':
+          // Plain text from a cell: blank lines separate paragraphs.
+          return { value: s.split(/\n\s*\n/).map((para) => `<p>${escapeHtml(para.trim()).replace(/\n/g, '<br>')}</p>`).join('') };
         case 'select':
           return opts ? matchList(opts) : { value: s };
         case 'multi':
@@ -260,7 +263,7 @@ export function registerStakeholderOps(S) {
     S.assertCan(actor, 'C', type, null);
     const config = await S.getConfig();
     const resolve = await resolver();
-    const fields = fieldsOf(type, config).filter((f) => !f.system && !f.readOnly && !f.hidden && f.type !== 'json' && f.type !== 'table' && f.type !== 'richtext');
+    const fields = fieldsOf(type, config).filter((f) => !f.system && !f.readOnly && !f.hidden && f.type !== 'json' && f.type !== 'table');
     const existingStakeholders = type === 'stakeholder' ? await S.driver.list('stakeholder') : [];
     const report = [];
     const seenInFile = [];

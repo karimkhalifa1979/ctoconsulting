@@ -2,6 +2,7 @@
 // scope; objectives and success measures; releases and milestones with Microsoft Project import;
 // decisions and assumptions; who has access.
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Icon from '../../ui/Icon.jsx';
 import { Card, PageHead, Tabs, Empty, Badge, StatusBadge, Spinner } from '../../ui/core.jsx';
 import RecordForm from '../../ui/RecordForm.jsx';
@@ -13,12 +14,12 @@ import { asArray } from '../../../shared/util.js';
 import { saveBlob } from '../../data/client.js';
 
 export default function Setup() {
-  const { m, ini, canDo } = useIniPage();
+  const { m, ini, canDo, base } = useIniPage();
   const [tab, setTab] = useTab('definition');
   if (!m) return <Spinner />;
   return (
     <>
-      <PageHead eyebrow="Phase 1 · Define Success" title="Definition and success">
+      <PageHead eyebrow="Phase 1 · Define Success" title="Definition and success" actions={<Link className="btn" to={`${base}/guide`}><Icon name="compass" />Guided set-up</Link>}>
         What the change must achieve, why it is needed now, how adoption will be recognised and how success will be measured.
       </PageHead>
       <Tabs value={tab} onChange={setTab} tabs={[
@@ -40,7 +41,7 @@ export default function Setup() {
         </div>
       )}
       {tab === 'milestones' && <Milestones />}
-      {tab === 'decisions' && <Register type="decision" title="Decisions and assumptions" sub="Who decided what and why (INI-007)." facets={['kind']} defaultSort={{ key: 'date', dir: 'desc' }} />}
+      {tab === 'decisions' && <Register type="decision" title="Decisions and assumptions" sub="Who decided what and why, and the assumptions the plan rests on (INI-012)." facets={['kind']} defaultSort={{ key: 'date', dir: 'desc' }} />}
       {tab === 'access' && <Access />}
     </>
   );

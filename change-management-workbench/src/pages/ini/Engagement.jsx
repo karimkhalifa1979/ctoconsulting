@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router-dom';
 import Icon from '../../ui/Icon.jsx';
 import { Card, PageHead, Tabs, Empty, Badge, StatusBadge, Spinner, Modal, Seg, AdkarTags, Help } from '../../ui/core.jsx';
 import DataGrid from '../../ui/DataGrid.jsx';
+import { ImportButton } from '../../ui/ImportWizard.jsx';
 import { FieldControl, RefPicker, RichText, AdkarPicker } from '../../ui/fields.jsx';
 import { MonthCalendar, ColumnChart, BarChart } from '../../charts/index.jsx';
 import { useIniPage, useTab } from '../../lib/hooks.js';
@@ -196,7 +197,7 @@ function CalendarView({ onLog }) {
 }
 
 function Log() {
-  const { m, config, usersById, drawer, user } = useIniPage();
+  const { m, ini, config, usersById, drawer, user, canDo } = useIniPage();
   const rows = sortBy(m.engagements.filter((e) => e.done || ['cancelled', 'didNotProceed'].includes(e.status)), '-date');
   const types = [...new Set(rows.map((e) => e.engagementType).filter(Boolean))];
   const cols = [
@@ -211,6 +212,7 @@ function Log() {
   ];
   return (
     <DataGrid id="engLog" type="engagement" title="Engagement log" rows={rows} columns={cols} onRowClick={(e) => drawer.open({ type: 'engagement', id: e.id, wide: true, after: (rec) => rec && <EngagementExtras e={rec} /> })}
+      toolbar={canDo('C', 'engagement') && <ImportButton type="engagement" initiativeId={ini.id} label="Import past engagements" />}
       facets={[
         { key: 'type', label: 'Type', options: types.map((t) => ({ id: t, label: label('engagementType', t, config) })), value: (e) => e.engagementType },
         { key: 'status', label: 'Status', options: ['completed', 'locked', 'cancelled', 'didNotProceed'].map((s) => ({ id: s, label: STATUS_LABEL(s, config) })), value: (e) => e.status },

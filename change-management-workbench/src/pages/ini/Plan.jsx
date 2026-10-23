@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import Icon from '../../ui/Icon.jsx';
 import { Card, PageHead, Tabs, Empty, Badge, StatusBadge, Spinner, Modal, AdkarTags, Meter } from '../../ui/core.jsx';
 import DataGrid from '../../ui/DataGrid.jsx';
+import { ImportButton } from '../../ui/ImportWizard.jsx';
 import ApprovalPanel from '../../ui/Approvals.jsx';
 import { RefPicker, AdkarPicker } from '../../ui/fields.jsx';
 import { Gantt, Heatmap, StackedBars, impactFill, impactInk } from '../../charts/index.jsx';
@@ -70,7 +71,7 @@ export function activityColumns({ m, config, lookups, usersById }) {
 }
 
 function Activities() {
-  const { m, config, lookups, usersById, drawer, canDo } = useIniPage();
+  const { m, ini, config, lookups, usersById, drawer, canDo } = useIniPage();
   const [suggest, setSuggest] = useState(false);
   const rows = sortBy(m.activities, (a) => a.startDate || '9999');
   const facets = [
@@ -83,7 +84,7 @@ function Activities() {
     <div className="stack">
       <div className="row-between">
         <p className="small muted" style={{ margin: 0, maxWidth: 760 }}>Activities with no target group apply to every group. Once the plan is baselined, changes to scope and dates need a reason and are kept in the change log (PLN-006).</p>
-        {canDo('C', 'activity') && <div className="btn-row"><button type="button" className="btn" onClick={() => setSuggest(true)}><Icon name="lightbulb" />Interventions for a barrier point</button><button type="button" className="btn btn-primary" onClick={() => drawer.open({ type: 'activity', defaults: { kind: 'activity', status: 'notStarted' }, wide: true })}><Icon name="plus" />Add activity</button></div>}
+        {canDo('C', 'activity') && <div className="btn-row"><ImportButton type="activity" initiativeId={ini.id} /><button type="button" className="btn" onClick={() => setSuggest(true)}><Icon name="lightbulb" />Interventions for a barrier point</button><button type="button" className="btn btn-primary" onClick={() => drawer.open({ type: 'activity', defaults: { kind: 'activity', status: 'notStarted' }, wide: true })}><Icon name="plus" />Add activity</button></div>}
       </div>
       <DataGrid id="activities" type="activity" title="Plan activities" rows={rows} columns={activityColumns({ m, config, lookups, usersById })} facets={facets}
         onRowClick={(a) => drawer.open({ type: 'activity', id: a.id, wide: true })} selectable={canDo('U', 'activity')} bulkFields={['ownerId', 'status', 'percentComplete', 'startDate', 'endDate']} defaultSort={{ key: 'startDate', dir: 'asc' }} />

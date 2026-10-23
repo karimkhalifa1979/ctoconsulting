@@ -719,3 +719,22 @@ kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; fon
 .master-search { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: flex-end; margin-bottom: 12px; }
 .master-search .field { flex: 1 1 320px; margin: 0; }
 .master-search > span { flex: 1 1 240px; padding-bottom: 6px; color: var(--ink-2); }
+
+/* Guided set-up (INI-010) */
+.guide { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 20px; align-items: start; }
+.guide-steps { position: sticky; top: 72px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+.guide-steps ol { list-style: none; margin: 0 0 10px; padding: 0; }
+.guide-steps button { display: flex; gap: 8px; align-items: center; width: 100%; text-align: left; background: none; border: 0; border-radius: 6px; padding: 7px 8px; font: inherit; font-size: 13.5px; color: var(--ink-2); cursor: pointer; }
+.guide-steps button:hover { background: var(--surface-2); color: var(--ink); }
+.guide-steps button.active { background: var(--brand-teal-soft); color: var(--ink); font-weight: 600; }
+.guide-steps button svg { width: 16px; height: 16px; flex: none; color: var(--ink-3); }
+.guide-steps button.done svg { color: var(--st-good); }
+.guide-steps .meter { margin-top: 6px; }
+.guide-checks { margin: 12px 0 14px; }
+.guide-checks li { font-size: 13px; }
+.guide-checks li.ok svg { color: var(--st-good); }
+.guide-callout { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; }
+@media (max-width: 860px) {
+  .guide { grid-template-columns: 1fr; }
+  .guide-steps { position: static; }
+}

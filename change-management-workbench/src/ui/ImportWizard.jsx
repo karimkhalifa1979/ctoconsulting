@@ -3,7 +3,7 @@
 // (with duplicate detection for stakeholders), decide what happens to each possible duplicate, then import.
 import { useMemo, useState } from 'react';
 import Icon from './Icon.jsx';
-import { Card, Badge, Empty } from './core.jsx';
+import { Card, Badge, Empty, Modal } from './core.jsx';
 import { selectOptions } from './fields.jsx';
 import { useApp, useToast } from '../state/app.jsx';
 import { useMutator } from '../state/initiative.jsx';
@@ -42,7 +42,7 @@ export function matchColumns(headers, fields) {
 
 // The fields a spreadsheet can fill (the same rule the service applies).
 export function importFields(type, config) {
-  return fieldsOf(type, config).filter((f) => !f.system && !f.readOnly && !f.hidden && !['json', 'table', 'richtext'].includes(f.type) && f.key !== 'initiativeId');
+  return fieldsOf(type, config).filter((f) => !f.system && !f.readOnly && !f.hidden && !['json', 'table'].includes(f.type) && f.key !== 'initiativeId');
 }
 
 function formatHint(f) {
@@ -60,6 +60,7 @@ function formatHint(f) {
     case 'user': return 'Name or email of a user';
     case 'users': return 'Names or emails of users, separated by semicolons';
     case 'email': return 'Email address';
+    case 'richtext': return 'Text (a blank line starts a new paragraph)';
     default: return 'Text';
   }
 }
@@ -149,6 +150,22 @@ async function readFile(file) {
   return { headers, rows };
 }
 
+// An Import button for a register: the wizard in a dialog (INT-009, IMP-012, TRA-01). Inside an initiative
+// the register refreshes when the import is committed.
+export function ImportButton({ type, initiativeId, label = 'Import' }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button type="button" className="btn" onClick={() => setOpen(true)}><Icon name="upload" />{label}</button>
+      {open && (
+        <Modal title={`Import ${entity(type).plural.toLowerCase()} from a spreadsheet`} wide onClose={() => setOpen(false)} footer={<button type="button" className="btn" onClick={() => setOpen(false)}>Close</button>}>
+          <ImportWizard type={type} initiativeId={initiativeId} />
+        </Modal>
+      )}
+    </>
+  );
+}
+
 export default function ImportWizard({ type, initiativeId, onDone }) {
   const { api, config } = useApp();
   const mut = useMutator();
@@ -197,7 +214,7 @@ export default function ImportWizard({ type, initiativeId, onDone }) {
     try {
       const r = await mut.op('importRecords', { type, initiativeId, rows: records(), mode: 'commit', decisions }, { quiet: true });
       setResult(r.result);
-      toast.success(`${r.result.created} created, ${r.result.merged} updated`);
+      toast.success(type === 'stakeholder' ? `${r.result.created} created, ${r.result.merged} updated` : `${r.result.created} created`);
       onDone?.(r.result);
     } catch (e) { setError(e.message); } finally { setBusy(''); }
   };
@@ -284,7 +301,7 @@ export default function ImportWizard({ type, initiativeId, onDone }) {
         <Card title="Import complete">
           <div className="row" style={{ gap: 8 }}>
             <Badge tone="good">{result.created} created</Badge>
-            <Badge tone="info">{result.merged} existing records updated</Badge>
+            {type === 'stakeholder' && <Badge tone="info">{result.merged} existing records updated</Badge>}
             <Badge>{result.skipped} skipped</Badge>
             {result.failed > 0 && <Badge tone="critical">{result.failed} failed</Badge>}
           </div>

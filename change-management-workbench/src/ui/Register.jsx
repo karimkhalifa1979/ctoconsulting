@@ -5,14 +5,18 @@ import Icon from './Icon.jsx';
 import DataGrid, { schemaColumns, facetFor } from './DataGrid.jsx';
 import { useRecordDrawer } from './RecordDrawer.jsx';
 import { useLookups } from './RecordForm.jsx';
+import { ImportButton } from './ImportWizard.jsx';
 import { useApp } from '../state/app.jsx';
 import { useIni } from '../state/initiative.jsx';
 import { can } from '../../shared/access.js';
 import { entity, fieldsOf } from '../../shared/schema.js';
 
+// Registers whose records are not kept as spreadsheet rows.
+const NO_IMPORT = new Set(['schedule', 'narrative', 'toolkitItem']);
+
 export default function Register({
   type, rows: givenRows, filter, title, sub, columns: givenColumns, include, exclude, prepend = [], append = [], facets: facetKeys, defaults, formInclude, formExclude,
-  bulkFields, bulkActions, toolbar, onOpen, createLabel, canCreate: canCreateProp, defaultSort, empty, id, rowClass, compact, drawerWide, after, before,
+  bulkFields, bulkActions, toolbar, onOpen, createLabel, canCreate: canCreateProp, defaultSort, empty, id, rowClass, compact, drawerWide, after, before, importable,
 }) {
   const { user, config } = useApp();
   const ini = useIni();
@@ -36,12 +40,13 @@ export default function Register({
   const open = (r) => (onOpen ? onOpen(r) : drawer.open({ type, id: r.id, include: formInclude, exclude: formExclude, wide: drawerWide, after, before }));
   const create = () => drawer.open({ type, defaults, include: formInclude, exclude: formExclude, wide: drawerWide, after, before });
   const editable = !ini.readOnly && can(user, 'U', type, null);
+  const canImport = canCreate && (importable ?? !NO_IMPORT.has(type));
   return (
     <div className="stack">
       {(title || canCreate) && (
         <div className="row-between">
           <div>{title && <h2>{title}</h2>}{sub && <p className="small muted" style={{ margin: '2px 0 0' }}>{sub}</p>}</div>
-          {canCreate && <button type="button" className="btn btn-primary" onClick={create}><Icon name="plus" />{createLabel || `Add ${meta.label.toLowerCase()}`}</button>}
+          {canCreate && <div className="btn-row">{canImport && <ImportButton type={type} initiativeId={ini.id} />}<button type="button" className="btn btn-primary" onClick={create}><Icon name="plus" />{createLabel || `Add ${meta.label.toLowerCase()}`}</button></div>}
         </div>
       )}
       <DataGrid id={id || `${type}`} type={type} title={title || meta.plural} rows={rows} columns={columns} facets={facets} onRowClick={open}
