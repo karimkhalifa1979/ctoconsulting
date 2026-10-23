@@ -15,7 +15,7 @@ import { fieldOf } from '../../../shared/schema.js';
 import { adkarLabel } from '../../../shared/refdata.js';
 import { completionGaps, canTransition, groupMemberIds, blackoutFor } from '../../../shared/rules/engagements.js';
 import { addDays, addMonths, periodRange, monthKey } from '../../../shared/dates.js';
-import { asArray, personName, sortBy, uid, stripHtml, countBy } from '../../../shared/util.js';
+import { asArray, personName, sortBy, uid, stripHtml, countBy, parseCsv } from '../../../shared/util.js';
 import { canSeeSensitive } from '../../../shared/access.js';
 import { saveBlob } from '../../data/client.js';
 
@@ -222,6 +222,64 @@ function Log() {
 }
 
 // Extra information on a logged engagement: status history and concern conversion (STK-033).
+// STK-031: attendance from a meeting platform's attendance report or a sign-in sheet (CSV). People are
+// matched by email, then by name, searching the whole stakeholder master when the working set holds only
+// the initiative's stakeholders; anyone not found is listed and left out.
+function AttendanceImport({ e }) {
+  const { m, api, mut, toast } = useIniPage();
+  const [rows, setRows] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const statusOf = (v, hasColumn) => {
+    const s = String(v ?? '').trim();
+    if (!hasColumn || /^(y|yes|true|1|attended|present|joined|in person|online)$/i.test(s)) return 'attended';
+    if (/apolog|declin|absent/i.test(s)) return 'apologies';
+    if (/no response|unknown|tentative/i.test(s)) return 'noResponse';
+    return /invit/i.test(s) ? 'invited' : 'attended';
+  };
+  const read = async (file) => {
+    const [head = [], ...body] = parseCsv(await file.text());
+    const idx = (re) => head.findIndex((h) => re.test(String(h).trim()));
+    const c = { email: idx(/e-?mail/i), name: idx(/^(full name|name|participant|attendee|person)/i), status: idx(/attend|status|response/i) };
+    const byEmail = Object.fromEntries(m.stakeholders.filter((s) => s.email).map((s) => [s.email.toLowerCase(), s]));
+    const byName = Object.fromEntries(m.stakeholders.map((s) => [personName(s).toLowerCase(), s]));
+    const out = [];
+    for (const [i, r] of body.filter((x) => x.some((v) => String(v).trim())).entries()) {
+      const email = c.email >= 0 ? String(r[c.email]).trim().toLowerCase() : '';
+      const name = c.name >= 0 ? String(r[c.name]).trim() : '';
+      let person = (email && byEmail[email]) || (name && byName[name.toLowerCase()]) || null;
+      if (!person && email) person = (await api.op('findStakeholders', { q: email, limit: 5 }).catch(() => [])).find((s) => s.email?.toLowerCase() === email) || null;
+      out.push({ row: i + 2, label: name || email || `Row ${i + 2}`, person, status: statusOf(c.status >= 0 ? r[c.status] : '', c.status >= 0) });
+    }
+    setRows(out);
+  };
+  const found = (rows || []).filter((r) => r.person);
+  const save = async () => {
+    setBusy(true);
+    try {
+      const merged = asArray(e.attendance).map((a) => ({ ...a }));
+      for (const r of found) {
+        const cur = merged.find((a) => a.stakeholderId === r.person.id);
+        if (cur) cur.status = r.status; else merged.push({ stakeholderId: r.person.id, status: r.status });
+      }
+      await mut.update('engagement', e.id, { attendance: merged }, { version: e.version });
+      toast.success(`Attendance recorded for ${found.length} ${found.length === 1 ? 'person' : 'people'}`);
+      setRows(null);
+    } catch { /* reported by the mutator */ } finally { setBusy(false); }
+  };
+  return (
+    <div className="mb-3">
+      <label className="btn btn-sm"><Icon name="upload" />Import attendance (CSV)<input type="file" accept=".csv,text/csv" hidden onChange={(ev) => { const f = ev.target.files?.[0]; ev.target.value = ''; if (f) read(f); }} /></label>
+      <span className="tiny muted" style={{ marginLeft: 8 }}>A meeting attendance report or sign-in sheet with names or emails, and optionally a status.</span>
+      {rows && (
+        <div className="callout small mt-2">
+          <strong>{found.length} of {rows.length} matched.</strong>{rows.length > found.length && <> Not found: {rows.filter((r) => !r.person).map((r) => r.label).join(', ')}.</>}
+          <div className="btn-row mt-2"><button type="button" className="btn btn-sm btn-primary" disabled={!found.length || busy} onClick={save}>Record attendance</button><button type="button" className="btn btn-sm" onClick={() => setRows(null)}>Cancel</button></div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function EngagementExtras({ e }) {
   const { mut, toast, canDo, settings, config, usersById } = useIniPage();
   const convert = async (index, to) => {
@@ -230,6 +288,12 @@ export function EngagementExtras({ e }) {
   };
   return (
     <div className="form-section">
+      {canDo('U', 'engagement', e) && (asArray(e.groupIds).length > 0 || asArray(e.attendance).length > 0 || ['townHall', 'workshop', 'briefing', 'training', 'focusGroup', 'demonstration'].includes(e.engagementType)) && (
+        <>
+          <h3>Attendance</h3>
+          <AttendanceImport e={e} />
+        </>
+      )}
       {asArray(e.concerns).length > 0 && (
         <>
           <h3>Concerns raised</h3>

@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHmac, randomBytes } from 'node:crypto';
+import { spawn } from 'node:child_process';
 import { openDatabase } from './db.mjs';
 import { createService } from '../shared/service/index.js';
 import { hashPassword, verifyPassword, passwordProblems, createSessions, createTokenService, createOidc, mapIdpRoles } from './auth.mjs';
@@ -23,6 +24,23 @@ const VERSION = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf
 const DEMO = env.CMW_DEMO === '1';
 const SECURE_COOKIE = env.COOKIE_SECURE === '1';
 const TRUST_PROXY = env.TRUST_PROXY === '1';
+
+// SEC-10: passes an upload to the organisation's malware scanner, a command that reads the file on standard
+// input and exits 0 when it is clean and 1 when it is infected (for example "clamdscan --no-summary -").
+// Uploads are refused when the scanner cannot be run.
+function scanWithCommand(command, bytes) {
+  return new Promise((resolve) => {
+    const [cmd, ...args] = command.split(/\s+/).filter(Boolean);
+    let out = '';
+    const p = spawn(cmd, args, { stdio: ['pipe', 'pipe', 'pipe'] });
+    p.stdout.on('data', (d) => { out += d; });
+    p.stderr.on('data', (d) => { out += d; });
+    p.on('error', (e) => resolve({ infected: true, detail: `the malware scanner could not be run (${e.message})` }));
+    p.on('close', (code) => resolve(code === 0 ? { infected: false } : { infected: true, detail: code === 1 ? out.trim().split('\n')[0] || 'malware found' : `the malware scanner failed (exit status ${code})` }));
+    p.stdin.on('error', () => {});
+    p.stdin.end(Buffer.from(bytes));
+  });
+}
 
 function log(level, msg, extra) {
   const line = { ts: new Date().toISOString(), level, msg, ...(extra !== undefined ? { detail: extra } : {}) };
@@ -43,6 +61,7 @@ const service = createService({
     log,
     // Master size above which each initiative's working set holds only the stakeholders it uses (PER-04).
     ...(env.CMW_SCOPE_THRESHOLD ? { scopeThreshold: Number(env.CMW_SCOPE_THRESHOLD) } : {}),
+    ...(env.CMW_SCAN_COMMAND ? { scanFile: (bytes) => scanWithCommand(env.CMW_SCAN_COMMAND, bytes) } : {}),
     // Survey invitations and reminders to stakeholders (ADK-007) need email and the public address.
     publicUrl: env.PUBLIC_URL || null,
     sendMail: mailer.enabled ? (to, subject, text) => mailer.send(to, subject, text) : null,

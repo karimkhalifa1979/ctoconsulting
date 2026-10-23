@@ -259,7 +259,9 @@ export function registerWorkflowOps(S) {
     if (!allowed.includes(ext)) throw new AppError(415, `Files of type .${ext} are not allowed. Allowed types: ${allowed.join(', ')}.`);
     const maxBytes = (config.settings.attachments.maxMb || 20) * 1024 * 1024;
     if (bytes.length > maxBytes) throw new AppError(413, `The file is larger than the ${config.settings.attachments.maxMb} MB limit.`);
-    const scan = S.env.scanFile ? await S.env.scanFile(bytes, filename) : basicScan(bytes, ext);
+    // The built-in checks always run; the organisation's scanner, when configured, runs as well.
+    let scan = basicScan(bytes, ext);
+    if (!scan.infected && S.env.scanFile) scan = await S.env.scanFile(bytes, filename);
     if (scan.infected) {
       await S.audit(actor, { action: 'malwareBlocked', type: recordType, recordId, initiativeId, summary: `Blocked upload of ${filename}: ${scan.detail}` });
       throw new AppError(422, `The file was rejected by malware scanning: ${scan.detail}`);
