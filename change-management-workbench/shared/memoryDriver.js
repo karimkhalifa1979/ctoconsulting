@@ -125,11 +125,16 @@ export function createMemoryDriver({ persist = null, initial = null } = {}) {
       return fn();
     },
     async stats() {
-      return { records: records.size, audit: audit.length, blobs: blobs.size };
+      let blobBytes = 0;
+      for (const b of blobs.values()) blobBytes += b.bytes?.byteLength || 0;
+      return { records: records.size, audit: audit.length, blobs: blobs.size, blobBytes };
     },
-    // Full export of the store (used by the demo mode's backup and by tests).
-    async dump() {
-      return { records: [...records.values()].map(clone), config: Object.fromEntries([...config.entries()].map(([k, v]) => [k, clone(v)])), counters: Object.fromEntries(counters), audit: clone(audit), seq };
+    // Full export of the store, for the browser-only workbench's backups and for tests. Stored files are
+    // included when asked for.
+    async dump({ withBlobs = false } = {}) {
+      const out = { records: [...records.values()].map(clone), config: Object.fromEntries([...config.entries()].map(([k, v]) => [k, clone(v)])), counters: Object.fromEntries(counters), audit: clone(audit), seq };
+      if (withBlobs) out.blobs = Object.fromEntries([...blobs.entries()].map(([k, v]) => [k, { bytes: v.bytes, meta: clone(v.meta) }]));
+      return out;
     },
   };
 }

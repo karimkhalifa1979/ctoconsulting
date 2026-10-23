@@ -23,7 +23,18 @@ Prosci® and ADKAR® are registered trademarks of Prosci, Inc. This application 
 
 ## Try it
 
-You need Node.js 22.13 or later.
+### Offline workbench: one file, nothing to install
+
+[`offline/Change_Management_Workbench.html`](offline/Change_Management_Workbench.html) is the whole application in one file. Copy it anywhere and double-click it. It opens in your web browser and runs without a server, an internet connection or Node.js. `npm run build:offline` rebuilds it.
+
+- **Your own data.** The workbench opens with the demonstration data. **Start your own workbench** on the sign-in screen replaces it with an empty workbench for your organisation, with you as its administrator and change management lead.
+- **Where data is kept.** Everything stays in the browser on that computer (IndexedDB). Google Chrome, Microsoft Edge and Firefox keep it between sessions. Safari may refuse storage to a file opened from disk; the workbench then says so, keeps working in memory and asks you to back up before you close it.
+- **Backups.** **Back up**, in the banner, the user menu or Administration › System, saves everything to one `.json` file: records, configuration, the audit trail and stored files. **Restore from a backup** loads that file in any browser, so a backup also moves the work to another computer. Back up regularly: clearing the browser's site data deletes the workbench.
+- **One tab at a time.** If you open a second tab, it offers to take over and the first one stops, so the two never overwrite each other.
+- **What needs a server.** There are no emails, single sign-on, AI assistance, API or webhooks. Survey links open in the same browser, for entering responses collected in a meeting or on paper.
+- **Access.** There are no passwords, so anyone who can use that browser can open the workbench. Keep the computer account protected.
+
+The rest of this section needs Node.js 22.13 or later.
 
 ### Browser-only demonstration
 
@@ -95,7 +106,7 @@ The REST API is described at `/api/v1/openapi.json`. API clients and webhooks ar
 
 - `shared/`: the domain, used unchanged by the server and the browser. It holds the entity schema, the business rules (`shared/rules/`, RUL-01 to RUL-20), the derived model and the service. The service covers access control, validation, the audit trail and every operation. It also holds the artefact engine: data snapshot, format-neutral content, then the Word, PowerPoint, PDF, Excel and HTML renderers.
 - `server/`: a Node.js HTTP server with sessions, OpenID Connect, API clients, the REST API and SQLite storage (`node:sqlite`, optionally encrypted). It also runs the background jobs: schedules, locking, cadence and measure alerts, survey opening and closing, HR synchronisation and retention.
-- `src/`: the React client, built with Vite. It talks to the server's API, or runs the shared service in the browser for the demonstration.
+- `src/`: the React client, built with Vite. It talks to the server's API, or runs the shared service in the browser for the demonstration and the offline workbench. `scripts/single-file.mjs` puts the offline build into one HTML file.
 
 Because the rules, model and renderers are the same code in both places, a figure on a screen and in a generated document always agree.
 

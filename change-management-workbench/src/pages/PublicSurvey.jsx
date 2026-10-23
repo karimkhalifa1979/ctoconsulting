@@ -1,7 +1,7 @@
 // Public survey response page (ADK-007, MEA-001): respondents need no account. Anonymous by default,
 // with the collection notice shown before any answer is given (PRV-02).
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useApp } from '../state/app.jsx';
 import { ErrorBox, Spinner } from '../ui/core.jsx';
 import { ADKAR_SCORE_SCALE } from '../../shared/refdata.js';
@@ -52,7 +52,11 @@ export default function PublicSurvey() {
             <h1>{tr(L?.title, survey.title)}</h1>
             <p className="muted">{survey.initiative}{survey.closesAt ? ` · closes ${fmtDate(survey.closesAt)}` : ''}</p>
             {done ? (
-              <div className="callout good mt-4">{L?.thanks ? L.thanks : <><h4>Thank you</h4>Your response has been recorded{survey.anonymous ? ' anonymously' : ''}. You can close this page.</>}</div>
+              <>
+                <div className="callout good mt-4">{L?.thanks ? L.thanks : <><h4>Thank you</h4>Your response has been recorded{survey.anonymous ? ' anonymously' : ''}. You can close this page.</>}</div>
+                {/* In the browser-only workbench, responses are entered here, one after another. */}
+                {api.mode === 'standalone' && <div className="btn-row mt-3" lang="en-AU"><button type="button" className="btn" onClick={() => { setDone(false); setAnswers({}); }}>Enter another response</button><Link className="btn" to="/">Back to the workbench</Link></div>}
+              </>
             ) : (
               <form onSubmit={submit} className="mt-3">
                 {survey.notice && <div className="callout small mb-3"><strong>How your information is used. </strong>{tr(L?.notice, survey.notice)}</div>}

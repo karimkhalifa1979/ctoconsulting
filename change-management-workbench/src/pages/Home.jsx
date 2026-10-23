@@ -80,9 +80,17 @@ const sentence = (parts) => {
 };
 
 function MyInitiatives({ initiatives, role }) {
-  const { usersById } = useApp();
+  const { usersById, user } = useApp();
   const view = DASHBOARD_VIEW[role] || 'lead';
-  if (!initiatives.length) return <Card title="My initiatives"><Empty icon="layers" title="You are not assigned to an initiative">Ask a change management lead or administrator to add you, or create one from Initiatives.</Empty></Card>;
+  if (!initiatives.length) {
+    return (
+      <Card title="My initiatives">
+        {hasRole(user, 'changeLead')
+          ? <Empty icon="layers" title="No initiatives yet" action={<Link className="btn btn-primary" to="/initiatives?new=1"><Icon name="plus" />Create an initiative</Link>}>Create your first change initiative. Each initiative has a guided set-up for what the Change Management Strategy needs.</Empty>
+          : <Empty icon="layers" title="You are not assigned to an initiative">Ask a change management lead or administrator to add you.</Empty>}
+      </Card>
+    );
+  }
   return (
     <Card title="My initiatives" sub="Status, readiness and the next milestone for each initiative you work on." flush actions={<Link className="btn btn-sm btn-ghost" to="/initiatives">All initiatives</Link>}>
       <div className="table-wrap">

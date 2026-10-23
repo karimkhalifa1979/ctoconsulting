@@ -1,10 +1,12 @@
 // Sign-in (INT-001, SEC-01): single sign-on when configured, local break-glass accounts, and the
-// demonstration users when demo mode is on.
+// demonstration users when demo mode is on. The browser-only workbench lists its people, and can start
+// an organisation's own workbench, restore a backup or load the demonstration data.
 import { useEffect, useState } from 'react';
 import { useApp } from '../state/app.jsx';
 import { Avatar, ErrorBox } from '../ui/core.jsx';
 import Icon from '../ui/Icon.jsx';
 import { PHASES, TRADEMARK_NOTICE } from '../../shared/refdata.js';
+import { LoadDemoButton, RestoreButton, StartOwnButton, StorageNotice, useWorkbenchStatus } from '../ui/WorkbenchData.jsx';
 
 export default function Login({ notice }) {
   const { api, refresh } = useApp();
@@ -13,7 +15,9 @@ export default function Login({ notice }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
+  const store = useWorkbenchStatus(api);
   useEffect(() => { api.authOptions().then(setOpts).catch(setError); }, [api]);
+  const own = opts?.workspace === 'own';
 
   const signIn = async (e) => {
     e.preventDefault();
@@ -41,8 +45,9 @@ export default function Login({ notice }) {
         <div className="auth-main">
           <div>
             <h2>Sign in{opts?.organisation ? ` to ${opts.organisation}` : ''}</h2>
-            {opts?.standalone && <p className="small muted mt-1">This is a browser-only demonstration with fictional data. Choose a person to see the workbench through their role.</p>}
+            {opts?.standalone && <p className="small muted mt-1">{own ? 'Choose your name to continue. The workbench and its data are kept in this browser on this computer.' : 'This is a browser-only demonstration with fictional data. Choose a person to see the workbench through their role.'}</p>}
           </div>
+          {opts?.standalone && <StorageNotice status={store} />}
           {notice && <div className="callout warn small">{notice}</div>}
           <ErrorBox error={error} />
           {opts?.sso && <a className="btn btn-navy" href={api.ssoUrl('/')}><Icon name="key" />Sign in with your organisation account</a>}
@@ -56,7 +61,7 @@ export default function Login({ notice }) {
           )}
           {opts?.demo && opts.demoUsers?.length > 0 && (
             <div className="stack-sm">
-              <h3>{opts.standalone ? 'Demonstration users' : 'Or use a demonstration user'}</h3>
+              <h3>{opts.standalone ? (own ? 'People' : 'Demonstration users') : 'Or use a demonstration user'}</h3>
               <div className="demo-users">
                 {opts.demoUsers.map((u) => (
                   <button key={u.id} type="button" className="demo-user" onClick={() => demo(u.id)} disabled={busy}>
@@ -66,6 +71,19 @@ export default function Login({ notice }) {
                 ))}
               </div>
               {!opts.standalone && <p className="tiny muted">Demonstration accounts also accept the password Demo-Workbench-2026.</p>}
+            </div>
+          )}
+          {opts?.standalone && (
+            <div className="stack-sm">
+              <h3>{own ? 'This workbench' : 'Use it for your own work'}</h3>
+              <p className="small muted" style={{ margin: 0 }}>{own
+                ? 'Restore a backup, start again with an empty workbench, or replace this one with the demonstration data.'
+                : 'Start an empty workbench for your organisation, or restore a backup. Everything stays in this browser on this computer.'}</p>
+              <div className="btn-row">
+                <StartOwnButton className={own ? 'btn btn-sm' : 'btn btn-sm btn-primary'} label={own ? 'Start a new workbench' : 'Start your own workbench'} />
+                <RestoreButton className="btn btn-sm" />
+                {own && <LoadDemoButton className="btn btn-sm" />}
+              </div>
             </div>
           )}
         </div>

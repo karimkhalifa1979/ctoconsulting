@@ -1,24 +1,53 @@
 // System and promotion (MNT-03, ADM-010): storage and service health with an integrity check of the audit
 // trail, and export and import of configuration and templates to promote changes between environments
-// (for example from test to production). Configuration changes are audited.
+// (for example from test to production). Configuration changes are audited. The browser-only workbench
+// also backs up and restores everything it holds here.
 import { useCallback, useEffect, useState } from 'react';
 import Icon from '../../ui/Icon.jsx';
 import { Card, Badge, Spinner, ErrorBox, KV } from '../../ui/core.jsx';
 import { useApp, useDialog, useToast } from '../../state/app.jsx';
 import { saveBlob } from '../../data/client.js';
 import { fmtDateTime } from '../../lib/format.js';
+import { BackupButton, LoadDemoButton, RestoreButton, StartOwnButton, StorageNotice, useWorkbenchStatus } from '../../ui/WorkbenchData.jsx';
 
 export default function System() {
+  const { mode } = useApp();
   return (
     <div className="stack">
       <Health />
+      {mode === 'standalone' && <BrowserData />}
       <Promotion />
     </div>
   );
 }
 
+function BrowserData() {
+  const { api } = useApp();
+  const status = useWorkbenchStatus(api);
+  if (!status) return null;
+  const own = status.workspace === 'own';
+  return (
+    <Card title="Workbench data in this browser" sub="Everything is kept in this browser on this computer, with no server. A backup is one file holding every record, the configuration, the audit trail and stored files; restore it here or in another browser to carry on.">
+      <div className="stack-sm">
+        <StorageNotice status={status} />
+        <KV items={[
+          ['Workbench', own ? `${status.organisation} (own data)` : 'Demonstration data (fictional)'],
+          ['Last backup', status.lastBackupAt ? fmtDateTime(status.lastBackupAt) : 'Never'],
+        ]} />
+        <div className="btn-row">
+          <BackupButton className="btn btn-primary" label="Back up the workbench" />
+          <RestoreButton className="btn" />
+          <StartOwnButton className="btn" label={own ? 'Start a new workbench' : 'Start your own workbench'} />
+          <LoadDemoButton className="btn" />
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 function Health() {
   const { api } = useApp();
+  const store = useWorkbenchStatus(api);
   const [h, setH] = useState(null);
   const [error, setError] = useState(null);
   const load = useCallback(() => { setH(null); api.op('systemHealth', {}).then(setH).catch(setError); }, [api]);
@@ -29,8 +58,8 @@ function Health() {
   return (
     <Card title="Health" sub="Storage, the audit trail and the service version." actions={<button type="button" className="btn btn-sm" onClick={load}><Icon name="refresh" />Check again</button>}>
       <KV items={[
-        ['Mode', h.mode === 'server' ? 'Server' : 'Browser-only demonstration'],
-        ['Storage', h.mode === 'server' ? h.storage || 'Unknown' : 'This browser (IndexedDB)'],
+        ['Mode', h.mode === 'server' ? 'Server' : store?.workspace === 'own' ? 'Offline workbench (browser only)' : 'Browser-only demonstration'],
+        ['Storage', h.mode === 'server' ? h.storage || 'Unknown' : store?.persistent === false ? 'Memory only: this browser does not keep the data' : 'This browser (IndexedDB)'],
         ['Version', h.version],
         ['Checked', fmtDateTime(h.time)],
         ['Records', stats.records != null ? Number(stats.records).toLocaleString('en-AU') : null],

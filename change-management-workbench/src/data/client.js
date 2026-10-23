@@ -1,10 +1,20 @@
 // Chooses the data mode. With a server (GET /api/health answers) the app uses the REST API; on static
-// hosting it runs the browser-only demonstration. `?mode=standalone` forces the browser-only mode.
+// hosting, and in the offline workbench opened from disk, it runs in the browser on its own.
+// `?mode=standalone` forces the browser-only mode.
 import { createHttpClient } from './http.js';
 
-export async function createClient({ onProgress } = {}) {
+let client = null;
+
+// One client per page, even when React runs effects twice in development.
+export function createClient(opts = {}) {
+  client ||= connect(opts);
+  return client;
+}
+
+async function connect({ onProgress, onBusy, onReset } = {}) {
   const forced = new URLSearchParams(location.search).get('mode');
-  if (forced !== 'standalone') {
+  const offline = location.protocol === 'file:' || import.meta.env?.MODE === 'offline';
+  if (forced !== 'standalone' && !offline) {
     const http = createHttpClient('');
     try {
       const ctl = new AbortController();
@@ -19,7 +29,7 @@ export async function createClient({ onProgress } = {}) {
     } catch { /* no server: fall through to the browser-only mode */ }
   }
   const { createLocalClient } = await import('./local.js');
-  return createLocalClient({ onProgress });
+  return createLocalClient({ onProgress, onBusy, onReset });
 }
 
 // Downloads a stored file in either mode.

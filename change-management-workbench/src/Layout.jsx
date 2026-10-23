@@ -11,6 +11,7 @@ import { can, hasRole, roleLabel } from '../shared/access.js';
 import { PHASES, TRADEMARK_NOTICE } from '../shared/refdata.js';
 import { entity } from '../shared/schema.js';
 import { fmtDateTime } from './lib/format.js';
+import { BackupButton, RestoreButton, WorkbenchBanner, canBackUp, useWorkbenchStatus } from './ui/WorkbenchData.jsx';
 
 // Where each record type lives in an initiative.
 export const TYPE_PAGE = {
@@ -140,13 +141,7 @@ export default function Layout({ children, initiativeId }) {
         <div className="sidebar-foot">{TRADEMARK_NOTICE}</div>
       </aside>
       <div className="main">
-        {mode === 'standalone' && (
-          <div className="mode-banner no-print" role="note">
-            <Icon name="info" size={15} />
-            <span><strong>Browser-only demonstration.</strong> Data is fictional and kept in this browser. Changes you make stay on this device.</span>
-            <button type="button" className="btn btn-xs" onClick={async () => { if (window.confirm('Reset the demonstration data? Your changes in this browser will be lost.')) await api.resetDemo(); }}>Reset demonstration data</button>
-          </div>
-        )}
+        {mode === 'standalone' && <WorkbenchBanner />}
         <header className="topbar no-print">
           <button type="button" className="icon-btn menu-btn" aria-label="Open navigation" aria-expanded={navOpen} onClick={() => setNavOpen((o) => !o)}><Icon name="menu" /></button>
           {current && <div className="small muted ellipsis" style={{ maxWidth: 260 }} title={current.name}><strong style={{ color: 'var(--ink)' }}>{current.shortName || current.name}</strong></div>}
@@ -274,6 +269,7 @@ function UserMenu() {
     try { localStorage.setItem('cmw.theme', t); } catch { /* storage unavailable */ }
   };
   const isDemo = mode === 'standalone' || api.serverInfo?.demo;
+  const own = useWorkbenchStatus(api)?.workspace === 'own';
   useEffect(() => { if (isDemo) api.authOptions().then((o) => setDemoUsers(o.demoUsers || [])).catch(() => {}); }, [api, isDemo]);
   const switchTo = async (id) => {
     await api.demoLogin(id);
@@ -293,10 +289,18 @@ function UserMenu() {
           {[['system', 'Auto'], ['light', 'Light'], ['dark', 'Dark']].map(([id, l]) => <button key={id} type="button" aria-pressed={theme === id} onClick={() => applyTheme(id)}>{l}</button>)}
         </div>
       </div>
-      {isDemo && demoUsers && (
+      {mode === 'standalone' && canBackUp(user) && (
         <>
           <hr />
-          <div className="menu-head">Switch demonstration user (see the app as each role)</div>
+          <div className="menu-head">Workbench data in this browser</div>
+          <BackupButton className="" label="Back up the workbench" />
+          <RestoreButton className="menu-item" />
+        </>
+      )}
+      {isDemo && demoUsers?.length > 1 && (
+        <>
+          <hr />
+          <div className="menu-head">{own ? 'Switch user' : 'Switch demonstration user (see the app as each role)'}</div>
           <div style={{ maxHeight: 240, overflowY: 'auto' }}>
             {demoUsers.filter((u) => u.id !== user.id).map((u) => <button key={u.id} type="button" data-close onClick={() => switchTo(u.id)}><Avatar name={u.name} size="sm" /><span className="grow"><span style={{ display: 'block' }}>{u.name}</span><span className="tiny muted">{u.title}</span></span></button>)}
           </div>

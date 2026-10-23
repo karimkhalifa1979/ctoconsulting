@@ -3,7 +3,7 @@
 // copying selected registers of another; closing, reopening, legal holds and exporting all of an
 // initiative's data in open formats.
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import Icon from '../ui/Icon.jsx';
 import { Card, PageHead, Tabs, Empty, Badge, Spinner, ErrorBox, Modal, Rag, RiskBadge, Popover } from '../ui/core.jsx';
 import DataGrid from '../ui/DataGrid.jsx';
@@ -33,7 +33,9 @@ export default function Initiatives() {
   const [tab, setTab] = useTab('list');
   const [rows, setRows] = useState(null);
   const [error, setError] = useState(null);
-  const [creating, setCreating] = useState(null);
+  // `?new=1` opens the new initiative form, for links such as the empty Home screen's.
+  const [params] = useSearchParams();
+  const [creating, setCreating] = useState(() => (params.get('new') === '1' && hasRole(user, 'changeLead') ? {} : null));
   const load = useCallback(() => api.op('initiativeList', {}).then((r) => { setRows(r); setError(null); }).catch(setError), [api]);
   useEffect(() => { load(); }, [load]);
   if (error) return <ErrorBox error={error} onRetry={load} />;

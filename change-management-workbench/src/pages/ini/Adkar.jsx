@@ -2,6 +2,7 @@
 // practitioners, managers, self-assessment surveys or inference, barrier points (RUL-01, RUL-02) with
 // anonymity thresholds (RUL-03), trends, practitioner confirmation and interventions for barrier points.
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Icon from '../../ui/Icon.jsx';
 import { Card, PageHead, Tabs, Empty, Badge, StatusBadge, Spinner, Modal, BarrierBadge, Help, KV } from '../../ui/core.jsx';
 import DataGrid from '../../ui/DataGrid.jsx';
@@ -238,11 +239,13 @@ export function AdkarScorer({ subjectType, subjectId: initialSubject, onClose })
 // Survey campaigns of any kind (ADK-005, MEA-001); the ADKAR screen lists ADKAR campaigns and the
 // Measurement screen lists the others.
 export function Surveys({ kinds = ['adkar'], intro, createLabel = 'New ADKAR campaign', Creator = NewCampaign }) {
-  const { m, mut, toast, canDo, dialog, today, config } = useIniPage();
+  const { m, mut, toast, canDo, dialog, today, config, mode } = useIniPage();
   const [creating, setCreating] = useState(false);
   const [results, setResults] = useState(null);
   const [translating, setTranslating] = useState(null);
-  const link = (s) => `${location.origin}${location.pathname}#/survey/${s.token}`;
+  // In the browser-only workbench the survey runs in this browser, so it opens in this tab.
+  const local = mode === 'standalone';
+  const link = (s) => `${location.href.split('#')[0]}#/survey/${s.token}`;
   const act = async (name, payload, msg) => { const r = await mut.op(name, payload); toast.success(typeof msg === 'function' ? msg(r) : msg); };
   const emailed = (r, sent, recorded) => (r?.emailed ? `${sent} ${r.emailed.toLocaleString('en-AU')} ${r.emailed === 1 ? 'person' : 'people'}` : recorded);
   const list = m.surveys.filter((s) => kinds.includes(s.kind || 'adkar'));
@@ -268,8 +271,10 @@ export function Surveys({ kinds = ['adkar'], intro, createLabel = 'New ADKAR cam
               {['draft', 'scheduled'].includes(s.status) && canDo('U', 'survey') && <button type="button" className="btn btn-sm btn-primary" onClick={() => act('openSurvey', { id: s.id }, (r) => emailed(r, 'Survey opened and emailed to', 'Survey opened'))}>{s.status === 'scheduled' ? 'Open now' : 'Open survey'}</button>}
               {s.status === 'open' && (
                 <>
-                  <button type="button" className="btn btn-sm" onClick={() => { navigator.clipboard?.writeText(link(s)); toast.success('Survey link copied'); }}><Icon name="link" />Copy link</button>
-                  <a className="btn btn-sm" href={link(s)} target="_blank" rel="noreferrer"><Icon name="external" />Open</a>
+                  <button type="button" className="btn btn-sm" onClick={() => { navigator.clipboard?.writeText(link(s)); toast.success(local ? 'Survey link copied. It opens in this browser only.' : 'Survey link copied'); }}><Icon name="link" />Copy link</button>
+                  {local
+                    ? <Link className="btn btn-sm" to={`/survey/${s.token}`} title="Opens the survey here, to enter responses in this browser"><Icon name="external" />Open</Link>
+                    : <a className="btn btn-sm" href={link(s)} target="_blank" rel="noreferrer"><Icon name="external" />Open</a>}
                   {canDo('U', 'survey') && <button type="button" className="btn btn-sm" onClick={() => act('sendSurveyReminder', { id: s.id }, (r) => emailed(r, 'Reminder emailed to', 'Reminder recorded'))}>Send reminder</button>}
                   {canDo('U', 'survey') && <button type="button" className="btn btn-sm" onClick={async () => { const d = await dialog.prompt({ title: 'Extend the campaign', label: 'New closing date (YYYY-MM-DD)', multiline: false, defaultValue: addDays(s.closesAt || today, 7) }); if (d) act('extendSurvey', { id: s.id, closesAt: d }, 'Campaign extended'); }}>Extend</button>}
                   {canDo('U', 'survey') && <button type="button" className="btn btn-sm" onClick={async () => { if (await dialog.confirm({ title: 'Close and aggregate', message: 'Closing stops new responses and stores aggregated results for each group, suppressing small segments.' })) act('closeSurvey', { id: s.id }, 'Survey closed and results stored'); }}>Close</button>}

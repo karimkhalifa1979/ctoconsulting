@@ -9,6 +9,7 @@ import { RecordDrawerHost } from './ui/RecordDrawer.jsx';
 import { Spinner, ErrorBox } from './ui/core.jsx';
 import Layout from './Layout.jsx';
 import Login from './pages/Login.jsx';
+import { clearRecent } from './lib/recent.js';
 
 const PublicSurvey = lazy(() => import('./pages/PublicSurvey.jsx'));
 const Home = lazy(() => import('./pages/Home.jsx'));
@@ -47,13 +48,27 @@ export default function App() {
   const [api, setApi] = useState(null);
   const [progress, setProgress] = useState('Starting');
   const [error, setError] = useState(null);
-  useEffect(() => { createClient({ onProgress: setProgress }).then(setApi).catch(setError); }, []);
+  // The browser-only workbench restarts the screens when its data is replaced (restore, a new workbench,
+  // the demonstration data), and works in one tab at a time.
+  const [generation, setGeneration] = useState(0);
+  const [waiting, setWaiting] = useState(null);
+  const [released, setReleased] = useState(false);
+  useEffect(() => {
+    createClient({
+      onProgress: setProgress,
+      onBusy: () => new Promise((resolve) => setWaiting(() => resolve)),
+      onReset: () => { clearRecent(); if (location.hash.length > 2) location.hash = '#/'; setGeneration((g) => g + 1); },
+    }).then(setApi).catch(setError);
+  }, []);
+  useEffect(() => api?.subscribe?.((s) => setReleased(s.released)), [api]);
   if (error) return <div className="content"><ErrorBox error={error} /></div>;
+  if (waiting) return <OtherTab onUse={() => { waiting(); setWaiting(null); }} />;
+  if (released) return <OtherTab moved onUse={() => api.reclaim()} />;
   if (!api) return <div className="auth-page"><div className="card card-pad" style={{ minWidth: 280 }}><Spinner label={progress} /></div></div>;
   return (
     <ToastProvider>
       <DialogProvider>
-        <AppProvider api={api}>
+        <AppProvider key={generation} api={api}>
           <EnterpriseProvider>
           <HashRouter>
             <Suspense fallback={<Spinner />}>
@@ -67,6 +82,20 @@ export default function App() {
         </AppProvider>
       </DialogProvider>
     </ToastProvider>
+  );
+}
+
+function OtherTab({ moved = false, onUse }) {
+  return (
+    <div className="auth-page">
+      <div className="card card-pad stack-sm" style={{ maxWidth: 460 }} role="alert">
+        <h1 style={{ fontSize: 20 }}>{moved ? 'The workbench is open in another tab' : 'The workbench is already open'}</h1>
+        <p className="small" style={{ margin: 0 }}>{moved
+          ? 'You opened the Change Management Workbench in another tab or window, so this one has stopped. Your changes here are saved.'
+          : 'The Change Management Workbench is open in another tab or window. Use it in one place at a time, so that changes made in one are not lost in the other.'}</p>
+        <div className="btn-row"><button type="button" className="btn btn-primary" onClick={onUse}>Use it here</button></div>
+      </div>
+    </div>
   );
 }
 
