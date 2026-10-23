@@ -12,7 +12,8 @@
     "build": "vite build",
     "start": "node --disable-warning=ExperimentalWarning server/index.mjs",
     "seed": "node --disable-warning=ExperimentalWarning server/seed.mjs",
-    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.mjs"
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.mjs",
+    "test:perf": "node --disable-warning=ExperimentalWarning test/perf/scale.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.1.0",

@@ -35,14 +35,14 @@ export default function Stakeholders() {
         The stakeholder master: one record for each person and group, shared by every initiative. Each initiative adds its own analysis in its stakeholder register; details kept here are the same everywhere.
       </PageHead>
       <Tabs value={tab} onChange={setTab} label="Stakeholders" tabs={[
-        { id: 'people', label: 'People', icon: 'users', count: people.length || null },
+        { id: 'people', label: 'People', icon: 'users', count: (ent.partial ? ent.total : people.length) || null },
         { id: 'groups', label: 'Stakeholder groups', icon: 'layers', count: groups.length || null },
         canImport && { id: 'import', label: 'Import', icon: 'upload' },
         { id: 'duplicates', label: 'Possible duplicates', icon: 'copy', count: dupCount || null },
       ]} />
       {!ent.records ? <Spinner label="Loading the stakeholder master" /> : (
         <>
-          {tab === 'people' && <People people={people} index={index} refresh={refresh} />}
+          {tab === 'people' && <People people={people} total={ent.total} partial={ent.partial} index={index} refresh={refresh} />}
           {tab === 'groups' && <Groups groups={groups} refresh={refresh} />}
           {tab === 'import' && canImport && <Import refresh={refresh} />}
           {tab === 'duplicates' && <Duplicates refresh={refresh} onCount={setDupCount} />}
@@ -52,9 +52,19 @@ export default function Stakeholders() {
   );
 }
 
-function People({ people, index, refresh }) {
-  const { user, config, initiatives } = useApp();
+function People({ people, total, partial, index, refresh }) {
+  const { api, user, config, initiatives } = useApp();
   const lookups = useLookups();
+  // A large master shows its first page; anyone else is found by searching it on the server (PER-02).
+  const [q, setQ] = useState('');
+  const [found, setFound] = useState(null);
+  useEffect(() => {
+    if (!partial || q.trim().length < 2) { setFound(null); return undefined; }
+    let alive = true;
+    const t = setTimeout(() => api.list('stakeholder', { q: q.trim(), limit: 1000, sort: 'familyName' }).then((r) => { if (alive) setFound(r); }).catch(() => { if (alive) setFound({ rows: [], total: 0 }); }), 300);
+    return () => { alive = false; clearTimeout(t); };
+  }, [api, partial, q]);
+  const shown = found ? found.rows.filter((s) => !s.mergedInto) : people;
   const drawer = useRecordDrawer();
   const navigate = useNavigate();
   const iniName = useMemo(() => Object.fromEntries(initiatives.map((i) => [i.id, i.shortName || i.name])), [initiatives]);
@@ -73,7 +83,14 @@ function People({ people, index, refresh }) {
     { key: 'updated', label: 'Updated', render: (s) => fmtDate(String(s.updatedAt || '').slice(0, 10)), value: (s) => s.updatedAt || '', hidden: true },
   ];
   return (
-    <DataGrid id="stakeholder-master" type="stakeholder" title="Stakeholders" rows={sortBy(people, 'familyName', 'givenName')} columns={cols} exportName="Stakeholder master"
+    <>
+      {partial && (
+        <div className="callout info small master-search" role="search">
+          <label className="field"><span>Search all {Number(total).toLocaleString('en-AU')} stakeholders</span><input type="search" value={q} placeholder="Name, email, position, organisation or code" onChange={(e) => setQ(e.target.value)} /></label>
+          <span aria-live="polite">{found ? `${found.total.toLocaleString('en-AU')} found${found.total > found.rows.length ? `; showing the first ${found.rows.length.toLocaleString('en-AU')}` : ''}.` : `Showing the first ${people.length.toLocaleString('en-AU')} alphabetically. Search to find anyone else in the master.`}</span>
+        </div>
+      )}
+    <DataGrid id="stakeholder-master" type="stakeholder" title="Stakeholders" rows={sortBy(shown, 'familyName', 'givenName')} columns={cols} exportName="Stakeholder master"
       searchKeys={[(s) => personName(s), 'positionTitle', 'organisation', 'businessUnit', 'location', 'email', 'code']}
       onRowClick={(s) => navigate(`/stakeholders/${s.id}`)} selectable={editable} bulkFields={editable ? ['status', 'location', 'businessUnit', 'employmentType'] : []} onChanged={refresh}
       facets={[
@@ -83,7 +100,8 @@ function People({ people, index, refresh }) {
         { key: 'ini', label: 'Initiative', options: [{ id: 'none', label: 'In no initiative' }, ...initiatives.map((i) => ({ id: i.id, label: i.shortName || i.name }))], value: (s) => (asArray(index[s.id]).length ? asArray(index[s.id]) : ['none']) },
       ]}
       toolbar={can(user, 'C', 'stakeholder') && <button type="button" className="btn btn-sm btn-primary" onClick={() => drawer.open({ type: 'stakeholder', defaults: { status: 'active', source: 'manual', employmentType: 'employee' }, onSaved: refresh })}><Icon name="plus" />Add stakeholder</button>}
-      empty={<Empty icon="users" title="No stakeholders">Add stakeholders one by one, import them from a spreadsheet, or synchronise them from the HR system.</Empty>} />
+      empty={found ? <Empty icon="search" title="No stakeholders match">Try other words, or fewer of them.</Empty> : <Empty icon="users" title="No stakeholders">Add stakeholders one by one, import them from a spreadsheet, or synchronise them from the HR system.</Empty>} />
+    </>
   );
 }
 
@@ -91,14 +109,7 @@ function Groups({ groups, refresh }) {
   const { api, user, config } = useApp();
   const drawer = useRecordDrawer();
   const [members, setMembers] = useState(null);
-  useEffect(() => {
-    api.list('membership', {}).then((r) => {
-      const today = new Date().toISOString().slice(0, 10);
-      const out = {};
-      for (const m of r.rows) if (!m.to || m.to >= today) out[m.groupId] = (out[m.groupId] || 0) + 1;
-      setMembers(out);
-    }).catch(() => setMembers({}));
-  }, [api, groups]);
+  useEffect(() => { api.op('groupMemberCounts', {}).then(setMembers).catch(() => setMembers({})); }, [api, groups]);
   const byId = Object.fromEntries(groups.map((g) => [g.id, g]));
   const path = (g) => { const out = []; let c = byId[g.parentId]; const seen = new Set(); while (c && !seen.has(c.id)) { out.unshift(c.name); seen.add(c.id); c = byId[c.parentId]; } return out.join(' › '); };
   const kinds = uniq(groups.map((g) => g.kind).filter(Boolean));
@@ -109,7 +120,7 @@ function Groups({ groups, refresh }) {
         { key: 'name', label: 'Group', render: (g) => <span><strong>{g.name}</strong><span className="sub-line tiny muted">{path(g)}</span></span>, value: (g) => g.name },
         { key: 'kind', label: 'Kind', render: (g) => cap(g.kind), value: (g) => g.kind || '' },
         { key: 'membership', label: 'Membership', render: (g) => (g.membershipType === 'dynamic' ? <Badge tone="info" title="Members are worked out from rules, for example business unit and location">Rule-based</Badge> : 'Listed members'), value: (g) => g.membershipType },
-        { key: 'members', label: 'Members recorded', align: 'num', render: (g) => (g.membershipType === 'dynamic' ? '—' : members ? members[g.id] || 0 : '…'), value: (g) => members?.[g.id] || 0 },
+        { key: 'members', label: 'Current members', align: 'num', render: (g) => (members ? (members[g.id] || 0).toLocaleString('en-AU') : '…'), value: (g) => members?.[g.id] || 0 },
         { key: 'headcount', label: 'Headcount', align: 'num', render: (g) => (g.headcount != null ? Number(g.headcount).toLocaleString('en-AU') : '—'), value: (g) => g.headcount ?? -1 },
         { key: 'org', label: 'Organisation', render: (g) => g.organisation || '—', value: (g) => g.organisation || '', hidden: true },
       ]}

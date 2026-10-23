@@ -11,6 +11,7 @@ import { AppError, uid, pad, asArray, clone, isEmpty, personName, sortBy } from 
 import { todayIso } from '../dates.js';
 import { ConflictError } from '../memoryDriver.js';
 import { dataset, DATASETS } from '../reporting.js';
+import { matchesRules } from '../rules/engagements.js';
 import { HOOKS } from './hooks.js';
 import { registerEngagementOps } from './ops/engagements.js';
 import { registerWorkflowOps } from './ops/workflow.js';
@@ -25,12 +26,31 @@ export const SYSTEM = { id: 'system', name: 'System', roles: ['changeLead', 'adm
 // Fields that only the service sets.
 const SYSTEM_KEYS = ['id', 'type', 'code', 'version', 'seq', 'createdAt', 'createdBy', 'updatedAt', 'updatedBy', 'deleted', '_redacted'];
 
+// Every id-like string held anywhere in the given records (record ids are unique, so these can be matched
+// against the master).
+function collectIds(value, out) {
+  if (typeof value === 'string') { if (value.length >= 8 && value.length <= 64 && !/\s/.test(value)) out.add(value); }
+  else if (Array.isArray(value)) for (const v of value) collectIds(v, out);
+  else if (value && typeof value === 'object') for (const v of Object.values(value)) collectIds(v, out);
+  return out;
+}
+
+// The fields global search looks in for each record type (never sensitive ones).
+const SEARCH_KEYS = {};
+const searchKeys = (type) => (SEARCH_KEYS[type] ||= fieldsOf(type).filter((f) => ['text', 'textarea', 'richtext', 'email'].includes(f.type) && !f.sensitive).map((f) => f.key));
+
 export function createService({ driver, env = {} }) {
   const now = env.now || (() => new Date());
   const nowIso = () => now().toISOString();
   let configCache = null;
   const ctxCache = new Map();
   const modelCache = new Map();
+  // Large stakeholder masters (PER-04): above this many people, an initiative's working set holds only the
+  // stakeholders it uses, and pickers search the master on the server.
+  const SCOPE_AT = Number(env.scopeThreshold ?? 5000);
+  const scopeCache = new Map();
+  let enterpriseVersion = 0;
+  let stakeholderIndex = null;
 
   const S = { driver, env, now, nowIso, SYSTEM, ops: {}, opMeta: {} };
 
@@ -53,7 +73,7 @@ export function createService({ driver, env = {} }) {
     };
     return configCache;
   };
-  S.invalidateConfig = () => { configCache = null; ctxCache.clear(); modelCache.clear(); };
+  S.invalidateConfig = () => { configCache = null; ctxCache.clear(); modelCache.clear(); scopeCache.clear(); enterpriseVersion++; stakeholderIndex = null; };
   S.today = async () => todayIso((await S.getConfig()).settings.timeZone, now());
 
   // --- Audit (SEC-05: tamper-evident hash chain) ----------------------------------------------------------
@@ -323,8 +343,59 @@ export function createService({ driver, env = {} }) {
     if (initiativeId) {
       versions.set(initiativeId, (versions.get(initiativeId) || 0) + 1);
       modelCache.delete(initiativeId);
-    } else modelCache.clear();
+      scopeCache.delete(initiativeId);
+    } else {
+      modelCache.clear();
+      scopeCache.clear();
+      enterpriseVersion++;
+      stakeholderIndex = null;
+    }
     ctxCache.clear();
+  };
+
+  // The stakeholder master with the text search runs over (PER-02), rebuilt after enterprise changes.
+  S.stakeholderIndex = async () => {
+    if (stakeholderIndex?.version === enterpriseVersion) return stakeholderIndex.rows;
+    const version = enterpriseVersion;
+    const keys = searchKeys('stakeholder');
+    const rows = (await driver.list('stakeholder')).filter((s) => !s.mergedInto).map((s) => ({ s, hay: [s.code, ...keys.map((k) => s[k])].join(' ').toLowerCase() }));
+    if (version === enterpriseVersion) stakeholderIndex = { version, rows };
+    return rows;
+  };
+
+  // The enterprise records an initiative's working set and model need. With a small master that is all of
+  // it; with a large one it is the stakeholders the initiative's records refer to, the members of the
+  // stakeholder groups they refer to (and of their sub-groups), each of those people's direct manager
+  // (PMG-002), the people linked to users, and the other ends of their recorded relationships.
+  S.enterpriseScope = async (initiativeId, loadOwn) => {
+    const key = `${versions.get(initiativeId) || 0}:${enterpriseVersion}`;
+    const hit = scopeCache.get(initiativeId);
+    if (hit?.key === key) return hit.scope;
+    const stakeholder = (await driver.list('stakeholder')).filter((s) => !s.mergedInto);
+    const membership = await driver.list('membership');
+    const relationship = await driver.list('relationship');
+    let scope = { stakeholder, membership, relationship, scoped: false };
+    if (stakeholder.length > SCOPE_AT) {
+      const refs = new Set();
+      collectIds([await S.initiative(initiativeId), await loadOwn()], refs);
+      for (const u of await driver.list('user')) if (u.stakeholderId) refs.add(u.stakeholderId);
+      const byId = new Map(stakeholder.map((s) => [s.id, s]));
+      const ids = new Set([...refs].filter((id) => byId.has(id)));
+      const groups = await driver.list('stakeholderGroup');
+      const groupIds = new Set(groups.filter((g) => refs.has(g.id)).map((g) => g.id));
+      for (let grew = true; grew;) {
+        grew = false;
+        for (const g of groups) if (g.parentId && groupIds.has(g.parentId) && !groupIds.has(g.id)) { groupIds.add(g.id); grew = true; }
+      }
+      for (const m of membership) if (groupIds.has(m.groupId)) ids.add(m.stakeholderId);
+      for (const g of groups) if (groupIds.has(g.id) && g.membershipType === 'dynamic') for (const s of stakeholder) if (matchesRules(s, g.rules)) ids.add(s.id);
+      for (const id of [...ids]) { const mgr = byId.get(id)?.managerId; if (mgr && byId.has(mgr)) ids.add(mgr); }
+      const rels = relationship.filter((r) => ids.has(r.fromId) || ids.has(r.toId));
+      for (const r of rels) for (const id of [r.fromId, r.toId]) if (byId.has(id)) ids.add(id);
+      scope = { stakeholder: [...ids].map((id) => byId.get(id)), membership: membership.filter((m) => ids.has(m.stakeholderId) || groupIds.has(m.groupId)), relationship: rels, scoped: true, ids };
+    }
+    scopeCache.set(initiativeId, { key, scope });
+    return scope;
   };
 
   // Raw (unredacted) data for an initiative, including the enterprise records it references.
@@ -334,10 +405,10 @@ export function createService({ driver, env = {} }) {
     const own = await driver.listInitiative(initiativeId);
     const records = {};
     for (const r of own) (records[r.type] ||= []).push(r);
-    for (const t of ['stakeholder', 'stakeholderGroup', 'membership', 'relationship', 'user', 'container']) records[t] = await driver.list(t);
-    // Keep merged stakeholders out of working sets.
-    records.stakeholder = records.stakeholder.filter((s) => !s.mergedInto);
-    return { initiative, records };
+    for (const t of ['stakeholderGroup', 'user', 'container']) records[t] = await driver.list(t);
+    const scope = await S.enterpriseScope(initiativeId, async () => own);
+    Object.assign(records, { stakeholder: scope.stakeholder, membership: scope.membership, relationship: scope.relationship });
+    return { initiative, records, scoped: scope.scoped };
   };
 
   S.model = async (initiativeId, { today } = {}) => {
@@ -356,7 +427,7 @@ export function createService({ driver, env = {} }) {
     const initiative = await S.initiative(initiativeId);
     if (!initiative || initiative.deleted) throw new AppError(404, 'Initiative not found.');
     S.assertInitiative(actor, initiative);
-    const { records } = await S.rawInitiativeData(initiativeId);
+    const { records, scoped } = await S.rawInitiativeData(initiativeId);
     const ctx = await S.accessCtx(actor, initiativeId);
     const out = {};
     let sensitiveSeen = 0;
@@ -374,20 +445,37 @@ export function createService({ driver, env = {} }) {
       out[type] = list;
     }
     if (sensitiveSeen && !actor.system) await S.audit(actor, { action: 'sensitiveRead', type: 'initiative', recordId: initiativeId, initiativeId, summary: `Viewed sensitive fields on ${sensitiveSeen} records` });
-    return { initiative: await S.redactFor(actor, 'initiative', initiative, ctx), records: out, seq: await driver.currentSeq() };
+    return { initiative: await S.redactFor(actor, 'initiative', initiative, ctx), records: out, seq: await driver.currentSeq(), scoped };
   };
 
   S.changes = async (actor, initiativeId, since) => {
     S.assertInitiative(actor, await S.initiative(initiativeId));
     const ctx = await S.accessCtx(actor, initiativeId);
     const { seq, records } = await driver.changesSince(Number(since) || 0, initiativeId);
+    const scope = await S.enterpriseScope(initiativeId, () => driver.listInitiative(initiativeId));
+    // With a large master, enterprise changes outside the initiative's scope are left out, and stakeholders
+    // that changed records now refer to are added.
+    const inScope = (r) => !scope.scoped || r.initiativeId || (r.type === 'stakeholder' ? scope.ids.has(r.id) : r.type === 'membership' ? scope.ids.has(r.stakeholderId) : r.type === 'relationship' ? scope.ids.has(r.fromId) || scope.ids.has(r.toId) : true);
     const out = [];
+    const kept = [];
     for (const r of records) {
       if (!ENTITIES[r.type] || r.type === 'notification' || r.type === 'apiClient' || r.type === 'webhook') continue;
       if (r.deleted) { out.push({ id: r.id, type: r.type, deleted: true }); continue; }
+      if (!inScope(r)) continue;
       if (r.type === 'user') { out.push(publicUser(r)); continue; }
       if (!can(actor, 'R', r.type, r, ctx)) continue;
+      kept.push(r);
       out.push(await S.redactFor(actor, r.type, r, ctx));
+    }
+    if (scope.scoped) {
+      const refs = new Set();
+      collectIds(kept, refs);
+      const sent = new Set(kept.map((r) => r.id));
+      for (const id of refs) {
+        if (sent.has(id) || !scope.ids.has(id)) continue;
+        const st = await driver.get('stakeholder', id);
+        if (st && can(actor, 'R', 'stakeholder', st, ctx)) out.push(await S.redactFor(actor, 'stakeholder', st, ctx));
+      }
     }
     return { seq, records: out };
   };
@@ -442,20 +530,24 @@ export function createService({ driver, env = {} }) {
     const hits = [];
     const initiatives = (await driver.list('initiative')).filter((i) => initiativeAccess(actor, i.id));
     const titleOf = (r) => { try { return entity(r.type).title(r) || r.code; } catch { return r.code; } };
-    const consider = async (r, ctx) => {
+    const hit = (r) => hits.push({ id: r.id, type: r.type, code: r.code, title: r.type === 'stakeholder' ? personName(r) : titleOf(r), initiativeId: r.initiativeId || null });
+    const matches = (hay) => words.every((w) => hay.includes(w));
+    const consider = (r, ctx) => {
       if (!ENTITIES[r.type] || ['notification', 'apiClient', 'webhook', 'membership', 'savedView', 'measureValue', 'surveyResponse'].includes(r.type)) return;
-      if (!can(actor, 'R', r.type, r, ctx)) return;
-      const keys = fieldsOf(r.type).filter((f) => ['text', 'textarea', 'richtext', 'email'].includes(f.type) && !f.sensitive).map((f) => f.key);
-      const hay = [r.code, ...keys.map((k) => r[k])].join(' ').toLowerCase().replace(/<[^>]+>/g, ' ');
-      if (words.every((w) => hay.includes(w))) hits.push({ id: r.id, type: r.type, code: r.code, title: r.type === 'stakeholder' ? personName(r) : titleOf(r), initiativeId: r.initiativeId || null });
+      const hay = [r.code, ...searchKeys(r.type).map((k) => r[k])].join(' ').toLowerCase().replace(/<[^>]+>/g, ' ');
+      if (matches(hay) && can(actor, 'R', r.type, r, ctx)) hit(r);
     };
-    for (const s of await driver.list('stakeholder')) if (!s.mergedInto) await consider(s, {});
+    for (const { s, hay } of await S.stakeholderIndex()) {
+      if (hits.length >= limit) break;
+      if (matches(hay) && can(actor, 'R', 'stakeholder', s, {})) hit(s);
+    }
     for (const i of initiatives) {
-      await consider(i, {});
+      if (hits.length >= limit) break;
+      consider(i, {});
       const ctx = await S.accessCtx(actor, i.id);
       for (const r of await driver.listInitiative(i.id)) {
         if (hits.length >= limit) break;
-        await consider(r, ctx);
+        consider(r, ctx);
       }
     }
     return hits.slice(0, limit);

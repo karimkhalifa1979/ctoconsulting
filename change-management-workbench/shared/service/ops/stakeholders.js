@@ -5,8 +5,9 @@ import { AppError, asArray, personName, uniq, isEmpty } from '../../util.js';
 import { ENTITIES, entity, fieldsOf, listOptions } from '../../schema.js';
 import { validateRecord, normalise } from '../../validate.js';
 import { findDuplicates, duplicateKey } from '../../rules/stakeholders.js';
+import { groupMemberIds } from '../../rules/engagements.js';
 import { parseAuDate } from '../../dates.js';
-import { hasRole, initiativeAccess } from '../../access.js';
+import { can, hasRole, initiativeAccess } from '../../access.js';
 
 // Every field that holds a stakeholder id, including table columns.
 function stakeholderRefFields(type) {
@@ -75,6 +76,55 @@ export function registerStakeholderOps(S) {
       for (const p of await S.driver.list('profile', { initiativeId: i.id })) if (p.stakeholderId) (out[p.stakeholderId] ||= []).push(i.id);
     }
     return out;
+  });
+
+  // Finds people in the stakeholder master for pickers, for when initiatives hold only the stakeholders they
+  // use (PER-02, PER-04): by words in the name, email, code, position or organisation, or by id.
+  S.op('findStakeholders', { area: 'stakeholder', summary: 'Find stakeholders in the master by name, email, code, position or organisation, or by id' }, async (actor, { q = '', ids, limit = 20 } = {}) => {
+    S.assertCan(actor, 'R', 'stakeholder', null);
+    const ctx = await S.accessCtx(actor, undefined);
+    const max = Math.min(Number(limit) || 20, 100);
+    let rows = [];
+    if (ids) rows = (await Promise.all(asArray(ids).slice(0, 500).map((id) => S.driver.get('stakeholder', id)))).filter((s) => s && !s.deleted);
+    else {
+      const words = String(q).toLowerCase().split(/\s+/).filter(Boolean);
+      if (!words.length) return [];
+      for (const { s, hay } of await S.stakeholderIndex()) {
+        if (rows.length >= max) break;
+        if (s.status !== 'left' && words.every((w) => hay.includes(w)) && can(actor, 'R', 'stakeholder', s, ctx)) rows.push(s);
+      }
+    }
+    return Promise.all(rows.filter((s) => can(actor, 'R', 'stakeholder', s, ctx)).map((s) => S.redactFor(actor, 'stakeholder', s, ctx)));
+  });
+
+  // A stakeholder's recorded relationships, group memberships and profiles in the initiatives the user can
+  // open, with the names of the people at the other end, for the enterprise profile (STK-005, STK-006, STK-010).
+  S.op('stakeholderLinks', { area: 'stakeholder', summary: "A stakeholder's relationships, group memberships and initiative profiles" }, async (actor, { stakeholderId }) => {
+    S.assertCan(actor, 'R', 'stakeholder', null);
+    const ctx = await S.accessCtx(actor, undefined);
+    const visible = (type, rows, c = ctx) => Promise.all(rows.filter((r) => can(actor, 'R', type, r, c)).map((r) => S.redactFor(actor, type, r, c)));
+    const relationships = await visible('relationship', (await S.driver.list('relationship')).filter((r) => r.fromId === stakeholderId || r.toId === stakeholderId));
+    const memberships = await visible('membership', (await S.driver.list('membership')).filter((m) => m.stakeholderId === stakeholderId));
+    const profiles = [];
+    for (const i of await S.driver.list('initiative')) {
+      if (!initiativeAccess(actor, i.id)) continue;
+      const own = (await S.driver.list('profile', { initiativeId: i.id })).filter((p) => p.stakeholderId === stakeholderId);
+      if (own.length) profiles.push(...(await visible('profile', own, await S.accessCtx(actor, i.id))));
+    }
+    const names = {};
+    const self = await S.driver.get('stakeholder', stakeholderId);
+    for (const id of uniq([self?.managerId, ...relationships.flatMap((r) => [r.fromId, r.toId])].filter(Boolean))) {
+      const st = await S.driver.get('stakeholder', id);
+      if (st) names[id] = st.deidentified ? 'De-identified stakeholder' : personName(st);
+    }
+    return { relationships, memberships, profiles, names };
+  });
+
+  // Current members of each stakeholder group, including its sub-groups and rule-based (dynamic) membership.
+  S.op('groupMemberCounts', { area: 'stakeholder', summary: 'The number of current members of each stakeholder group' }, async (actor) => {
+    S.assertCan(actor, 'R', 'stakeholderGroup', null);
+    const ctx = { groups: await S.driver.list('stakeholderGroup'), memberships: await S.driver.list('membership'), stakeholders: (await S.driver.list('stakeholder')).filter((s) => !s.mergedInto), today: await S.today() };
+    return Object.fromEntries(ctx.groups.map((g) => [g.id, groupMemberIds(g.id, ctx).size]));
   });
 
   // STK-046: merge preserves the history of both records by re-pointing every reference.

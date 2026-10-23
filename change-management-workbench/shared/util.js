@@ -48,16 +48,22 @@ export function countBy(arr, fn) {
   return out;
 }
 
+// One collator for every sort: creating one per comparison is slow on large registers.
+const COLLATOR = new Intl.Collator('en-AU', { numeric: true });
+export const compareText = (a, b) => COLLATOR.compare(a, b);
+
 export function sortBy(arr, ...fns) {
+  const keys = fns.map((fn) => {
+    const desc = typeof fn === 'string' && fn.startsWith('-');
+    return { desc, get: typeof fn === 'function' ? fn : (x) => x?.[desc ? fn.slice(1) : fn] };
+  });
   return [...arr].sort((a, b) => {
-    for (const fn of fns) {
-      const desc = typeof fn === 'string' && fn.startsWith('-');
-      const get = typeof fn === 'function' ? fn : (x) => x?.[desc ? fn.slice(1) : fn];
+    for (const { desc, get } of keys) {
       const va = get(a), vb = get(b);
       if (va == null && vb == null) continue;
       if (va == null) return 1;
       if (vb == null) return -1;
-      const c = typeof va === 'number' && typeof vb === 'number' ? va - vb : String(va).localeCompare(String(vb), 'en-AU', { numeric: true });
+      const c = typeof va === 'number' && typeof vb === 'number' ? va - vb : COLLATOR.compare(String(va), String(vb));
       if (c) return desc ? -c : c;
     }
     return 0;

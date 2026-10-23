@@ -147,7 +147,7 @@ export function Tabs({ tabs, value, onChange, label = 'Sections' }) {
     <div className="tabs" role="tablist" aria-label={label}>
       {tabs.filter(Boolean).map((t) => (
         <button key={t.id} type="button" role="tab" aria-selected={value === t.id} onClick={() => onChange(t.id)}>
-          {t.icon && <Icon name={t.icon} size={15} />}{t.label}{t.count != null && <span className="pill-count">{t.count}</span>}
+          {t.icon && <Icon name={t.icon} size={15} />}{t.label}{t.count != null && <span className="pill-count">{typeof t.count === 'number' ? t.count.toLocaleString('en-AU') : t.count}</span>}
         </button>
       ))}
     </div>

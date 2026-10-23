@@ -336,7 +336,7 @@ export function PlanItemEditor({ item, defaults = {}, onClose }) {
             {field('messageFocus')}
             {field('engagementType')}
             {field('channel')}
-            <label className="field span-2"><span>Stakeholders</span><RefPicker multiple options={lookups.optionsFor('stakeholder')} value={asArray(d.stakeholderIds)} onChange={(v) => set('stakeholderIds', v)} /></label>
+            <label className="field span-2"><span>Stakeholders</span><RefPicker multiple options={lookups.optionsFor('stakeholder')} search={lookups.search?.stakeholder} value={asArray(d.stakeholderIds)} onChange={(v) => set('stakeholderIds', v)} /></label>
             <label className="field span-2"><span>Stakeholder groups</span><RefPicker multiple options={lookups.optionsFor('stakeholderGroup')} value={asArray(d.groupIds)} onChange={(v) => set('groupIds', v)} /></label>
           </div>
           <div className="form-section">
@@ -354,7 +354,7 @@ export function PlanItemEditor({ item, defaults = {}, onClose }) {
           <div className="form-section">
             <h3>Who and what</h3>
             <div className="form-grid">
-              <label className="field"><span>Sender or presenter<em className="req">*</em> <Help term="Preferred sender" text="Business reasons are best delivered by the primary sponsor; personal impacts by each person's direct manager (RUL-11)." /></span><RefPicker options={lookups.optionsFor('stakeholder')} value={d.senderId || null} onChange={(v) => set('senderId', v)} /></label>
+              <label className="field"><span>Sender or presenter<em className="req">*</em> <Help term="Preferred sender" text="Business reasons are best delivered by the primary sponsor; personal impacts by each person's direct manager (RUL-11)." /></span><RefPicker options={lookups.optionsFor('stakeholder')} search={lookups.search?.stakeholder} value={d.senderId || null} onChange={(v) => set('senderId', v)} /></label>
               {field('facilitator')}
               {field('relationshipOwnerId')}
               {field('planType')}
@@ -455,7 +455,7 @@ export function LogEngagement({ engagement, defaults = {}, onClose }) {
           <label className="field"><span>Start time and duration</span><div className="row" style={{ flexWrap: 'nowrap' }}><input type="time" value={d.startTime || ''} onChange={(e) => set('startTime', e.target.value)} aria-label="Start time" /><input type="number" min={5} step={5} value={d.durationMinutes || ''} onChange={(e) => set('durationMinutes', e.target.value)} aria-label="Duration in minutes" style={{ width: 90 }} /><span className="small muted">min</span></div></label>
           <label className="field"><span>Engagement type<em className="req">*</em></span>{ctl('engagementType')}</label>
           <label className="field"><span>Channel</span>{ctl('channel')}</label>
-          <label className="field span-2"><span>Stakeholders engaged</span><RefPicker multiple options={lookups.optionsFor('stakeholder')} value={asArray(d.stakeholderIds)} onChange={(v) => set('stakeholderIds', v)} /></label>
+          <label className="field span-2"><span>Stakeholders engaged</span><RefPicker multiple options={lookups.optionsFor('stakeholder')} search={lookups.search?.stakeholder} value={asArray(d.stakeholderIds)} onChange={(v) => set('stakeholderIds', v)} /></label>
           <label className="field span-2"><span>Groups engaged</span><RefPicker multiple options={lookups.optionsFor('stakeholderGroup')} value={asArray(d.groupIds)} onChange={(v) => set('groupIds', v)} /></label>
           <label className="field span-2"><span>Internal participants</span><RefPicker multiple options={lookups.optionsFor('user')} value={asArray(d.internalParticipantIds)} onChange={(v) => set('internalParticipantIds', v)} /></label>
           <label className="field span-2"><span>Purpose</span><textarea rows={2} value={d.purpose} onChange={(e) => set('purpose', e.target.value)} /></label>

@@ -8,20 +8,27 @@ import { fieldsOf, entity } from '../../shared/schema.js';
 import { validateRecord } from '../../shared/validate.js';
 import { useApp } from '../state/app.jsx';
 import { useIniOptional, useMutator } from '../state/initiative.jsx';
-import { makeLookups } from '../lib/lookups.js';
+import { makeLookups, stakeholderOption } from '../lib/lookups.js';
 import { Help } from './core.jsx';
 import { useEnterprise } from '../state/enterprise.jsx';
 
 const WIDE = new Set(['textarea', 'richtext', 'table', 'json', 'refs', 'multi', 'adkar', 'users']);
 
 export function useLookups() {
-  const { users, initiatives, containers } = useApp();
+  const { api, users, initiatives, containers } = useApp();
   const ini = useIniOptional();
   const ent = useEnterprise();
   // Outside an initiative, stakeholders and groups come from the enterprise records.
   useEffect(() => { if (!ini && ent && !ent.records) ent.ensure(); }, [ini, ent]);
   const records = ini?.records || ent?.records || EMPTY;
-  return useMemo(() => makeLookups({ records, users, initiatives, containers, model: ini?.model }), [records, ini?.model, users, initiatives, containers]);
+  // With a large stakeholder master the working set holds only the stakeholders in use, so pickers also
+  // search the master on the server (PER-04).
+  const partial = ini ? !!ini.data?.scoped : !!ent?.partial;
+  return useMemo(() => {
+    const lookups = makeLookups({ records, users, initiatives, containers, model: ini?.model });
+    if (partial) lookups.search = { stakeholder: (q) => api.op('findStakeholders', { q, limit: 20 }).then((rows) => rows.map(stakeholderOption)) };
+    return lookups;
+  }, [records, ini?.model, users, initiatives, containers, partial, api]);
 }
 const EMPTY = {};
 

@@ -3,6 +3,8 @@ import { personName, sortBy } from '../../shared/util.js';
 import { entity } from '../../shared/schema.js';
 import { fmtDate } from './format.js';
 
+export const stakeholderOption = (s) => ({ id: s.id, label: personName(s), sub: [s.positionTitle, s.organisation].filter(Boolean).join(' · ') });
+
 export function makeLookups({ records = {}, users = [], initiatives = [], containers = [], model = null } = {}) {
   const R = (t) => records[t] || [];
   const byId = {};
@@ -14,7 +16,7 @@ export function makeLookups({ records = {}, users = [], initiatives = [], contai
 
   const optionsFor = (ref) => {
     switch (ref) {
-      case 'stakeholder': return sortBy(R('stakeholder').filter((s) => !s.mergedInto && s.status !== 'left'), 'familyName', 'givenName').map((s) => ({ id: s.id, label: personName(s), sub: [s.positionTitle, s.organisation].filter(Boolean).join(' · ') }));
+      case 'stakeholder': return sortBy(R('stakeholder').filter((s) => !s.mergedInto && s.status !== 'left'), 'familyName', 'givenName').map(stakeholderOption);
       case 'stakeholderGroup': return sortBy(R('stakeholderGroup'), 'name').map((g) => ({ id: g.id, label: g.name, sub: g.kind }));
       case 'user': return sortBy(Object.values(byId.user || {}).filter((u) => u.status !== 'left'), 'name').map((u) => ({ id: u.id, label: u.name, sub: u.email }));
       case 'milestone': return sortBy(R('milestone'), 'date').map((m) => ({ id: m.id, label: m.name, sub: fmtDate(m.date) }));

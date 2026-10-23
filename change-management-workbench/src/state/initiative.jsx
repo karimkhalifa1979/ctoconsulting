@@ -32,7 +32,7 @@ function mergeChanges(data, changes) {
     else list.push(r);
     records[r.type] = list;
   }
-  return { initiative, records, seq: changes.seq };
+  return { ...data, initiative, records, seq: changes.seq };
 }
 
 export function InitiativeProvider({ id, children }) {

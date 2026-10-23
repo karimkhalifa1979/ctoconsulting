@@ -59,9 +59,9 @@ export function FieldControl({ fd, value, onChange, lookups, config, model, disa
     case 'adkar':
       return <AdkarPicker id={id} value={asArray(value)} onChange={set} disabled={disabled} />;
     case 'ref':
-      return <RefPicker id={id} options={lookups?.optionsFor(fd.ref) || []} value={value || null} onChange={set} disabled={disabled} invalid={invalid} />;
+      return <RefPicker id={id} options={lookups?.optionsFor(fd.ref) || []} search={lookups?.search?.[fd.ref]} value={value || null} onChange={set} disabled={disabled} invalid={invalid} />;
     case 'refs':
-      return <RefPicker id={id} multiple options={lookups?.optionsFor(fd.ref) || []} value={asArray(value)} onChange={set} disabled={disabled} invalid={invalid} />;
+      return <RefPicker id={id} multiple options={lookups?.optionsFor(fd.ref) || []} search={lookups?.search?.[fd.ref]} value={asArray(value)} onChange={set} disabled={disabled} invalid={invalid} />;
     case 'user':
       return <RefPicker id={id} options={lookups?.optionsFor('user') || []} value={value || null} onChange={set} disabled={disabled} invalid={invalid} />;
     case 'users':
@@ -102,18 +102,32 @@ export function MultiSelect({ options, value = [], onChange, disabled, id }) {
 }
 
 // Combobox for single or multiple references with type-ahead (USE-02: keyboard operable).
-export function RefPicker({ options = [], value, onChange, multiple = false, disabled, placeholder = 'Search…', id, invalid, allowCreate }) {
+// `search`, when given, finds further options on the server as the user types (a large stakeholder master).
+export function RefPicker({ options = [], value, onChange, multiple = false, disabled, placeholder = 'Search…', id, invalid, allowCreate, search }) {
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
+  const [remote, setRemote] = useState({ q: '', options: [] });
+  const [known, setKnown] = useState({});
   const listId = useId();
   const ref = useRef(null);
   const selected = multiple ? asArray(value) : value ? [value] : [];
-  const byId = useMemo(() => Object.fromEntries(options.map((o) => [o.id, o])), [options]);
+  const byId = useMemo(() => ({ ...known, ...Object.fromEntries(options.map((o) => [o.id, o])) }), [options, known]);
+  const term = q.trim();
+  useEffect(() => {
+    if (!search || !open || term.length < 2) return undefined;
+    let alive = true;
+    const t = setTimeout(() => search(term).then((found) => { if (alive) setRemote({ q: term, options: found }); }).catch(() => { if (alive) setRemote({ q: term, options: [] }); }), 250);
+    return () => { alive = false; clearTimeout(t); };
+  }, [search, open, term]);
+  const searching = !!search && term.length >= 2 && remote.q !== term;
   const matches = useMemo(() => {
     const words = q.toLowerCase().split(/\s+/).filter(Boolean);
-    return options.filter((o) => (!multiple || !selected.includes(o.id)) && words.every((w) => `${o.label} ${o.sub || ''}`.toLowerCase().includes(w))).slice(0, 60);
-  }, [options, q, multiple, selected]);
+    const local = options.filter((o) => (!multiple || !selected.includes(o.id)) && words.every((w) => `${o.label} ${o.sub || ''}`.toLowerCase().includes(w)));
+    const seen = new Set(local.map((o) => o.id));
+    const more = remote.q === term && term.length >= 2 ? remote.options.filter((o) => !seen.has(o.id) && (!multiple || !selected.includes(o.id))) : [];
+    return [...local, ...more].slice(0, 60);
+  }, [options, remote, term, q, multiple, selected]);
   useEffect(() => {
     if (!open) return undefined;
     const onDoc = (e) => { if (!ref.current?.contains(e.target)) setOpen(false); };
@@ -121,6 +135,7 @@ export function RefPicker({ options = [], value, onChange, multiple = false, dis
     return () => document.removeEventListener('mousedown', onDoc);
   }, [open]);
   const choose = (o) => {
+    if (!byId[o.id]) setKnown((k) => ({ ...k, [o.id]: o }));
     if (multiple) onChange([...selected, o.id]);
     else { onChange(o.id); setOpen(false); }
     setQ('');
@@ -154,7 +169,8 @@ export function RefPicker({ options = [], value, onChange, multiple = false, dis
               <span>{o.label}</span>{o.sub && <span className="sub">{o.sub}</span>}
             </div>
           ))}
-          {!matches.length && <div className="muted small" style={{ padding: 8 }}>{allowCreate && q ? <button type="button" className="link-btn" onMouseDown={(e) => { e.preventDefault(); allowCreate(q); setQ(''); }}>Create “{q}”</button> : 'No matches'}</div>}
+          {!matches.length && <div className="muted small" style={{ padding: 8 }}>{searching ? 'Searching…' : allowCreate && q ? <button type="button" className="link-btn" onMouseDown={(e) => { e.preventDefault(); allowCreate(q); setQ(''); }}>Create “{q}”</button> : 'No matches'}</div>}
+          {matches.length > 0 && searching && <div className="muted tiny" style={{ padding: '4px 8px' }}>Searching the stakeholder master…</div>}
         </div>
       )}
     </div>

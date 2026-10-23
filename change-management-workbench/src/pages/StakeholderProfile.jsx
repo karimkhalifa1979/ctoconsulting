@@ -46,15 +46,9 @@ export default function StakeholderProfile() {
     let alive = true;
     (async () => {
       try {
-        const [rels, mems, groups] = await Promise.all([api.list('relationship', {}), api.list('membership', {}), api.list('stakeholderGroup', {})]);
-        const profiles = [];
-        for (const i of initiatives) {
-          try {
-            const r = await api.list('profile', { initiativeId: i.id });
-            for (const p of r.rows) if (p.stakeholderId === sid) profiles.push({ ...p, initiative: i });
-          } catch { /* no access */ }
-        }
-        if (alive) setEnterprise({ rels: rels.rows.filter((r) => r.fromId === sid || r.toId === sid), mems: mems.rows.filter((x) => x.stakeholderId === sid), groups: groups.rows, profiles });
+        const [links, groups] = await Promise.all([api.op('stakeholderLinks', { stakeholderId: sid }), api.list('stakeholderGroup', {})]);
+        const profiles = links.profiles.map((p) => ({ ...p, initiative: initiatives.find((i) => i.id === p.initiativeId) })).filter((p) => p.initiative);
+        if (alive) setEnterprise({ rels: links.relationships, mems: links.memberships, groups: groups.rows, profiles, names: links.names });
       } catch (e) { if (alive) setEnterprise({ error: e }); }
     })();
     return () => { alive = false; };
@@ -101,7 +95,7 @@ export default function StakeholderProfile() {
               ['Email', st.email ? <a href={`mailto:${st.email}`}>{st.email}</a> : null],
               ['Phone', st.phone],
               ['Location', st.location],
-              ['Manager', manager ? personName(manager) : lookups.nameOf('stakeholder', st.managerId)],
+              ['Manager', manager ? personName(manager) : lookups.nameOf('stakeholder', st.managerId) || enterprise?.names?.[st.managerId]],
               ['Employment', label('employmentType', st.employmentType, config)],
               ['Preferred channels', asArray(st.preferredChannels).map((c) => label('channel', c, config)).join(', ')],
               ['Availability', st.availability],
@@ -151,7 +145,7 @@ export default function StakeholderProfile() {
                   <ul className="small" style={{ margin: 0, paddingLeft: 18 }}>
                     {enterprise.rels.map((r) => {
                       const other = r.fromId === sid ? r.toId : r.fromId;
-                      const otherName = lookups.nameOf('stakeholder', other) || 'another stakeholder';
+                      const otherName = enterprise.names?.[other] || lookups.nameOf('stakeholder', other) || 'another stakeholder';
                       return <li key={r.id}>{r.fromId === sid ? <>{label('relationshipType', r.relType, config)} <Link to={ini ? `/i/${ini.id}/stakeholders/${other}` : `/stakeholders/${other}`}>{otherName}</Link></> : <><Link to={ini ? `/i/${ini.id}/stakeholders/${other}` : `/stakeholders/${other}`}>{otherName}</Link> {label('relationshipType', r.relType, config).toLowerCase()} this person</>} <span className="muted">({r.strength})</span></li>;
                     })}
                   </ul>

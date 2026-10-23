@@ -61,12 +61,13 @@ export function fieldColumn(f, { config, lookups, model } = {}) {
   return { key: f.key, label: f.label, render, value: (r) => (num ? (r[f.key] == null ? null : Number(r[f.key])) : text(r)), align: num ? 'num' : undefined, wrap: ['textarea', 'richtext'].includes(f.type), field: f, facet: ['select'].includes(f.type) ? optLabel : null };
 }
 
+const COLLATOR = new Intl.Collator('en-AU', { numeric: true, sensitivity: 'base' });
 function cmp(a, b) {
   if (a == null && b == null) return 0;
   if (a == null || a === '') return 1;
   if (b == null || b === '') return -1;
   if (typeof a === 'number' && typeof b === 'number') return a - b;
-  return String(a).localeCompare(String(b), 'en-AU', { numeric: true, sensitivity: 'base' });
+  return COLLATOR.compare(String(a), String(b));
 }
 
 export default function DataGrid({

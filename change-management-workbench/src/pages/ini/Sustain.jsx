@@ -150,12 +150,12 @@ function Handover() {
       <div className="grid g-2">
         <Card title="Sustainment owners by group" flush>
           <table className="tbl"><tbody>{m.groups.map((g) => (
-            <tr key={g.id}><td style={{ width: '45%' }}><strong>{g.name}</strong></td><td>{canDo('U', 'impactedGroup', g) ? <RefPicker options={people} value={g.sustainmentOwnerId || null} onChange={(v) => setOwner('impactedGroup', g, v)} placeholder="Nominate an owner" /> : lookups.nameOf('stakeholder', g.sustainmentOwnerId) || '—'}</td></tr>
+            <tr key={g.id}><td style={{ width: '45%' }}><strong>{g.name}</strong></td><td>{canDo('U', 'impactedGroup', g) ? <RefPicker options={people} search={lookups.search?.stakeholder} value={g.sustainmentOwnerId || null} onChange={(v) => setOwner('impactedGroup', g, v)} placeholder="Nominate an owner" /> : lookups.nameOf('stakeholder', g.sustainmentOwnerId) || '—'}</td></tr>
           ))}</tbody></table>
         </Card>
         <Card title="Sustainment owners by measure" flush>
           <table className="tbl"><tbody>{m.measures.map((x) => (
-            <tr key={x.id}><td style={{ width: '45%' }}><strong>{x.name}</strong>{x.postCloseoutMonths ? <span className="tiny muted sub-line">Tracked {x.postCloseoutMonths} months after closeout</span> : null}</td><td>{canDo('U', 'measure', x) ? <RefPicker options={people} value={x.sustainmentOwnerId || null} onChange={(v) => setOwner('measure', x, v)} placeholder="Nominate an owner" /> : lookups.nameOf('stakeholder', x.sustainmentOwnerId) || '—'}</td></tr>
+            <tr key={x.id}><td style={{ width: '45%' }}><strong>{x.name}</strong>{x.postCloseoutMonths ? <span className="tiny muted sub-line">Tracked {x.postCloseoutMonths} months after closeout</span> : null}</td><td>{canDo('U', 'measure', x) ? <RefPicker options={people} search={lookups.search?.stakeholder} value={x.sustainmentOwnerId || null} onChange={(v) => setOwner('measure', x, v)} placeholder="Nominate an owner" /> : lookups.nameOf('stakeholder', x.sustainmentOwnerId) || '—'}</td></tr>
           ))}</tbody></table>
         </Card>
       </div>

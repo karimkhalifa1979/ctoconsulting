@@ -41,6 +41,8 @@ const service = createService({
     mode: 'server',
     version: VERSION,
     log,
+    // Master size above which each initiative's working set holds only the stakeholders it uses (PER-04).
+    ...(env.CMW_SCOPE_THRESHOLD ? { scopeThreshold: Number(env.CMW_SCOPE_THRESHOLD) } : {}),
     aiAvailable,
     emailAvailable: mailer.enabled,
     ssoAvailable: Boolean(env.OIDC_ISSUER),

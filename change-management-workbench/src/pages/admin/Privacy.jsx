@@ -219,7 +219,7 @@ function Requests() {
   return (
     <Card title="Access and correction requests" sub="Find every record that holds information about a person, across all initiatives, to give them a copy or correct it (PRV-05). Searches are recorded in the audit trail.">
       <div className="row" style={{ alignItems: 'flex-end', flexWrap: 'wrap' }}>
-        <label className="field" style={{ minWidth: 320, flex: 1 }}><span>Person</span><RefPicker value={sid} onChange={setSid} options={lookups.optionsFor('stakeholder')} placeholder="Search by name" /></label>
+        <label className="field" style={{ minWidth: 320, flex: 1 }}><span>Person</span><RefPicker value={sid} onChange={setSid} options={lookups.optionsFor('stakeholder')} search={lookups.search?.stakeholder} placeholder="Search by name" /></label>
         <button type="button" className="btn btn-primary" disabled={!sid || busy} onClick={search}><Icon name="search" />{busy ? 'Searching…' : 'Find personal information'}</button>
       </div>
       {found && (

@@ -108,8 +108,10 @@ function AddStakeholders({ onClose, lookups }) {
   const [owner, setOwner] = useState(user.id);
   const [influence, setInfluence] = useState('');
   const [interest, setInterest] = useState('');
-  const existing = new Set(m.profiles.filter((p) => p.person).map((p) => p.stakeholderId));
+  const existing = useMemo(() => new Set(m.profiles.filter((p) => p.person).map((p) => p.stakeholderId)), [m.profiles]);
   const opts = lookups.optionsFor('stakeholder').filter((o) => !existing.has(o.id));
+  const find = lookups.search?.stakeholder;
+  const search = useMemo(() => (find ? (q) => find(q).then((found) => found.filter((o) => !existing.has(o.id))) : undefined), [find, existing]);
   const add = async () => {
     const res = await mut.op('addProfiles', { initiativeId: ini.id, stakeholderIds: ids, defaults: { changeRoles: roles, relationshipOwnerId: owner, influence: influence || null, interest: interest || null } });
     toast.success(`${Array.isArray(res) ? res.length : ids.length} stakeholder${(Array.isArray(res) ? res.length : ids.length) === 1 ? '' : 's'} added`);
@@ -119,7 +121,7 @@ function AddStakeholders({ onClose, lookups }) {
     <Modal title="Add stakeholders to this initiative" onClose={onClose} wide footer={<><button type="button" className="btn" onClick={onClose}>Cancel</button><button type="button" className="btn btn-primary" disabled={!ids.length || !roles.length} onClick={add}>Add {ids.length || ''} stakeholder{ids.length === 1 ? '' : 's'}</button></>}>
       <p className="small muted">Choose people from the enterprise stakeholder register. New people are added on the Stakeholders page (with duplicate checks). Profiles are specific to this initiative; the person's details stay in one place (STK-001, STK-009).</p>
       <div className="stack">
-        <label className="field"><span>Stakeholders</span><RefPicker multiple options={opts} value={ids} onChange={setIds} placeholder="Search by name, position or organisation…" /></label>
+        <label className="field"><span>Stakeholders</span><RefPicker multiple options={opts} search={search} value={ids} onChange={setIds} placeholder="Search by name, position or organisation…" /></label>
         <div className="form-grid">
           <label className="field span-2"><span>Change roles</span><RefPicker multiple options={options('changeRole', config).map((o) => ({ id: o.id, label: o.label }))} value={roles} onChange={setRoles} /></label>
           <label className="field"><span>Relationship owner</span><RefPicker options={lookups.optionsFor('user')} value={owner} onChange={setOwner} /></label>

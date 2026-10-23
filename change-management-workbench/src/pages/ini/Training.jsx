@@ -248,7 +248,7 @@ function AttendanceModal({ session, onClose }) {
       </div>
       <div className="field mt-3">
         <span>Enrol more people</span>
-        <RefPicker multiple value={add} onChange={setAdd} options={lookups.optionsFor('stakeholder').filter((o) => !rows.some((r) => r.stakeholderId === o.id))} />
+        <RefPicker multiple value={add} onChange={setAdd} options={lookups.optionsFor('stakeholder').filter((o) => !rows.some((r) => r.stakeholderId === o.id))} search={lookups.search?.stakeholder} />
         {suggested.length > 0 && <button type="button" className="btn btn-xs mt-2" onClick={() => setAdd(uniq([...add, ...suggested.slice(0, Math.max(0, (session.capacity || 999) - rows.length))]))}>Add the target audience ({suggested.length} not yet enrolled)</button>}
       </div>
     </Modal>

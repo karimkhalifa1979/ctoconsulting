@@ -222,8 +222,26 @@ export function headerFooter({ docControl: dc, branding: b, watermark, s }) {
 
 const PAGE = { size: { width: 11906, height: 16838 }, margin: { top: 1300, bottom: 1200, left: 1134, right: 1134, header: 500, footer: 500 } };
 
+// Page numbers for the contents are worked out by laying the pages out, in several passes, which takes longer
+// the longer the document. Past about 200 pages (some 25 paragraphs, table rows or list items to a page) the
+// contents keeps its entries and links, and Word fills in their page numbers when it opens the document, so
+// generation stays within ART-018's time.
+const ESTIMATE_UP_TO = 5000;
+export function contentWeight(doc) {
+  let w = 0;
+  const walk = (blocks) => {
+    for (const b of blocks || []) {
+      if (b.t === 'cols') { for (const c of b.cols || []) walk(c); continue; }
+      w += b.t === 'table' ? b.rows.length + 1 : b.t === 'kv' ? b.rows.length : b.t === 'bullets' || b.t === 'numbers' ? b.items.length : b.t === 'chart' ? 12 : 1;
+    }
+  };
+  for (const sec of doc.sections || []) { w += 1; walk(sec.blocks); }
+  return w;
+}
+
 export async function renderDocx(doc, ctx) {
   const { docControl: dc, branding, s, estimatePages = true } = ctx;
+  const estimate = estimatePages && contentWeight(doc) <= ESTIMATE_UP_TO;
   const primary = hex(branding.primary);
   const { header, footer } = headerFooter(ctx);
   const body = [...(doc.meta.toc ? [new Paragraph({ style: 'Caption', children: [new TextRun({ text: 'Contents', size: 28, color: primary })] }), new TableOfContents('Contents', { hyperlink: true, headingStyleRange: '1-2' }), new Paragraph({ children: [new PageBreak()] })] : []), ...bodyElements(doc, { primary })];
@@ -237,11 +255,11 @@ export async function renderDocx(doc, ctx) {
   const document = new Document({
     creator: dc.generatedBy || 'Change Management Workbench', lastModifiedBy: 'Change Management Workbench', title: dc.title, subject: s.initiative.name, description: `${dc.title} for ${s.initiative.name}. Version ${dc.version}, ${dc.status}.`, keywords: dc.classification || '',
     customProperties: [{ name: 'Version', value: String(dc.version || '') }, { name: 'Status', value: String(dc.status || '') }, { name: 'Classification', value: String(dc.classification || '') }, { name: 'DataSnapshot', value: String(s.takenAt || '') }, { name: 'Initiative', value: s.initiative.name }],
-    features: { updateFields: false },
+    features: { updateFields: !estimate && !!doc.meta.toc },
     styles: styles(branding),
     externalStyles: tableStyles(primary),
     numbering: NUMBERING,
-    ...(estimatePages ? { pageNumbers: estimatePageNumbersWith({ guess: true }) } : {}),
+    ...(estimate ? { pageNumbers: estimatePageNumbersWith({ guess: true }) } : {}),
     sections,
   });
   return new Uint8Array(await Packer.toArrayBuffer(document));

@@ -69,7 +69,7 @@ export default function QuickCapture() {
       {outbox.length > 0 && <div className="callout warn small mb-3"><Icon name="clock" size={14} /> {outbox.length} capture(s) waiting to be sent. <button type="button" className="btn btn-xs" onClick={flush}>Send now</button></div>}
       <Card>
         <form onSubmit={submit} className="stack">
-          <label className="field"><span>Who did you talk to?</span><RefPicker multiple options={lookups.optionsFor('stakeholder')} value={d.stakeholderIds} onChange={(v) => set('stakeholderIds', v)} placeholder="Start typing a name…" /></label>
+          <label className="field"><span>Who did you talk to?</span><RefPicker multiple options={lookups.optionsFor('stakeholder')} search={lookups.search?.stakeholder} value={d.stakeholderIds} onChange={(v) => set('stakeholderIds', v)} placeholder="Start typing a name…" /></label>
           <label className="field"><span>Or which group?</span><RefPicker multiple options={lookups.optionsFor('stakeholderGroup')} value={d.groupIds} onChange={(v) => set('groupIds', v)} /></label>
           <div className="form-grid">
             <label className="field"><span>Date</span><input type="date" value={d.actualDate} max={today} onChange={(e) => set('actualDate', e.target.value)} /></label>
