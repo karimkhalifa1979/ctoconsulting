@@ -1,7 +1,7 @@
 // Charts (STK-041, IMP-008, ADK-010, RPT-001). Thin marks, rounded data ends anchored to the baseline,
 // 2px surface gaps, recessive hairline grids, a legend for two or more series, selective direct
 // labels and a hover/focus tooltip on every mark. Every chart has a table equivalent on its screen.
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ADKAR, adkarLabel } from '../../shared/refdata.js';
 import { compact, fmtDate, fmtNum } from '../lib/format.js';
 import { addDays, diffDays } from '../../shared/dates.js';
@@ -26,28 +26,56 @@ export function adkarFill(v, threshold = 3) {
 }
 export const adkarInk = (v, threshold = 3) => (v != null && (Number(v) - threshold <= -1.5 || Number(v) - threshold >= 2) ? '#ffffff' : 'var(--ink)');
 
-function niceMax(v) {
-  if (!v || v <= 0) return 1;
-  const p = 10 ** Math.floor(Math.log10(v));
-  const n = v / p;
+// Axis maximum: the data maximum rounded up to a multiple of a 1-2-2.5-5 step (about four steps).
+function niceStep(raw) {
+  const p = 10 ** Math.floor(Math.log10(raw));
+  const n = raw / p;
   return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * p;
 }
-const ticks = (max, n = 4) => Array.from({ length: n + 1 }, (_, i) => (max / n) * i);
+function niceMax(v) {
+  if (!v || v <= 0) return 1;
+  const step = v >= 4 ? Math.max(1, niceStep(v / 4)) : niceStep(v / 4);
+  return Math.ceil(v / step - 1e-9) * step;
+}
+// Ticks at the smallest nice step that divides the axis exactly into at most six intervals.
+const ticks = (max) => {
+  if (!(max > 0)) return [0];
+  const p = 10 ** Math.floor(Math.log10(max / 6));
+  for (const k of [1, 2, 2.5, 5, 10, 20, 25, 50]) {
+    const step = k * p;
+    if (Number.isInteger(max) && max >= 2 && !Number.isInteger(+step.toFixed(6))) continue;
+    const n = max / step;
+    if (n <= 6 + 1e-9 && Math.abs(n - Math.round(n)) < 1e-6) return Array.from({ length: Math.round(n) + 1 }, (_, i) => +(i * step).toFixed(6));
+  }
+  return [0, max / 2, max];
+};
 
-function useTip() {
+function useTip(initialWidth = 640) {
   const [tip, setTip] = useState(null);
-  const ref = useRef(null);
+  const [width, setWidth] = useState(initialWidth);
+  const box = useRef(null);
+  const [el, setEl] = useState(null);
+  const ref = useCallback((node) => { box.current = node; setEl(node); }, []);
+  useEffect(() => {
+    if (!el || typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver((entries) => {
+      const w = Math.round(entries[0].contentRect.width);
+      if (w > 0) setWidth(Math.max(280, w));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [el]);
   const show = (e, content) => {
-    const box = ref.current?.getBoundingClientRect();
-    if (!box) return;
+    const rect = box.current?.getBoundingClientRect();
+    if (!rect) return;
     const t = e.currentTarget.getBoundingClientRect();
-    const x = (e.clientX ?? t.left + t.width / 2) - box.left;
-    const y = (e.clientY ? Math.min(e.clientY, t.top + 4) : t.top) - box.top;
-    setTip({ x: Math.max(70, Math.min(box.width - 70, x)), y: Math.max(10, y), content });
+    const x = (e.clientX ?? t.left + t.width / 2) - rect.left;
+    const y = (e.clientY ? Math.min(e.clientY, t.top + 4) : t.top) - rect.top;
+    setTip({ x: Math.max(70, Math.min(rect.width - 70, x)), y: Math.max(10, y), content });
   };
   const hide = () => setTip(null);
   const node = tip ? <div className="chart-tip" style={{ left: tip.x, top: tip.y }} role="tooltip">{tip.content}</div> : null;
-  return { ref, show, hide, node };
+  return { ref, show, hide, node, width };
 }
 
 const TipRow = ({ color, label, value }) => (
@@ -78,9 +106,9 @@ function vbarPath(x, y, w, h, r = 4) {
 // Horizontal bars for one measure across categories.
 export function BarChart({ data = [], max, unit = '', color = 'var(--series-1)', format = (v) => fmtNum(v, 1), labelWidth = 170, onSelect, colorOf, ariaLabel, threshold }) {
   const tip = useTip();
-  const width = 640;
+  const width = tip.width;
   const barH = 18, gap = 12;
-  const top = 6;
+  const top = threshold != null ? 22 : 6;
   const height = top + data.length * (barH + gap) + 18;
   const m = max ?? niceMax(Math.max(...data.map((d) => Number(d.value) || 0), threshold || 0));
   const plotW = width - labelWidth - 56;
@@ -90,7 +118,7 @@ export function BarChart({ data = [], max, unit = '', color = 'var(--series-1)',
       <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={ariaLabel || 'Bar chart'}>
         {ticks(m).map((t) => <line key={t} className="gridline" x1={labelWidth + x(t)} x2={labelWidth + x(t)} y1={0} y2={height - 16} />)}
         {ticks(m).map((t) => <text key={`t${t}`} x={labelWidth + x(t)} y={height - 3} textAnchor="middle">{compact(t)}{unit}</text>)}
-        {threshold != null && <g><line x1={labelWidth + x(threshold)} x2={labelWidth + x(threshold)} y1={0} y2={height - 16} stroke="var(--ink-3)" strokeWidth="1.5" /><text x={labelWidth + x(threshold) + 4} y={10} className="label-2">Target {threshold}{unit}</text></g>}
+        {threshold != null && <g><line x1={labelWidth + x(threshold)} x2={labelWidth + x(threshold)} y1={14} y2={height - 16} stroke="var(--ink-3)" strokeWidth="1.5" strokeDasharray="4 3" /><text x={labelWidth + x(threshold)} y={11} textAnchor={x(threshold) > plotW - 60 ? 'end' : 'middle'} className="label-2">Target {threshold}{unit}</text></g>}
         {data.map((d, i) => {
           const y = top + i * (barH + gap);
           const w = Math.max(0, x(d.value || 0));
@@ -116,7 +144,7 @@ export function BarChart({ data = [], max, unit = '', color = 'var(--series-1)',
 // Horizontal stacked bars (part-to-whole by row), with 2px surface gaps between segments.
 export function StackedBars({ rows = [], series = [], labelWidth = 170, ariaLabel, total: showTotal = true, onSelect }) {
   const tip = useTip();
-  const width = 640, barH = 18, gap = 12, top = 6;
+  const width = tip.width, barH = 18, gap = 12, top = 6;
   const height = top + rows.length * (barH + gap) + 18;
   const totals = rows.map((r) => series.reduce((a, s) => a + (Number(r.values[s.key]) || 0), 0));
   const m = niceMax(Math.max(...totals, 1));
@@ -160,7 +188,7 @@ export function StackedBars({ rows = [], series = [], labelWidth = 170, ariaLabe
 // Grouped columns by period (for example planned and completed engagements per month).
 export function ColumnChart({ periods = [], series = [], height = 220, ariaLabel, format = (v) => fmtNum(v) }) {
   const tip = useTip();
-  const width = 640, left = 34, bottom = 24, top = 10;
+  const width = tip.width, left = 34, bottom = 24, top = 10;
   const max = niceMax(Math.max(1, ...periods.flatMap((p) => series.map((s) => Number(p.values[s.key]) || 0))));
   const plotH = height - bottom - top;
   const band = (width - left) / Math.max(1, periods.length);
@@ -198,7 +226,7 @@ export function ColumnChart({ periods = [], series = [], height = 220, ariaLabel
 export function LineChart({ series = [], yMin = 0, yMax, height = 230, unit = '', threshold, thresholdLabel, ariaLabel, format = (v) => fmtNum(v, 2), dateFormat = (d) => fmtDate(d, { short: true }) }) {
   const tip = useTip();
   const [hover, setHover] = useState(null);
-  const width = 640, left = 38, right = 96, top = 12, bottom = 24;
+  const width = tip.width, left = 38, right = 96, top = 12, bottom = 24;
   const dates = useMemo(() => [...new Set(series.flatMap((s) => s.points.map((p) => p.date)))].sort(), [series]);
   if (!dates.length) return <div className="muted small">No data yet.</div>;
   const minD = dates[0], maxD = dates[dates.length - 1];
@@ -217,7 +245,18 @@ export function LineChart({ series = [], yMin = 0, yMax, height = 230, unit = ''
     setHover(best);
     tip.show(e, <><div className="tip-title">{fmtDate(best)}</div>{series.map((s) => { const p = s.points.find((q) => q.date === best); return p ? <TipRow key={s.key} color={s.color} value={`${format(p.value)}${unit}`} label={s.label} /> : null; })}</>);
   };
-  const endLabels = series.length <= 4;
+  // Direct end labels only where they do not collide (otherwise the legend and tooltip carry them).
+  const endY = series.map((s) => {
+    const pts = s.points.filter((p) => Number.isFinite(Number(p.value))).sort((a, b) => a.date.localeCompare(b.date));
+    return pts.length ? { key: s.key, y: y(pts[pts.length - 1].value) } : null;
+  }).filter(Boolean).sort((a, b) => a.y - b.y);
+  const labelled = new Set();
+  if (series.length <= 4) {
+    for (let k = 0; k < endY.length; k++) {
+      const tooClose = (k > 0 && endY[k].y - endY[k - 1].y < 13) || (k < endY.length - 1 && endY[k + 1].y - endY[k].y < 13);
+      if (!tooClose) labelled.add(endY[k].key);
+    }
+  }
   return (
     <div className="chart" ref={tip.ref}>
       <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={ariaLabel || 'Line chart'} onMouseMove={onMove} onMouseLeave={() => { setHover(null); tip.hide(); }}>
@@ -235,7 +274,7 @@ export function LineChart({ series = [], yMin = 0, yMax, height = 230, unit = ''
             <g key={s.key}>
               <path d={d} fill="none" stroke={s.color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
               {pts.map((p) => <circle key={p.date} cx={x(p.date)} cy={y(p.value)} r={hover === p.date ? 5 : 3.2} fill={s.color} stroke="var(--chart-surface)" strokeWidth="2" />)}
-              {endLabels && <text x={x(last.date) + 8} y={y(last.value) + 4} className="label-strong">{format(last.value)}{unit}{series.length > 1 ? '' : ''}</text>}
+              {labelled.has(s.key) && <text x={x(last.date) + 8} y={y(last.value) + 4} className="label-strong">{format(last.value)}{unit}</text>}
             </g>
           );
         })}
@@ -264,11 +303,11 @@ export function Sparkline({ values = [], width = 90, height = 24, color = 'var(-
 // ADKAR profile for one result: five columns against the barrier threshold; the barrier point is
 // flagged with its label (status colour is never the only cue).
 export function AdkarProfile({ scores = {}, barrier, threshold = 3, height = 170, compare, compareLabel = 'Previous', currentLabel = 'Current' }) {
-  const tip = useTip();
-  const width = 360, left = 26, bottom = 22, top = 10;
+  const tip = useTip(360);
+  const width = tip.width, left = 26, bottom = 22, top = 10;
   const plotH = height - top - bottom;
   const band = (width - left) / 5;
-  const barW = compare ? 16 : 24;
+  const barW = Math.min(compare ? 16 : 24, band / 3);
   const y = (v) => top + plotH - ((Number(v) - 0) / 5) * plotH;
   return (
     <div className="chart" ref={tip.ref}>
@@ -393,7 +432,7 @@ const ENG_LABEL = { unaware: 'Unaware', resistant: 'Resistant', neutral: 'Neutra
 export function GapChart({ profiles = [], onSelect, labelWidth = 170 }) {
   const tip = useTip();
   const rows = profiles.filter((p) => p.currentEngagement && p.desiredEngagement);
-  const width = 640, rowH = 24, top = 22;
+  const width = tip.width, rowH = 24, top = 22;
   const height = top + rows.length * rowH + 6;
   const plotW = width - labelWidth - 30;
   const x = (lvl) => labelWidth + (ENG_LEVELS.indexOf(lvl) / (ENG_LEVELS.length - 1)) * plotW;
@@ -425,8 +464,8 @@ export function GapChart({ profiles = [], onSelect, labelWidth = 170 }) {
 
 // Influence network (STK-042): a deterministic force layout of stakeholders and their relationships.
 export function NetworkGraph({ nodes = [], edges = [], onSelect, height = 460 }) {
-  const tip = useTip();
-  const width = 760;
+  const tip = useTip(760);
+  const width = tip.width;
   const layout = useMemo(() => {
     const n = nodes.length;
     const pos = nodes.map((nd, i) => ({ id: nd.id, x: width / 2 + Math.cos((i / n) * 2 * Math.PI) * (width / 3), y: height / 2 + Math.sin((i / n) * 2 * Math.PI) * (height / 3), vx: 0, vy: 0 }));
@@ -456,7 +495,7 @@ export function NetworkGraph({ nodes = [], edges = [], onSelect, height = 460 })
       }
     }
     return { pos, idx, links };
-  }, [nodes, edges, height]);
+  }, [nodes, edges, height, width]);
   const deg = {};
   for (const l of layout.links) { deg[l.from] = (deg[l.from] || 0) + 1; deg[l.to] = (deg[l.to] || 0) + 1; }
   const groups = [...new Set(nodes.map((n) => n.group))];
@@ -570,7 +609,7 @@ export function PctTriangle({ aspects = {}, labels = {}, overall }) {
   const keys = Object.keys(labels);
   const corner = [pts.top, pts.left, pts.right];
   return (
-    <svg viewBox="0 0 360 272" role="img" aria-label={`PCT health: ${keys.map((k) => `${labels[k]} ${aspects[k] ?? 'not rated'}`).join(', ')}; overall ${overall ?? 'not rated'}`} style={{ width: '100%', maxWidth: 380 }}>
+    <svg viewBox="-70 -34 500 330" role="img" aria-label={`PCT health: ${keys.map((k) => `${labels[k]} ${aspects[k] ?? 'not rated'}`).join(', ')}; overall ${overall ?? 'not rated'}`} style={{ width: '100%', maxWidth: 420 }}>
       <polygon points="180,22 28,228 332,228" fill="var(--surface-2)" stroke="var(--line-strong)" strokeWidth="1.5" />
       <circle cx="180" cy="160" r="34" fill="var(--brand-teal-soft)" stroke="var(--brand-teal)" />
       <text x="180" y="156" textAnchor="middle" style={{ fill: 'var(--ink-2)', fontSize: 10.5 }}>Success</text>

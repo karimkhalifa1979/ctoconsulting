@@ -25,7 +25,7 @@ export function formFields(type, config, { include, exclude = [], showHidden = [
   return list;
 }
 
-export default function RecordForm({ type, record, defaults = {}, include, exclude, showHidden, onSaved, onCancel, readOnly: forceReadOnly, saveLabel, extra, compact = false, transform, requiredExtra = [], hideSections = false }) {
+export default function RecordForm({ type, record, defaults = {}, include, exclude, showHidden, onSaved, onCancel, readOnly: forceReadOnly, saveLabel, extra, compact = false, transform, requiredExtra = [], hideSections = false, groups: groupMap, validate: extraValidate }) {
   const { config, settings } = useApp();
   const ini = useIniOptional();
   const lookups = useLookups();
@@ -51,13 +51,13 @@ export default function RecordForm({ type, record, defaults = {}, include, exclu
     if (hideSections) return [{ name: null, fields }];
     const out = [];
     for (const f of fields) {
-      const name = f.group || null;
+      const name = groupMap?.[f.key] || f.group || null;
       let s = out.find((x) => x.name === name);
       if (!s) { s = { name, fields: [] }; out.push(s); }
       s.fields.push(f);
     }
     return out;
-  }, [fields, hideSections]);
+  }, [fields, hideSections, groupMap]);
 
   const set = (k, v) => { setData((d) => ({ ...d, [k]: v })); if (errors[k]) setErrors((e) => ({ ...e, [k]: null })); };
 
@@ -68,6 +68,7 @@ export default function RecordForm({ type, record, defaults = {}, include, exclu
     if (transform) payload = transform(payload);
     const errs = validateRecord(type, payload, config, { ctx: { customPlans: ini?.initiative?.customPlans } }).filter((x) => fields.some((f) => f.key === x.field) || requiredExtra.includes(x.field));
     for (const k of requiredExtra) if (payload[k] == null || payload[k] === '' || (Array.isArray(payload[k]) && !payload[k].length)) errs.push({ field: k, message: `${fields.find((f) => f.key === k)?.label || k} is required` });
+    if (extraValidate) errs.push(...extraValidate(payload));
     if (errs.length) {
       setErrors(Object.fromEntries(errs.map((x) => [x.field, x.message])));
       document.getElementById(`f-${type}-${errs[0].field}`)?.focus?.();

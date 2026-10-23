@@ -5,11 +5,11 @@ import Icon from './Icon.jsx';
 import { AdkarTags, StatusBadge, Popover, Empty } from './core.jsx';
 import { FieldControl, selectOptions } from './fields.jsx';
 import { fieldsOf, listLabel } from '../../shared/schema.js';
-import { asArray, toCsv, stripHtml, personName } from '../../shared/util.js';
+import { asArray, stripHtml, personName } from '../../shared/util.js';
 import { fmtDate, fmtDateTime, fmtNum, fmtMoney } from '../lib/format.js';
 import { useApp, useDialog, useToast } from '../state/app.jsx';
 import { useMutator } from '../state/initiative.jsx';
-import { saveBlob } from '../data/client.js';
+import { exportTable } from '../lib/export.js';
 
 const STATUS_KEYS = new Set(['status', 'commsStatus', 'confirmationStatus', 'state', 'decision', 'result']);
 
@@ -83,7 +83,7 @@ export default function DataGrid({
   const [q, setQ] = useState('');
   const [facetVals, setFacetVals] = useState(initialFacets);
   const [sort, setSort] = useState(stored.sort || defaultSort || null);
-  const [hidden, setHidden] = useState(new Set(stored.hidden || []));
+  const [hidden, setHidden] = useState(() => new Set(stored.hidden ?? columns.filter((c) => c.hidden).map((c) => c.key)));
   const [selected, setSelected] = useState(new Set());
   const [page, setPage] = useState(0);
   const [views, setViews] = useState([]);
@@ -126,25 +126,9 @@ export default function DataGrid({
 
   const toggleSort = (key) => setSort((s) => (s?.key === key ? (s.dir === 'asc' ? { key, dir: 'desc' } : null) : { key, dir: 'asc' }));
   const exportRows = (fmt) => {
-    const cols = visibleCols.filter((c) => c.key !== '_actions');
+    const cols = visibleCols.filter((c) => c.key !== '_actions' && !c.key.startsWith('_'));
     const data = sorted.map((r) => Object.fromEntries(cols.map((c) => [c.label, c.exportValue ? c.exportValue(r) : c.value ? c.value(r) : r[c.key]])));
-    const name = `${exportName || title || gridId} ${new Date().toISOString().slice(0, 10)}`;
-    if (fmt === 'csv') {
-      saveBlob(new Blob(['﻿', toCsv(data, cols.map((c) => c.label))], { type: 'text/csv;charset=utf-8' }), `${name}.csv`);
-    } else {
-      import('exceljs').then(async ({ default: ExcelJS }) => {
-        const wb = new ExcelJS.Workbook();
-        wb.creator = 'Change Management Workbench';
-        const ws = wb.addWorksheet((title || 'Data').slice(0, 30));
-        ws.columns = cols.map((c) => ({ header: c.label, key: c.label, width: Math.min(60, Math.max(12, c.label.length + 4)) }));
-        ws.getRow(1).font = { bold: true };
-        ws.views = [{ state: 'frozen', ySplit: 1 }];
-        for (const r of data) ws.addRow(r);
-        ws.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: cols.length } };
-        const buf = await wb.xlsx.writeBuffer();
-        saveBlob(new Blob([buf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), `${name}.xlsx`);
-      }).catch(toast.error);
-    }
+    exportTable(data, cols.map((c) => c.label), { name: exportName || title || gridId, format: fmt, sheet: title }).catch(toast.error);
   };
 
   const bulkEdit = async (fd) => {
@@ -194,7 +178,7 @@ export default function DataGrid({
             {!views.length && <div className="menu-head">None yet</div>}
             <hr />
             <button type="button" data-close onClick={saveView}><Icon name="plus" />Save current view…</button>
-            <button type="button" data-close onClick={() => { setQ(''); setFacetVals({}); setSort(defaultSort || null); setHidden(new Set()); }}><Icon name="refresh" />Reset</button>
+            <button type="button" data-close onClick={() => { setQ(''); setFacetVals({}); setSort(defaultSort || null); setHidden(new Set(columns.filter((c) => c.hidden).map((c) => c.key))); }}><Icon name="refresh" />Reset</button>
           </Popover>
         )}
         <Popover button={({ toggle }) => <button type="button" className="btn btn-sm" onClick={toggle} aria-haspopup="menu" aria-label="Choose columns"><Icon name="columns" /></button>}>
@@ -224,7 +208,7 @@ export default function DataGrid({
       )}
       {sorted.length === 0 ? (empty || <Empty icon="search" title={rows.length ? 'No records match' : 'Nothing here yet'} />) : (
         <div className="table-wrap" style={{ maxHeight: compact ? 420 : 'none' }}>
-          <table className={`tbl ${compact ? 'tbl-compact' : ''}`}>
+          <table className={`tbl grid-table ${compact ? 'tbl-compact' : ''}`}>
             <thead>
               <tr>
                 {selectable && <th className="cb"><input type="checkbox" aria-label="Select all on this page" checked={allShownSelected} onChange={() => setSelected((s) => { const n = new Set(s); if (allShownSelected) shown.forEach((r) => n.delete(r.id)); else shown.forEach((r) => n.add(r.id)); return n; })} /></th>}

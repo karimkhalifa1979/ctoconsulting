@@ -115,7 +115,9 @@ export function Avatar({ name, size = '' }) {
   return <span className={`avatar ${size}`} aria-hidden="true">{initials(name)}</span>;
 }
 
-export function Kpi({ label, value, unit, sub, to, tone, onClick, title }) {
+const KPI_TONE = { bad: 'critical', warn: 'warning' };
+export function Kpi({ label, value, unit, sub, to, tone: givenTone, onClick, title }) {
+  const tone = KPI_TONE[givenTone] || givenTone;
   const inner = (
     <>
       <span className="kpi-label">{label}</span>
@@ -128,7 +130,9 @@ export function Kpi({ label, value, unit, sub, to, tone, onClick, title }) {
   return <div className="kpi" title={title}>{inner}</div>;
 }
 
-export function Meter({ value, max = 100, tone, label, track = '' }) {
+const METER_TONE = { warning: 'warn', critical: 'bad', serious: 'bad' };
+export function Meter({ value, max = 100, tone: givenTone, label, track = '' }) {
+  const tone = METER_TONE[givenTone] || givenTone;
   const pct = value == null ? 0 : Math.max(0, Math.min(100, (Number(value) / max) * 100));
   return (
     <div className={`meter ${tone || ''} ${track}`} role="meter" aria-valuemin={0} aria-valuemax={max} aria-valuenow={value ?? 0} aria-label={label}>

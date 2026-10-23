@@ -289,6 +289,36 @@ export const QUESTION_SETS = {
   },
 };
 
+// Starting questions for readiness, sentiment and training evaluation surveys (MEA-001). Organisation-
+// authored and editable per survey; scale questions are rated 1 (strongly disagree) to 5 (strongly agree).
+export const SURVEY_TEMPLATES = {
+  readiness: [
+    { id: 'r1', type: 'scale', text: 'I understand what is changing for me and my team, and when.' },
+    { id: 'r2', type: 'scale', text: 'My manager has talked with our team about how the change affects us.' },
+    { id: 'r3', type: 'scale', text: 'I know where to go for help and support once the change happens.' },
+    { id: 'r4', type: 'scale', text: 'I have had the training I need to work in the new way.' },
+    { id: 'r5', type: 'scale', text: 'I feel ready to work in the new way from the go-live date.' },
+    { id: 'r6', type: 'text', text: 'What would help you feel more ready?' },
+  ],
+  sentiment: [
+    { id: 's1', type: 'scale', text: 'Overall, I feel positive about this change.' },
+    { id: 's2', type: 'scale', text: 'I believe the change will make our work better.' },
+    { id: 's3', type: 'scale', text: 'I feel heard when I raise questions or concerns about the change.' },
+    { id: 's4', type: 'text', text: 'What is your biggest concern about the change at the moment?' },
+  ],
+  trainingEvaluation: [
+    { id: 't1', type: 'scale', text: 'The training was relevant to the work I do.' },
+    { id: 't2', type: 'scale', text: 'I can now perform the tasks covered in the training.' },
+    { id: 't3', type: 'scale', text: 'The training was well timed for when I need to use the new skills.' },
+    { id: 't4', type: 'scale', text: 'I know where to find job aids and support after the training.' },
+    { id: 't5', type: 'text', text: 'What could be improved?' },
+  ],
+  custom: [
+    { id: 'c1', type: 'scale', text: 'Statement rated from 1 (strongly disagree) to 5 (strongly agree).' },
+    { id: 'c2', type: 'text', text: 'Open question.' },
+  ],
+};
+
 // Focus-area suggestions for low-scoring items (RSK-005). Each rule fires when the matching item
 // (or PCT aspect) scores at or below `when`; suggestions are offered for practitioner acceptance.
 export const FOCUS_RULES = [

@@ -191,6 +191,14 @@ export const HOOKS = {
     },
   },
 
+  blueprint: {
+    // An approved Blueprint that is changed goes back to draft and needs approval again.
+    beforeUpdate: async (S, { cur, next, opts }) => {
+      if (cur.status === 'approved' && !opts.system && (JSON.stringify(next.elements ?? null) !== JSON.stringify(cur.elements ?? null) || next.name !== cur.name)) next.status = 'draft';
+      return next;
+    },
+  },
+
   toolkitItem: {
     beforeUpdate: async (S, { cur, next }) => {
       if (next.content !== cur.content || next.title !== cur.title) next.itemVersion = (cur.itemVersion || 1) + 1;
