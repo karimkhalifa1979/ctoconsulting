@@ -35,6 +35,14 @@ function collectIds(value, out) {
   return out;
 }
 
+// Individual survey responses stay on the server, so that results are only ever seen aggregated with small
+// segments suppressed (RUL-03); the client gets each campaign's response count.
+function withResponseCounts(surveys, responses) {
+  const counts = {};
+  for (const r of responses) if (!r.deleted) counts[r.surveyId] = (counts[r.surveyId] || 0) + 1;
+  return surveys.map((s) => ({ ...s, responseCount: counts[s.id] || 0 }));
+}
+
 // The fields global search looks in for each record type (never sensitive ones).
 const SEARCH_KEYS = {};
 const searchKeys = (type) => (SEARCH_KEYS[type] ||= fieldsOf(type).filter((f) => ['text', 'textarea', 'richtext', 'email'].includes(f.type) && !f.sensitive).map((f) => f.key));
@@ -433,7 +441,7 @@ export function createService({ driver, env = {} }) {
     let sensitiveSeen = 0;
     for (const [type, rows] of Object.entries(records)) {
       if (!ENTITIES[type]) continue;
-      if (['notification', 'apiClient', 'webhook'].includes(type)) continue;
+      if (['notification', 'apiClient', 'webhook', 'surveyResponse'].includes(type)) continue;
       const list = [];
       for (const r of rows) {
         if (type === 'user') { list.push(publicUser(r)); continue; }
@@ -445,6 +453,7 @@ export function createService({ driver, env = {} }) {
       out[type] = list;
     }
     if (sensitiveSeen && !actor.system) await S.audit(actor, { action: 'sensitiveRead', type: 'initiative', recordId: initiativeId, initiativeId, summary: `Viewed sensitive fields on ${sensitiveSeen} records` });
+    if (out.survey) out.survey = withResponseCounts(out.survey, records.surveyResponse || []);
     return { initiative: await S.redactFor(actor, 'initiative', initiative, ctx), records: out, seq: await driver.currentSeq(), scoped };
   };
 
@@ -458,7 +467,9 @@ export function createService({ driver, env = {} }) {
     const inScope = (r) => !scope.scoped || r.initiativeId || (r.type === 'stakeholder' ? scope.ids.has(r.id) : r.type === 'membership' ? scope.ids.has(r.stakeholderId) : r.type === 'relationship' ? scope.ids.has(r.fromId) || scope.ids.has(r.toId) : true);
     const out = [];
     const kept = [];
+    const answered = new Set();
     for (const r of records) {
+      if (r.type === 'surveyResponse') { if (r.surveyId) answered.add(r.surveyId); continue; }
       if (!ENTITIES[r.type] || r.type === 'notification' || r.type === 'apiClient' || r.type === 'webhook') continue;
       if (r.deleted) { out.push({ id: r.id, type: r.type, deleted: true }); continue; }
       if (!inScope(r)) continue;
@@ -476,6 +487,16 @@ export function createService({ driver, env = {} }) {
         const st = await driver.get('stakeholder', id);
         if (st && can(actor, 'R', 'stakeholder', st, ctx)) out.push(await S.redactFor(actor, 'stakeholder', st, ctx));
       }
+    }
+    // Campaigns that changed or gained responses are sent with their response count.
+    for (const id of answered) {
+      if (out.some((x) => x.id === id)) continue;
+      const sv = await driver.get('survey', id);
+      if (sv && !sv.deleted && can(actor, 'R', 'survey', sv, ctx)) out.push(await S.redactFor(actor, 'survey', sv, ctx));
+    }
+    if (out.some((x) => x.type === 'survey' && !x.deleted)) {
+      const counted = withResponseCounts(out.filter((x) => x.type === 'survey' && !x.deleted), await driver.list('surveyResponse', { initiativeId }));
+      for (const sv of counted) out[out.findIndex((x) => x.id === sv.id)] = sv;
     }
     return { seq, records: out };
   };

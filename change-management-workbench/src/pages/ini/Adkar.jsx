@@ -241,6 +241,7 @@ export function Surveys({ kinds = ['adkar'], intro, createLabel = 'New ADKAR cam
   const { m, mut, toast, canDo, dialog, today, config } = useIniPage();
   const [creating, setCreating] = useState(false);
   const [results, setResults] = useState(null);
+  const [translating, setTranslating] = useState(null);
   const link = (s) => `${location.origin}${location.pathname}#/survey/${s.token}`;
   const act = async (name, payload, msg) => { await mut.op(name, payload); toast.success(msg); };
   const list = m.surveys.filter((s) => kinds.includes(s.kind || 'adkar'));
@@ -271,6 +272,7 @@ export function Surveys({ kinds = ['adkar'], intro, createLabel = 'New ADKAR cam
                   {canDo('U', 'survey') && <button type="button" className="btn btn-sm" onClick={async () => { if (await dialog.confirm({ title: 'Close and aggregate', message: 'Closing stops new responses and stores aggregated results for each group, suppressing small segments.' })) act('closeSurvey', { id: s.id }, 'Survey closed and results stored'); }}>Close</button>}
                 </>
               )}
+              {s.status !== 'closed' && canDo('U', 'survey') && <button type="button" className="btn btn-sm" onClick={() => setTranslating(s)}><Icon name="globe" />Languages{asArray(s.languages).length ? ` (${s.languages.length})` : ''}</button>}
               {s.responses > 0 && <button type="button" className="btn btn-sm" onClick={async () => setResults(await mut.op('surveyResults', { id: s.id }, { quiet: true }))}><Icon name="chart" />Results</button>}
             </div>
           </div>
@@ -278,7 +280,48 @@ export function Surveys({ kinds = ['adkar'], intro, createLabel = 'New ADKAR cam
       ))}
       {creating && <Creator onClose={() => setCreating(false)} />}
       {results && <SurveyResults data={results} onClose={() => setResults(null)} />}
+      {translating && <SurveyLanguages survey={translating} onClose={() => setTranslating(null)} />}
     </div>
+  );
+}
+
+// USE-07: survey content in other languages. Respondents choose a language on the survey page; anything
+// left blank is shown in English.
+const BLANK_LANGUAGE = { code: '', label: '', title: '', intro: '', notice: '', questions: {}, scale: ['', '', '', '', ''], submit: '', thanks: '' };
+function SurveyLanguages({ survey, onClose }) {
+  const { mut, toast, settings } = useIniPage();
+  const notice = asArray(settings?.collectionNotices).find((n) => n.id === survey.collectionNoticeId)?.text;
+  const langs = asArray(survey.languages);
+  const [code, setCode] = useState(langs[0]?.code || '');
+  const [d, setD] = useState(() => ({ ...BLANK_LANGUAGE, ...(langs[0] || {}) }));
+  const pick = (c) => { setCode(c); setD({ ...BLANK_LANGUAGE, ...(langs.find((l) => l.code === c) || {}) }); };
+  const set = (k, v) => setD((x) => ({ ...x, [k]: v }));
+  const codeOk = /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/.test(d.code.trim());
+  const write = async (languages, msg) => { await mut.update('survey', survey.id, { languages }, { version: survey.version }); toast.success(msg); onClose(); };
+  const save = () => { const entry = { ...d, code: d.code.trim(), label: d.label.trim() }; return write([...langs.filter((l) => l.code !== code && l.code !== entry.code), entry], `${entry.label} saved`); };
+  const questions = asArray(survey.questions);
+  return (
+    <Modal title={`Languages: ${survey.title}`} wide onClose={onClose}
+      footer={<>{code && <button type="button" className="btn" onClick={() => write(langs.filter((l) => l.code !== code), 'Language removed')}><Icon name="trash" />Remove this language</button>}<span className="grow" /><button type="button" className="btn" onClick={onClose}>Cancel</button><button type="button" className="btn btn-primary" disabled={!codeOk || !d.label.trim()} onClick={save}>Save</button></>}>
+      <p className="small muted">Respondents can answer in any language added here. Anything left blank is shown in English, and each response records the language it was given in.</p>
+      <div className="form-grid">
+        <label className="field"><span>Language</span><select value={code} onChange={(e) => pick(e.target.value)}>{langs.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}<option value="">Add a language…</option></select></label>
+        <div />
+        <label className="field"><span>Language code</span><input type="text" value={d.code} placeholder="For example: vi" onChange={(e) => set('code', e.target.value)} aria-invalid={!!d.code && !codeOk} />{d.code && !codeOk && <span className="err">Use a language code such as vi, ar or zh-Hant.</span>}</label>
+        <label className="field"><span>Name shown to respondents</span><input type="text" value={d.label} placeholder="For example: Tiếng Việt (Vietnamese)" onChange={(e) => set('label', e.target.value)} /></label>
+        <label className="field span-2"><span>Title</span><input type="text" value={d.title} placeholder={survey.title} onChange={(e) => set('title', e.target.value)} /></label>
+        <label className="field span-2"><span>Introduction</span><textarea rows={3} value={d.intro} placeholder={survey.intro || ''} onChange={(e) => set('intro', e.target.value)} /></label>
+        {notice && <label className="field span-2"><span>How your information is used (collection notice, PRV-02)</span><textarea rows={3} value={d.notice} placeholder={notice} onChange={(e) => set('notice', e.target.value)} /></label>}
+      </div>
+      <h3 className="mt-4">Questions</h3>
+      <div className="stack-sm">{questions.map((q, i) => <label key={q.id} className="field"><span>{i + 1}. {q.text}</span><textarea rows={2} value={d.questions?.[q.id] || ''} onChange={(e) => set('questions', { ...d.questions, [q.id]: e.target.value })} /></label>)}</div>
+      <h3 className="mt-4">Answer scale and buttons</h3>
+      <div className="form-grid">
+        {ADKAR_SCORE_SCALE.map((o, i) => <label key={o.value} className="field"><span>{o.value}: {o.label}</span><input type="text" value={d.scale?.[i] || ''} onChange={(e) => set('scale', Object.assign([...(d.scale || BLANK_LANGUAGE.scale)], { [i]: e.target.value }))} /></label>)}
+        <label className="field"><span>Submit my response</span><input type="text" value={d.submit} onChange={(e) => set('submit', e.target.value)} /></label>
+        <label className="field span-2"><span>Thank-you message</span><input type="text" value={d.thanks} placeholder="Your response has been recorded. You can close this page." onChange={(e) => set('thanks', e.target.value)} /></label>
+      </div>
+    </Modal>
   );
 }
 

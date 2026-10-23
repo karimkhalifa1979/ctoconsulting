@@ -313,7 +313,7 @@ export function buildModel(data, { config = {}, today } = {}) {
   // --- Surveys -----------------------------------------------------------------------------------------
   const responses = R('surveyResponse');
   const surveys = R('survey').map((s) => {
-    const n = responses.filter((r) => r.surveyId === s.id).length;
+    const n = s.responseCount ?? responses.filter((r) => r.surveyId === s.id).length;
     return { ...s, responses: n, responseRate: s.invited ? round((n / s.invited) * 100) : null };
   });
 

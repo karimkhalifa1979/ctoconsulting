@@ -1,8 +1,9 @@
-// Scale and performance checks (ART-018, PER-02 to PER-04), run on demand with `npm run test:perf`.
+// Scale and performance checks (ART-018, PER-02 to PER-05), run on demand with `npm run test:perf`.
 // Grows the demonstration initiative to 2,000 stakeholders and 1,000 plan activities and times the Master
-// Change Management Plan and the steering committee presentation; then grows the stakeholder master to
-// 100,000 records and times search, the master register and opening an initiative. Set
-// CMW_PERF_DRIVER=sqlite to use the server's SQLite storage (in a temporary file) instead of memory.
+// Change Management Plan and the steering committee presentation, times survey results for a campaign of
+// 20,000 responses, then grows the stakeholder master to 100,000 records and times search, the master
+// register and opening an initiative. Set CMW_PERF_DRIVER=sqlite to use the server's SQLite storage (in a
+// temporary file) instead of memory.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -113,6 +114,22 @@ for (let i = 0; i < RUNS; i++) {
   slides = Object.keys(zip.files).filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n)).length;
 }
 check('ART-018 Steering committee presentation (PowerPoint)', worst(deck), 30000, `${slides} slides; runs ${deck.map((x) => (x / 1000).toFixed(1)).join(', ')} s`);
+// --- PER-05: 20,000 responses to one survey campaign ----------------------------------------------------------
+const survey = (await driver.list('survey', { initiativeId: ini.id })).find((x) => x.status === 'open') || (await driver.list('survey', { initiativeId: ini.id }))[0];
+const scored = (survey.questions || []).filter((q) => q.type !== 'text');
+const surveyGroups = survey.groupIds?.length ? survey.groupIds : [null];
+const answersFor = (n) => Object.fromEntries(scored.map((q, i) => [q.id, 1 + ((n * 7 + i * 3) % 5)]));
+const responsesWanted = 20000;
+const answered = (await driver.list('surveyResponse', { initiativeId: ini.id })).filter((r) => r.surveyId === survey.id).length;
+const responses = [];
+for (let n = answered; n < responsesWanted; n++) responses.push({ id: uid(), type: 'surveyResponse', initiativeId: ini.id, surveyId: survey.id, groupId: surveyGroups[n % surveyGroups.length], answers: answersFor(n), submittedAt: S.nowIso(), version: 1, code: `SR-P${n}` });
+await bulk(responses);
+S.touch(ini.id);
+const [resultsMs, aggregate] = await time(() => S.ops.surveyResults(lead, { id: survey.id }));
+check('PER-05 Survey results for 20,000 responses', resultsMs, 2000, `${aggregate.overall?.n?.toLocaleString('en-AU')} responses, ${Object.keys(aggregate.segments || {}).length} group segment(s)`);
+const [submitMs] = await time(() => S.submitSurveyResponse(survey.token, { groupId: surveyGroups[0], answers: answersFor(1) }));
+check('PER-05 Submit a response to a campaign of 20,000', submitMs, 2000);
+
 const [openMs, data] = await time(() => S.loadInitiative(lead, ini.id));
 check('PER-01 Open the large initiative (working set)', openMs, 2000, `${(JSON.stringify(data).length / 1e6).toFixed(1)} MB`);
 

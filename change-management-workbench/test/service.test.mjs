@@ -174,3 +174,17 @@ test('WFL-001 / WFL-002: my work shows approvals awaiting the approver and their
   assert.ok(Array.isArray(w.awaiting) && Array.isArray(w.tasks) && w.initiatives.length > 0);
   for (const a of w.awaiting) assert.ok(a.approvers.some((x) => x.userId === sponsorUser.id && !x.decision));
 });
+
+test('RUL-03: individual survey responses stay on the server; the client gets response counts', async () => {
+  const lead = who('Priya Raman');
+  const d = await S.loadInitiative(lead, ini.id);
+  assert.equal(d.records.surveyResponse, undefined, 'no raw responses in the working set');
+  const all = await S.driver.list('surveyResponse', { initiativeId: ini.id });
+  const open = d.records.survey.find((s) => s.status === 'open' && s.token);
+  assert.equal(open.responseCount, all.filter((r) => r.surveyId === open.id).length);
+  const q = open.questions.find((x) => x.type !== 'text');
+  await S.submitSurveyResponse(open.token, { groupId: open.groupIds?.[0] || null, answers: { [q.id]: 4 } });
+  const ch = await S.changes(lead, ini.id, d.seq);
+  assert.ok(!ch.records.some((r) => r.type === 'surveyResponse'), 'no raw responses in the change feed');
+  assert.equal(ch.records.find((r) => r.id === open.id)?.responseCount, open.responseCount + 1);
+});

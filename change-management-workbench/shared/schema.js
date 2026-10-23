@@ -465,6 +465,7 @@ export const ENTITIES = {
       sel('commsStatus', 'Communication status', 'commsStatus', { group: 'Communication', default: 'draft' }),
       f('contentLink', 'Link to content', 'url', { group: 'Communication' }),
       f('content', 'Content', 'richtext', { group: 'Communication' }),
+      f('translations', 'Content in other languages', 'table', { group: 'Communication', help: 'The same communication for audiences who prefer another language (USE-07).', columns: [f('language', 'Language', 'text', { required: true }), f('content', 'Content', 'textarea', { required: true })] }),
       f('reach', 'Reach metrics', 'json', { group: 'Communication' }),
       f('sentAt', 'Sent', 'datetime', { readOnly: true, group: 'Communication' }),
       f('aiDrafted', 'AI-drafted (not yet accepted)', 'bool', { readOnly: true, hidden: true }),
@@ -476,6 +477,7 @@ export const ENTITIES = {
     fields: [
       f('title', 'Message', 'text', { required: true, grid: true }),
       text('text', 'Message text', { required: true }),
+      f('translations', 'Message in other languages', 'table', { help: 'The message for audiences who prefer another language (USE-07).', columns: [f('language', 'Language', 'text', { required: true }), f('text', 'Message text', 'textarea', { required: true })] }),
       refs('audienceGroupIds', 'Audience (impacted groups)', 'impactedGroup', { grid: true }),
       multi('audienceRoles', 'Audience (change roles)', 'changeRole'),
       f('adkar', 'ADKAR elements', 'adkar', { grid: true }),
