@@ -103,6 +103,7 @@ export const ENTITIES = {
       f('collectionNoticeDate', 'Collection notice date', 'date', { group: 'Privacy' }),
       f('deidentified', 'De-identified', 'bool', { readOnly: true, hidden: true }),
       f('mergedInto', 'Merged into', 'text', { readOnly: true, hidden: true }),
+      f('notDuplicateOf', 'Confirmed as not duplicates of', 'json', { hidden: true, readOnly: true }),
     ],
   },
   stakeholderGroup: {

@@ -261,6 +261,17 @@ export function registerArtefactOps(S) {
   // ART-029: field catalogue for template authors.
   S.op('fieldCatalogue', { area: 'templates', summary: 'Every merge field available to template authors (ART-029)' }, async () => (await engine()).fieldCatalogue(await S.getConfig()));
 
+  // ART-025: a starting tagged Word template showing the tagging convention, in the organisation's branding.
+  S.op('starterTemplate', { area: 'templates', summary: 'Download a starter tagged Word template' }, async (actor, { templateId } = {}) => {
+    const t = templateId ? await S.driver.get('template', templateId) : null;
+    const config = await S.getConfig();
+    const bytes = await (await engine()).starterTemplate({ organisation: config.settings.organisationName, ...(t?.branding || {}) });
+    const blobId = 'blob-starter-template';
+    const filename = 'Change Workbench starter template.docx';
+    await S.driver.putBlob(blobId, bytes, { filename, mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', kind: 'template' });
+    return { blobId, filename };
+  });
+
   // ART-028: validate a tagged Word template on upload.
   S.op('validateTemplate', { area: 'templates', summary: 'Validate a tagged Word template (ART-028)' }, async (actor, { blobId, templateId }) => {
     let bytes;

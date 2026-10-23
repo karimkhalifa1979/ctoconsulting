@@ -4,9 +4,9 @@
 import { AppError, asArray, personName, uniq, isEmpty } from '../../util.js';
 import { ENTITIES, entity, fieldsOf, listOptions } from '../../schema.js';
 import { validateRecord, normalise } from '../../validate.js';
-import { findDuplicates } from '../../rules/stakeholders.js';
+import { findDuplicates, duplicateKey } from '../../rules/stakeholders.js';
 import { parseAuDate } from '../../dates.js';
-import { hasRole } from '../../access.js';
+import { hasRole, initiativeAccess } from '../../access.js';
 
 // Every field that holds a stakeholder id, including table columns.
 function stakeholderRefFields(type) {
@@ -25,6 +25,56 @@ export function registerStakeholderOps(S) {
     S.assertCan(actor, 'R', 'stakeholder', null);
     const dups = findDuplicates(candidate || {}, await S.driver.list('stakeholder'));
     return dups.map((d) => ({ id: d.record.id, code: d.record.code, name: personName(d.record), email: d.record.email, organisation: d.record.organisation, reason: d.reason }));
+  });
+
+  // STK-047: possible duplicates across the whole stakeholder master, for review and merging. Records are
+  // bucketed by email and by name and organisation, so the scan stays quick for large registers.
+  S.op('duplicateScan', { area: 'stakeholder', summary: 'Find possible duplicate stakeholders across the master' }, async (actor) => {
+    S.assertCan(actor, 'R', 'stakeholder', null);
+    const all = (await S.driver.list('stakeholder')).filter((x) => !x.mergedInto && !x.deidentified);
+    const buckets = new Map();
+    for (const st of all) {
+      const k = duplicateKey(st);
+      if (k.email) (buckets.get(`e:${k.email}`) || buckets.set(`e:${k.email}`, []).get(`e:${k.email}`)).push(st);
+      if (k.name !== '||') (buckets.get(`n:${k.name}`) || buckets.set(`n:${k.name}`, []).get(`n:${k.name}`)).push(st);
+    }
+    const brief = (x) => ({ id: x.id, code: x.code, name: personName(x), email: x.email || '', positionTitle: x.positionTitle || '', organisation: x.organisation || '', businessUnit: x.businessUnit || '', source: x.source || '', status: x.status, updatedAt: x.updatedAt });
+    const pairs = new Map();
+    for (const [key, list] of buckets) {
+      if (list.length < 2) continue;
+      for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
+        if (asArray(list[i].notDuplicateOf).includes(list[j].id) || asArray(list[j].notDuplicateOf).includes(list[i].id)) continue;
+        const id = [list[i].id, list[j].id].sort().join(':');
+        const reason = key.startsWith('e:') ? 'Same email address' : 'Same name and organisation';
+        if (pairs.has(id)) { if (!pairs.get(id).reasons.includes(reason)) pairs.get(id).reasons.push(reason); continue; }
+        // Suggested to keep: the record from the system of record (HR or directory), then the one with an
+        // email address, then the older one.
+        const rank = (x) => `${['hr', 'directory'].includes(x.source) ? 0 : 1}${x.email ? 0 : 1}${x.createdAt || ''}`;
+        const [a, b] = rank(list[i]) <= rank(list[j]) ? [list[i], list[j]] : [list[j], list[i]];
+        pairs.set(id, { id, keep: brief(a), merge: brief(b), reasons: [reason] });
+      }
+    }
+    return [...pairs.values()];
+  });
+
+  // A reviewed pair that is not a duplicate is not flagged again.
+  S.op('dismissDuplicate', { area: 'stakeholder', summary: 'Record that two stakeholders are not duplicates' }, async (actor, { aId, bId }) => {
+    const [a, b] = [await S.driver.get('stakeholder', aId), await S.driver.get('stakeholder', bId)];
+    if (!a || !b) throw new AppError(404, 'Stakeholder not found.');
+    S.assertCan(actor, 'U', 'stakeholder', a);
+    for (const [x, other] of [[a, bId], [b, aId]]) await S.update(actor, 'stakeholder', x.id, { notDuplicateOf: uniq([...asArray(x.notDuplicateOf), other]) }, { system: true, skipValidation: true, auditAction: 'notDuplicate' });
+    return { ok: true };
+  });
+
+  // Which initiatives each stakeholder takes part in, for the enterprise register (PRT-004, PRT-005).
+  S.op('stakeholderInitiatives', { area: 'stakeholder', summary: 'The initiatives each stakeholder has a profile in' }, async (actor) => {
+    S.assertCan(actor, 'R', 'stakeholder', null);
+    const out = {};
+    for (const i of await S.driver.list('initiative')) {
+      if (!initiativeAccess(actor, i.id)) continue;
+      for (const p of await S.driver.list('profile', { initiativeId: i.id })) if (p.stakeholderId) (out[p.stakeholderId] ||= []).push(i.id);
+    }
+    return out;
   });
 
   // STK-046: merge preserves the history of both records by re-pointing every reference.

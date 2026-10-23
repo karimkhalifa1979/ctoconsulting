@@ -200,6 +200,20 @@ export function registerPlanningOps(S) {
   });
 
   // MEA-004: corrective action from a gap, optionally creating a plan revision.
+  // MEA: feedback becomes a draft FAQ or an observed resistance item, linked both ways.
+  S.op('convertFeedback', { area: 'plans', summary: 'Turn feedback into a draft FAQ or a resistance item' }, async (actor, { id, to }) => {
+    const f = await S.driver.get('feedback', id);
+    if (!f || f.deleted) throw new AppError(404, 'Feedback not found.');
+    if (!['faq', 'resistance'].includes(to)) throw new AppError(422, 'Feedback can become an FAQ or a resistance item.');
+    S.assertCan(actor, 'U', 'feedback', f, await S.accessCtx(actor, f.initiativeId));
+    const text = String(f.text || '');
+    const rec = to === 'faq'
+      ? await S.create(actor, 'faq', { initiativeId: f.initiativeId, question: text.slice(0, 200), status: 'draft', audienceGroupIds: f.groupId ? [f.groupId] : [], adkar: asArray(f.adkar), sourceType: 'feedback', sourceId: f.id })
+      : await S.create(actor, 'resistance', { initiativeId: f.initiativeId, kind: 'observed', title: text.slice(0, 120), description: text, sourceType: f.stakeholderId ? 'stakeholder' : 'group', stakeholderId: f.stakeholderId || null, groupId: f.groupId || null, barrierPoint: asArray(f.adkar)[0] || null, status: 'open', date: f.date, raisedFromType: 'feedback', raisedFromId: f.id });
+    await S.update(actor, 'feedback', f.id, { status: 'actioned', convertedType: to, convertedId: rec.id }, { system: true, skipValidation: true });
+    return rec;
+  });
+
   S.op('raiseCorrectiveAction', { area: 'plans', summary: 'Raise a corrective action from a performance gap' }, async (actor, { initiativeId, gap, measureId, groupId, adkar = [], action, ownerId, dueDate, createActivity }) => {
     const ca = await S.create(actor, 'correctiveAction', { initiativeId, gap, measureId, groupId, adkar, action, ownerId: ownerId || actor.id, dueDate, status: 'open' }, { raw: true });
     if (createActivity) {

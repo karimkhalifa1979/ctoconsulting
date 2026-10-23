@@ -73,7 +73,8 @@ export async function seedDemo(S, { setPassword, today } = {}) {
   }
 
   // --- Configuration and templates -------------------------------------------------------------------
-  await S.driver.setConfig('settings', { organisationName: ORG, timeZone: 'Australia/Sydney' });
+  // The agency's own saturation thresholds: two concurrent high impacts on one group is too much.
+  await S.driver.setConfig('settings', { organisationName: ORG, timeZone: 'Australia/Sydney', saturation: { maxInitiatives: 3, maxAggregateImpact: 7, maxHoursPerPersonPerMonth: 12 } });
   S.invalidateConfig();
   const brand = { organisation: ORG, primary: '#0b1f3a', accent: '#0fa3b1', secondary: '#1d3d69', highlight: '#f2a900', fontHeading: 'Calibri', fontBody: 'Calibri', footer: `${ORG} · Change Management Office`, coverNote: 'Prepared by the Change Management Office' };
   const tplStd = await mk('template', { name: 'Agency standard (documents and presentations)', artefactType: '*', variant: 'full', state: 'published', templateVersion: 2, branding: brand, versions: [{ templateVersion: 1, branding: { ...brand, accent: '#2a78d6' }, publishedAt: T('2026-03-02') }], publishedAt: T('2026-06-01'), notes: 'Default corporate template for every artefact. Version 2 adopted the 2026 colour palette.' });
@@ -129,6 +130,10 @@ export async function seedDemo(S, { setPassword, today } = {}) {
   await rel('rajesh', 'influences', 'olivia', 'strong');
   await rel('rajesh', 'influences', 'ahmed', 'strong');
   await rel('kim', 'influences', 'ca3', 'moderate', 'Respected senior planner; informal opinion leader');
+  // Two possible duplicates for the duplicate review (STK-047): a manual re-entry of an HR record without
+  // an email address, and a second copy of a partner contact from a spreadsheet import.
+  P.louiseDup = await mk('stakeholder', { givenName: 'Louise', familyName: 'Barrett', positionTitle: 'GM Contact Centre', organisation: ORG, businessUnit: 'Contact Centre Operations', location: 'Geelong', employmentType: 'employee', source: 'manual', status: 'active', preferredChannels: ['virtual'], language: 'English' }, { by: 'system', at: T(addDays(DEMO_ANCHOR, -12), '09:40') });
+  P.sophieDup = await mk('stakeholder', { givenName: 'Sophie', familyName: 'Laurent', preferredName: 'Soph', positionTitle: 'General Manager', organisation: 'Partners in the Community', location: 'Melbourne', email: P.sophie.email, employmentType: 'external', source: 'import', status: 'active', preferredChannels: ['written'], language: 'English' }, { by: 'system', at: T(addDays(DEMO_ANCHOR, -5), '14:05') });
   await rel('kim', 'isInfluencedBy', 'ahmed', 'moderate');
   await rel('marcus', 'worksCloselyWith', 'hannah_s', 'strong');
   await rel('james', 'worksCloselyWith', 'marcus', 'moderate');

@@ -17,6 +17,7 @@ import { QUADRANT_LABELS } from '../../shared/rules/stakeholders.js';
 import { asArray, personName, sortBy, stripHtml } from '../../shared/util.js';
 import { can, hasRole } from '../../shared/access.js';
 import { adkarLabel } from '../../shared/refdata.js';
+import { rememberRecent } from '../lib/recent.js';
 
 export default function StakeholderProfile() {
   const { sid } = useParams();
@@ -35,6 +36,10 @@ export default function StakeholderProfile() {
     if (fromSet) { setSt(fromSet); return; }
     api.get('stakeholder', sid).then(setSt).catch(setError);
   }, [api, sid, fromSet, version]);
+
+  useEffect(() => {
+    if (st?.id && !st.deidentified) rememberRecent(user?.id, { type: 'stakeholder', id: st.id, code: st.code, title: personName(st) });
+  }, [st?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Relationships, memberships and profiles in other initiatives (enterprise view).
   useEffect(() => {

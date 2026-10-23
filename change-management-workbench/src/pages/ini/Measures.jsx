@@ -241,12 +241,7 @@ function Feedback() {
     return sortBy(Object.values(out), (x) => -Object.values(x.values).reduce((a, b) => a + b, 0));
   }, [recent, config]);
   const convert = async (f, to) => {
-    if (to === 'faq') {
-      await mut.create('faq', { initiativeId: f.initiativeId, question: f.text.slice(0, 200), status: 'draft', audienceGroupIds: f.groupId ? [f.groupId] : [], adkar: asArray(f.adkar), sourceType: 'feedback', sourceId: f.id });
-    } else {
-      await mut.create('resistance', { initiativeId: f.initiativeId, kind: 'observed', title: f.text.slice(0, 120), description: f.text, sourceType: f.stakeholderId ? 'stakeholder' : 'group', stakeholderId: f.stakeholderId || null, groupId: f.groupId || null, barrierPoint: asArray(f.adkar)[0] || null, status: 'open', date: f.date, raisedFromType: 'feedback', raisedFromId: f.id });
-    }
-    await mut.update('feedback', f.id, { status: 'actioned', convertedType: to, convertedId: 'created' }, { version: f.version, quiet: true });
+    await mut.op('convertFeedback', { id: f.id, to });
     toast.success(to === 'faq' ? 'FAQ drafted from the feedback' : 'Resistance item raised from the feedback');
   };
   return (

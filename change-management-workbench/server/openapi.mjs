@@ -1,6 +1,7 @@
 // OpenAPI 3 description of the REST API, generated from the entity schema and the operations registry
 // (INT-007, STD-03).
 import { ENTITIES } from '../shared/schema.js';
+import { DATASETS } from '../shared/reporting.js';
 
 const typeSchema = (fd) => {
   switch (fd.type) {
@@ -57,7 +58,7 @@ export function buildOpenApi(service, { version = '1.0.0', serverUrl = '/' } = {
     },
     '/api/v1/files/{blobId}': { get: { tags: ['Files'], summary: 'Download an artefact, attachment or export', parameters: [{ name: 'blobId', in: 'path', required: true, schema: { type: 'string' } }], responses: { 200: { description: 'File content' }, ...errorResponses } } },
     '/api/v1/search': { get: { tags: ['Search'], summary: 'Global search across records the caller may view (WFL-006)', parameters: [{ name: 'q', in: 'query', required: true, schema: { type: 'string' } }], responses: { 200: { description: 'Hits' } } } },
-    '/api/v1/reporting/{dataset}': { get: { tags: ['Reporting'], summary: 'Read-only reporting feed for BI tools (RPT-005)', parameters: [{ name: 'dataset', in: 'path', required: true, schema: { type: 'string', enum: ['initiatives', 'groups', 'stakeholders', 'engagements', 'activities', 'adkar', 'measures', 'risks'] } }, { name: 'initiativeId', in: 'query', schema: { type: 'string' } }], responses: { 200: { description: 'Rows' }, ...errorResponses } } },
+    '/api/v1/reporting/{dataset}': { get: { tags: ['Reporting'], summary: 'Read-only reporting feed for BI tools (RPT-005)', parameters: [{ name: 'dataset', in: 'path', required: true, schema: { type: 'string', enum: Object.keys(DATASETS) } }, { name: 'initiativeId', in: 'query', schema: { type: 'string' } }], responses: { 200: { description: 'Rows' }, ...errorResponses } } },
     '/api/public/surveys/{token}': { get: { tags: ['Public surveys'], summary: 'Survey content for respondents (no sign-in)', security: [], parameters: [{ name: 'token', in: 'path', required: true, schema: { type: 'string' } }], responses: { 200: { description: 'Survey' } } } },
     '/api/public/surveys/{token}/responses': { post: { tags: ['Public surveys'], summary: 'Submit a survey response (no sign-in)', security: [], parameters: [{ name: 'token', in: 'path', required: true, schema: { type: 'string' } }], responses: { 200: { description: 'Accepted' } } } },
   };

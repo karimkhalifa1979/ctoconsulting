@@ -1,10 +1,15 @@
-// Display helpers. Dates are DD/MM/YYYY in Australian English (USE-07); numbers use en-AU grouping.
+// Display helpers. Dates are DD/MM/YYYY in Australian English (USE-06); numbers use en-AU grouping.
 import { fmtDate as fd, fmtDateTime as fdt, diffDays } from '../../shared/dates.js';
 import { listLabel, listOptions } from '../../shared/schema.js';
 import { personName } from '../../shared/util.js';
 
+// Times are shown in the signed-in person's time zone when they have chosen one (USE-06); otherwise in
+// the zone the caller passes (the organisation's).
+let personalZone = null;
+export const setDisplayTimeZone = (tz) => { personalZone = tz || null; };
+
 export const fmtDate = (iso, opts) => (iso ? fd(String(iso).slice(0, 10), opts) : '');
-export const fmtDateTime = (ts, tz) => (ts ? fdt(ts, tz) : '');
+export const fmtDateTime = (ts, tz) => (ts ? fdt(ts, personalZone || tz) : '');
 export const fmtNum = (v, dp = 0) => (v == null || v === '' || Number.isNaN(Number(v)) ? '—' : Number(v).toLocaleString('en-AU', { maximumFractionDigits: dp, minimumFractionDigits: 0 }));
 export const fmtMoney = (v) => (v == null || v === '' ? '—' : Number(v).toLocaleString('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 }));
 export const fmtPct = (v) => (v == null ? '—' : `${Math.round(v)}%`);

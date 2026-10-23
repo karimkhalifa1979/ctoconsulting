@@ -10,6 +10,7 @@ import { INTERVENTIONS, QUESTION_SETS, READINESS_CHECKLISTS, FOCUS_RULES, DEFAUL
 import { AppError, uid, pad, asArray, clone, isEmpty, personName, sortBy } from '../util.js';
 import { todayIso } from '../dates.js';
 import { ConflictError } from '../memoryDriver.js';
+import { dataset, DATASETS } from '../reporting.js';
 import { HOOKS } from './hooks.js';
 import { registerEngagementOps } from './ops/engagements.js';
 import { registerWorkflowOps } from './ops/workflow.js';
@@ -59,10 +60,14 @@ export function createService({ driver, env = {} }) {
   S.audit = (actor, evt) => driver.appendAudit({ ts: nowIso(), userId: actor?.id || 'system', userName: actor?.name || 'System', ...evt });
 
   // --- Notifications (WFL-003) -----------------------------------------------------------------------------
+  // People may mute the kinds of notification they do not want; approvals, task assignments, mentions,
+  // leavers and resistance escalations are always delivered.
+  const ESSENTIAL = new Set(['approval', 'task', 'mention', 'leaver', 'resistance']);
   S.notify = async (userIds, n) => {
     const ids = [...new Set(asArray(userIds).filter((x) => x && x !== 'system'))];
     const out = [];
     for (const userId of ids) {
+      if (!ESSENTIAL.has(n.kind) && asArray((await driver.get('user', userId))?.notify?.mute).includes(n.kind)) continue;
       const rec = { id: uid(), type: 'notification', initiativeId: n.initiativeId || null, code: null, version: 1, createdAt: nowIso(), createdBy: 'system', updatedAt: nowIso(), updatedBy: 'system', userId, kind: n.kind || 'info', title: n.title, body: n.body || '', link: n.link || null, read: false };
       await driver.put(rec);
       out.push(rec);
@@ -144,6 +149,20 @@ export function createService({ driver, env = {} }) {
     return changes;
   }
 
+  // Writes through the public record API (the REST record routes and the browser client's equivalents)
+  // cannot set read-only fields, which only the service's own operations and rules maintain, and cannot
+  // create, change or delete records that only the workflow manages. Creating a record may still say where
+  // it came from (for example the feedback an FAQ was drafted from).
+  const PROVENANCE = new Set(['sourceType', 'sourceId', 'raisedFromType', 'raisedFromId', 'recordType', 'recordId']);
+  const WORKFLOW_ONLY = new Set(['approval', 'notification', 'artefact', 'planBaseline', 'planChange', 'surveyResponse', 'apiClient', 'webhook']);
+  const KEEP_ON_REMOVE = new Set(['approval', 'notification', 'planBaseline', 'planChange', 'surveyResponse']);
+  const guardExternal = (type, data, config, action) => {
+    if (action !== 'remove' && WORKFLOW_ONLY.has(type)) throw new AppError(403, `${entity(type).plural} are managed by the application's workflow and cannot be ${action === 'create' ? 'created' : 'changed'} directly.`);
+    if (action === 'remove' && KEEP_ON_REMOVE.has(type)) throw new AppError(403, `${entity(type).plural} are kept as part of the record and cannot be deleted.`);
+    if (data) for (const fd of fieldsOf(type, config)) if (fd.readOnly && !(action === 'create' && PROVENANCE.has(fd.key))) delete data[fd.key];
+    return data;
+  };
+
   S.create = async (actor, type, input, opts = {}) => {
     const meta = entity(type);
     const config = await S.getConfig();
@@ -157,6 +176,7 @@ export function createService({ driver, env = {} }) {
     let data = {};
     for (const [k, v] of Object.entries(input || {})) if (!SYSTEM_KEYS.includes(k)) data[k] = v;
     delete data.initiativeId;
+    if (opts.external) guardExternal(type, data, config, 'create');
     for (const fd of fieldsOf(type, config)) if (fd.default !== undefined && data[fd.key] === undefined) data[fd.key] = clone(fd.default);
     data = normalise(type, data, config);
     const draft = { ...data, type, initiativeId, createdBy: actor.id };
@@ -195,6 +215,7 @@ export function createService({ driver, env = {} }) {
     if (!opts.system) S.assertCan(actor, 'U', type, cur, ctx);
     let clean = {};
     for (const [k, v] of Object.entries(patch || {})) if (!SYSTEM_KEYS.includes(k) && k !== 'initiativeId') clean[k] = v;
+    if (opts.external) guardExternal(type, clean, config, 'update');
     clean = normalise(type, clean, config);
     const sens = sensitiveKeys(type, config).filter((k) => k in clean && JSON.stringify(clean[k] ?? null) !== JSON.stringify(cur[k] ?? null));
     if (sens.length && !actor.system && !canSeeSensitive(actor, type, cur, ctx)) throw new AppError(403, `You do not have permission to change ${sens.join(', ')}.`);
@@ -221,6 +242,8 @@ export function createService({ driver, env = {} }) {
     const meta = entity(type);
     const cur = await driver.get(type, id);
     if (!cur || cur.deleted) throw new AppError(404, `${meta.label} not found.`);
+    if (opts.external) guardExternal(type, null, null, 'remove');
+    if (type === 'artefact' && cur.status === 'approved' && !actor.system) throw new AppError(409, 'Approved artefacts are kept as business records (REC-03) and cannot be deleted.');
     const initiative = cur.initiativeId ? await S.initiative(cur.initiativeId) : null;
     S.assertInitiative(actor, initiative);
     S.assertWritable(initiative, type, actor);
@@ -369,7 +392,7 @@ export function createService({ driver, env = {} }) {
     const templates = await driver.list('template');
     const notifications = (await driver.list('notification')).filter((n) => n.userId === actor.id);
     return {
-      user: publicUser(actor),
+      user: { ...publicUser(actor), notify: actor.notify || {} },
       config,
       roles: ROLES,
       initiatives: sortBy(initiatives, 'name'),
@@ -380,6 +403,25 @@ export function createService({ driver, env = {} }) {
       mode: env.mode || 'server',
       features: { ai: !!env.aiAvailable && config.settings.ai?.enabled !== false, email: !!env.emailAvailable, sso: !!env.ssoAvailable },
     };
+  };
+
+  // RPT-005: the reporting feed behind the BI connection, report exports and the report builder. Rows come
+  // from each initiative's model, so they agree with the screens and artefacts; the user must be able to
+  // read the dataset's records, and sensitive columns appear only for those allowed to see them.
+  const DATASET_TYPES = { initiatives: 'initiative', groups: 'impactedGroup', stakeholders: 'profile', engagements: 'engagement', activities: 'activity', communications: 'activity', training: 'trainingIntervention', resistance: 'resistance', actions: 'task', changeAgents: 'changeAgent', adkar: 'assessment', measures: 'measure', risks: 'risk' };
+  S.reportingFeed = async (actor, name, { initiativeId } = {}) => {
+    if (!DATASETS[name]) throw new AppError(404, 'Unknown dataset');
+    S.assertCan(actor, 'R', DATASET_TYPES[name], null);
+    const ids = initiativeId ? [initiativeId] : (await driver.list('initiative')).map((i) => i.id);
+    const canSensitive = actor.system || canSeeSensitive(actor, 'profile', {}, { practitionerScope: 'all' });
+    const rows = [];
+    for (const id of ids) {
+      const ini = await driver.get('initiative', id);
+      if (!ini || ini.deleted || !(actor.system || initiativeAccess(actor, id))) continue;
+      rows.push(...dataset(name, await S.model(id), { canSensitive }));
+    }
+    await S.audit(actor, { action: 'export', type: 'reporting', summary: `Reporting feed ${name}: ${rows.length} rows` });
+    return { dataset: name, description: DATASETS[name], generatedAt: nowIso(), rows };
   };
 
   // Global search across records the user may view (WFL-006).

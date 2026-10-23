@@ -4,6 +4,7 @@ import { HashRouter, Navigate, Route, Routes, useParams } from 'react-router-dom
 import { createClient } from './data/client.js';
 import { AppProvider, DialogProvider, ToastProvider, useApp } from './state/app.jsx';
 import { InitiativeProvider } from './state/initiative.jsx';
+import { EnterpriseProvider } from './state/enterprise.jsx';
 import { RecordDrawerHost } from './ui/RecordDrawer.jsx';
 import { Spinner, ErrorBox } from './ui/core.jsx';
 import Layout from './Layout.jsx';
@@ -52,6 +53,7 @@ export default function App() {
     <ToastProvider>
       <DialogProvider>
         <AppProvider api={api}>
+          <EnterpriseProvider>
           <HashRouter>
             <Suspense fallback={<Spinner />}>
               <Routes>
@@ -60,6 +62,7 @@ export default function App() {
               </Routes>
             </Suspense>
           </HashRouter>
+          </EnterpriseProvider>
         </AppProvider>
       </DialogProvider>
     </ToastProvider>

@@ -4,6 +4,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { buildModel } from '../../shared/model.js';
 import { useApp, useDialog, useToast } from './app.jsx';
+import { rememberRecent } from '../lib/recent.js';
 
 const IniCtx = createContext(null);
 export const useIni = () => {
@@ -35,7 +36,7 @@ function mergeChanges(data, changes) {
 }
 
 export function InitiativeProvider({ id, children }) {
-  const { api, config, today, refresh: refreshApp } = useApp();
+  const { api, config, today, user, refresh: refreshApp } = useApp();
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const dataRef = useRef(null);
@@ -46,11 +47,12 @@ export function InitiativeProvider({ id, children }) {
     try {
       const d = await api.loadInitiative(id);
       setData(d);
+      rememberRecent(user?.id, { type: 'initiative', id, code: d.initiative?.code, title: d.initiative?.name });
     } catch (e) {
       if (e.status === 401) refreshApp();
       setError(e);
     }
-  }, [api, id, refreshApp]);
+  }, [api, id, refreshApp]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { setData(null); load(); }, [load]);
 

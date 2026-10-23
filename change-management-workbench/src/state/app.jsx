@@ -3,6 +3,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { indexBy } from '../../shared/util.js';
 import { todayIso } from '../../shared/dates.js';
+import { clearRecent } from '../lib/recent.js';
+import { setDisplayTimeZone } from '../lib/format.js';
 
 const AppCtx = createContext(null);
 const ToastCtx = createContext(null);
@@ -51,12 +53,14 @@ export function AppProvider({ api, children }) {
 
   const signOut = useCallback(async () => {
     try { await api.logout(); } catch { /* ignore */ }
+    clearRecent();
     setBoot(null);
     setStatus('signedOut');
   }, [api]);
 
   const value = useMemo(() => {
     const config = boot?.config || null;
+    setDisplayTimeZone(boot?.user?.timeZone);
     const users = boot?.users || [];
     return {
       api,

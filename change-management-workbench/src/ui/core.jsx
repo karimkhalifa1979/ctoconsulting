@@ -4,6 +4,7 @@ import Icon from './Icon.jsx';
 import { STATUS_BADGE, RISK_BADGE, RAG_LABEL, initials } from '../lib/format.js';
 import { ADKAR, GLOSSARY, adkarLabel } from '../../shared/refdata.js';
 import { sanitiseHtml } from '../../shared/util.js';
+import { Link } from 'react-router-dom';
 
 export function PageHead({ eyebrow, title, children, actions }) {
   return (
@@ -125,7 +126,7 @@ export function Kpi({ label, value, unit, sub, to, tone: givenTone, onClick, tit
       {sub && <span className="kpi-sub">{sub}</span>}
     </>
   );
-  if (to) return <a className="kpi" href={to} title={title}>{inner}</a>;
+  if (to) return <Link className="kpi" to={to} title={title}>{inner}</Link>;
   if (onClick) return <button type="button" className="kpi" onClick={onClick} style={{ textAlign: 'left', cursor: 'pointer' }} title={title}>{inner}</button>;
   return <div className="kpi" title={title}>{inner}</div>;
 }

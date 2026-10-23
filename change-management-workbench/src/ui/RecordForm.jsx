@@ -10,14 +10,20 @@ import { useApp } from '../state/app.jsx';
 import { useIniOptional, useMutator } from '../state/initiative.jsx';
 import { makeLookups } from '../lib/lookups.js';
 import { Help } from './core.jsx';
+import { useEnterprise } from '../state/enterprise.jsx';
 
 const WIDE = new Set(['textarea', 'richtext', 'table', 'json', 'refs', 'multi', 'adkar', 'users']);
 
 export function useLookups() {
   const { users, initiatives, containers } = useApp();
   const ini = useIniOptional();
-  return useMemo(() => makeLookups({ records: ini?.records || {}, users, initiatives, containers, model: ini?.model }), [ini?.records, ini?.model, users, initiatives, containers]);
+  const ent = useEnterprise();
+  // Outside an initiative, stakeholders and groups come from the enterprise records.
+  useEffect(() => { if (!ini && ent && !ent.records) ent.ensure(); }, [ini, ent]);
+  const records = ini?.records || ent?.records || EMPTY;
+  return useMemo(() => makeLookups({ records, users, initiatives, containers, model: ini?.model }), [records, ini?.model, users, initiatives, containers]);
 }
+const EMPTY = {};
 
 export function formFields(type, config, { include, exclude = [], showHidden = [] } = {}) {
   let list = fieldsOf(type, config).filter((f) => !f.system && (!f.hidden || showHidden.includes(f.key)) && !exclude.includes(f.key));

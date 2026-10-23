@@ -13,7 +13,6 @@ import { startScheduler } from './scheduler.mjs';
 import { createMailer } from './mailer.mjs';
 import { AppError, uid, asArray } from '../shared/util.js';
 import { roleLabel, can, canSeeSensitive } from '../shared/access.js';
-import { dataset, DATASETS } from '../shared/reporting.js';
 import { ENTITIES } from '../shared/schema.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -309,19 +308,19 @@ route('POST', '/api/v1/records/:type', async (ctx) => {
   checkType(ctx.params.type);
   const body = await readJson(ctx.req);
   const data = body.data || body;
-  return { status: 201, body: await service.create(ctx.user, ctx.params.type, data, { allowDuplicate: !!body.allowDuplicate, reason: body.reason }) };
+  return { status: 201, body: await service.create(ctx.user, ctx.params.type, data, { allowDuplicate: !!body.allowDuplicate, reason: body.reason, external: true }) };
 }, { write: true });
 route('PATCH', '/api/v1/records/:type/:id', async (ctx) => {
   checkType(ctx.params.type);
   const body = await readJson(ctx.req);
   const version = body.version ?? (ctx.req.headers['if-match'] ? Number(String(ctx.req.headers['if-match']).replace(/[^0-9]/g, '')) : undefined);
-  return service.update(ctx.user, ctx.params.type, ctx.params.id, body.data || {}, { version, reason: body.reason, clearQuickCapture: body.clearQuickCapture });
+  return service.update(ctx.user, ctx.params.type, ctx.params.id, body.data || {}, { version, reason: body.reason, clearQuickCapture: body.clearQuickCapture, external: true });
 }, { write: true });
-route('DELETE', '/api/v1/records/:type/:id', async (ctx) => { checkType(ctx.params.type); return service.remove(ctx.user, ctx.params.type, ctx.params.id, { reason: ctx.url.searchParams.get('reason') }); }, { write: true });
+route('DELETE', '/api/v1/records/:type/:id', async (ctx) => { checkType(ctx.params.type); return service.remove(ctx.user, ctx.params.type, ctx.params.id, { reason: ctx.url.searchParams.get('reason'), external: true }); }, { write: true });
 route('POST', '/api/v1/records/:type/bulk', async (ctx) => {
   checkType(ctx.params.type);
   const { ids, patch, reason } = await readJson(ctx.req);
-  return service.bulkUpdate(ctx.user, ctx.params.type, ids, patch, { reason });
+  return service.bulkUpdate(ctx.user, ctx.params.type, ids, patch, { reason, external: true });
 }, { write: true });
 
 route('POST', '/api/v1/ops/:name', async (ctx) => {
@@ -346,26 +345,8 @@ route('POST', '/api/v1/files', async (ctx) => {
 
 // RPT-005: read-only reporting feed for BI tools, enforcing access rights.
 route('GET', '/api/v1/reporting/:dataset', async (ctx) => {
-  const name = ctx.params.dataset;
-  if (name !== 'initiatives' && !DATASETS[name]) throw new AppError(404, 'Unknown dataset');
   if (ctx.user.api && !asArray(ctx.user.scopes).includes('reporting') && !asArray(ctx.user.scopes).includes('read')) throw new AppError(403, 'This client is not allowed to read the reporting feed.');
-  const ids = ctx.url.searchParams.get('initiativeId') ? [ctx.url.searchParams.get('initiativeId')] : (await driver.list('initiative')).map((i) => i.id);
-  const rows = [];
-  for (const id of ids) {
-    const ini = await driver.get('initiative', id);
-    if (!ini) continue;
-    try { service.assertInitiative(ctx.user, ini); } catch { continue; }
-    const model = await service.model(id);
-    if (name === 'initiatives') {
-      const { initiativeComparison } = await import('../shared/rules/portfolio.js');
-      rows.push(...initiativeComparison([model]));
-    } else {
-      const canSens = canSeeSensitive(ctx.user, 'profile', {}, { practitionerScope: 'all' });
-      rows.push(...dataset(name, model, { canSensitive: canSens }));
-    }
-  }
-  await service.audit(ctx.user, { action: 'export', type: 'reporting', summary: `Reporting feed ${name}: ${rows.length} rows` });
-  return { dataset: name, generatedAt: new Date().toISOString(), rows };
+  return service.reportingFeed(ctx.user, ctx.params.dataset, { initiativeId: ctx.url.searchParams.get('initiativeId') || undefined });
 });
 
 // Administration endpoints that need server-side secrets.

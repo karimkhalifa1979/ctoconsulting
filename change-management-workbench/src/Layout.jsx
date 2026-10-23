@@ -26,7 +26,10 @@ export const TYPE_PAGE = {
 export function recordPath(type, id, initiativeId) {
   if (type === 'stakeholder') return `/stakeholders/${id}`;
   if (type === 'initiative') return `/i/${id}`;
+  if (type === 'approval') return '/work?tab=approvals';
+  if (type === 'task') return `/work?open=task:${id}`;
   if (!initiativeId) return '/work';
+  if (type === 'artefact') return `/i/${initiativeId}/artefacts?tab=library&artefact=${id}`;
   const page = TYPE_PAGE[type] ?? '';
   return `/i/${initiativeId}${page ? `/${page}` : ''}?open=${type}:${id}`;
 }

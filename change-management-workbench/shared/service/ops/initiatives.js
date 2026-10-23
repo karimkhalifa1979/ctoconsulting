@@ -1,6 +1,6 @@
 // Initiative lifecycle and enterprise operations: INI-001, INI-008 (create from template or copy),
 // SUS-007 (close), INT-010 (export), INI-006/PLN-008 (milestone import), PRT (portfolio), SUS-004 (lessons).
-import { AppError, asArray, uid, clone } from '../../util.js';
+import { AppError, asArray, uid, clone, sortBy } from '../../util.js';
 import { ENTITIES, INITIATIVE_TYPES, entity } from '../../schema.js';
 import { hasRole, initiativeAccess } from '../../access.js';
 import { portfolioView, initiativeComparison, sharedStakeholders } from '../../rules/portfolio.js';
@@ -10,6 +10,20 @@ import { addMonths } from '../../dates.js';
 // Registers copied when an initiative is created from another (INI-008). Stakeholder assessments are
 // excluded unless explicitly selected.
 export const COPYABLE = ['milestone', 'objective', 'measure', 'impactedGroup', 'impact', 'profile', 'blueprint', 'activity', 'keyMessage', 'faq', 'toolkitItem', 'tna', 'trainingIntervention', 'readinessChecklist', 'risk', 'coalitionMember', 'changeAgent', 'sustainmentItem', 'strategy', 'narrative'];
+
+// One line per initiative for the Initiatives and Home screens: the portfolio comparison figures plus
+// who leads it, where it sits in the hierarchy and what comes next.
+export function initiativeSummary(m) {
+  const [cmp] = initiativeComparison([m]);
+  const i = m.initiative;
+  return {
+    ...cmp, code: i.code, version: i.version, containerId: i.containerId || null, deliveryApproach: i.deliveryApproach || null, classification: i.classification || null,
+    changeLeadId: i.changeLeadId || null, projectManagerId: i.projectManagerId || null, primarySponsorId: i.primarySponsorId || null,
+    leadName: m.userName(i.changeLeadId) || '', pmName: m.userName(i.projectManagerId) || '', sponsorName: m.stakeholderName(i.primarySponsorId) || '',
+    legalHold: !!i.legalHold, closedAt: i.closedAt || null, criticalAlerts: m.kpis.criticalAlerts,
+    nextMilestone: m.milestones.filter((x) => x.date && x.date >= m.today).sort((a, b) => a.date.localeCompare(b.date))[0] || null,
+  };
+}
 
 export function registerInitiativeOps(S) {
   S.op('createInitiative', { area: 'initiative', summary: 'Create a change initiative, optionally copying another initiative' }, async (actor, { data = {}, copyFrom }) => {
@@ -114,7 +128,15 @@ export function registerInitiativeOps(S) {
     const start = from || addMonths(today, -2).slice(0, 8) + '01';
     const end = to || addMonths(today, 10);
     const view = portfolioView(models, { from: start, to: end, unit, settings: config.settings });
-    return { from: start, to: end, unit, ...view, comparison: initiativeComparison(models), shared: sharedStakeholders(models, today) };
+    // The change calendar: every initiative's releases and milestones in the period.
+    const milestones = sortBy(models.flatMap((m) => m.milestones.filter((x) => x.date && x.date >= start && x.date <= end).map((x) => ({ id: x.id, initiativeId: m.initiative.id, initiative: m.initiative.shortName || m.initiative.name, name: x.name, kind: x.kind, date: x.date }))), 'date');
+    return { from: start, to: end, unit, today, ...view, milestones, comparison: initiativeComparison(models), shared: sharedStakeholders(models, today) };
+  });
+
+  S.op('initiativeList', { area: 'initiative', summary: 'Initiatives I can see, with status, phase, readiness and next milestone' }, async (actor) => {
+    const out = [];
+    for (const i of await S.driver.list('initiative')) if (initiativeAccess(actor, i.id)) out.push(initiativeSummary(await S.model(i.id)));
+    return sortBy(out, (x) => (x.status === 'closed' ? 1 : 0), 'name');
   });
 
   // SUS-004 / PRT-005: lessons learned searchable across initiatives.

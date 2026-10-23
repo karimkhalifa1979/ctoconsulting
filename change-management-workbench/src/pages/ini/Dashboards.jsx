@@ -20,6 +20,7 @@ import { MEASURE_STATUS_LABELS } from '../../../shared/rules/measures.js';
 import { addDays, addMonths, periodRange, monthKey, weekStart } from '../../../shared/dates.js';
 import { asArray, sortBy, round, uniq } from '../../../shared/util.js';
 import { hasRole } from '../../../shared/access.js';
+import { STANDARD_REPORTS } from '../../../shared/reporting.js';
 
 const ROLE_VIEWS = [
   { id: 'lead', label: 'Change management lead' },
@@ -52,23 +53,8 @@ export default function Dashboards() {
 // Each report returns a chart, the rows behind it (with columns for filtering and export) and where a
 // row drills down to.
 
-const REPORTS = [
-  { id: 'coverage', label: 'Stakeholder engagement coverage', build: coverageReport },
-  { id: 'plannedActual', label: 'Planned versus actual engagements', build: plannedActualReport },
-  { id: 'gap', label: 'Engagement gap', build: gapReport },
-  { id: 'adkar', label: 'ADKAR heatmap and trends', build: adkarReport },
-  { id: 'impact', label: 'Impact heatmap and timeline', build: impactReport },
-  { id: 'comms', label: 'Communications calendar', build: commsReport },
-  { id: 'training', label: 'Training completion and proficiency', build: trainingReport },
-  { id: 'resistance', label: 'Resistance summary', build: resistanceReport },
-  { id: 'readiness', label: 'Readiness status', build: readinessReport },
-  { id: 'progress', label: 'Plan progress', build: progressReport },
-  { id: 'risks', label: 'Change risks', build: risksReport },
-  { id: 'actions', label: 'Open actions', build: actionsReport },
-  { id: 'sponsor', label: 'Sponsor activity', build: sponsorReport },
-  { id: 'agents', label: 'Change agent coverage', build: agentsReport },
-  { id: 'measures', label: 'Adoption and success measures', build: measuresReport },
-];
+const BUILDERS = { coverage: coverageReport, plannedActual: plannedActualReport, gap: gapReport, adkar: adkarReport, impact: impactReport, comms: commsReport, training: trainingReport, resistance: resistanceReport, readiness: readinessReport, progress: progressReport, risks: risksReport, actions: actionsReport, sponsor: sponsorReport, agents: agentsReport, measures: measuresReport };
+const REPORTS = STANDARD_REPORTS.map((r) => ({ ...r, build: BUILDERS[r.id] }));
 
 function coverageReport(m, { base }) {
   const persons = m.profiles.filter((p) => p.person && p.cadenceDays);

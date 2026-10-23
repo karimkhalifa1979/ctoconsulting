@@ -1,9 +1,11 @@
 // Workflow operations: approvals (WFL-001, STR-006, PLN-007, COM-005, ART-014), coverage acknowledgement
 // (RUL-15), tasks, comments, notifications (WFL-002 to WFL-004) and attachments (WFL-005, SEC-10).
-import { AppError, asArray, uid, clone, base64ToBytes } from '../../util.js';
+import { AppError, asArray, uid, clone, base64ToBytes, sortBy } from '../../util.js';
+import { addDays } from '../../dates.js';
 import { approvalNotice } from '../notices.js';
 import { entity } from '../../schema.js';
-import { can } from '../../access.js';
+import { can, initiativeAccess } from '../../access.js';
+import { initiativeSummary } from './initiatives.js';
 
 const SUBJECTS = {
   strategy: { type: 'strategy', label: 'Change Management Strategy' },
@@ -173,6 +175,69 @@ export function registerWorkflowOps(S) {
     const mine = (await S.driver.list('notification')).filter((n) => n.userId === actor.id && !n.read && (all || asArray(ids).includes(n.id)));
     for (const n of mine) await S.driver.put({ ...n, read: true, version: n.version + 1 }, { expectedVersion: n.version });
     return { updated: mine.length };
+  });
+
+  // Home and My work (Section 5.4, WFL-002): my tasks, approvals awaiting my decision, my upcoming and
+  // unlogged engagements, my alerts and the initiatives I can see, across every initiative.
+  S.op('myWork', { area: 'workflow', summary: 'My tasks, approvals, engagements and alerts across initiatives' }, async (actor, { days = 14 } = {}) => {
+    const today = await S.today();
+    const until = addDays(today, days);
+    const initiatives = (await S.driver.list('initiative')).filter((i) => initiativeAccess(actor, i.id));
+    const names = Object.fromEntries(initiatives.map((i) => [i.id, i.shortName || i.name]));
+    const visible = (r) => !r.initiativeId || names[r.initiativeId];
+    const tasks = sortBy((await S.driver.list('task')).filter((t) => t.assigneeId === actor.id && visible(t)), (t) => (['done', 'cancelled'].includes(t.status) ? 1 : 0), (t) => t.dueDate || '9999')
+      .map((t) => ({ ...t, initiative: names[t.initiativeId] || '', overdue: !!(t.dueDate && t.dueDate < today && !['done', 'cancelled'].includes(t.status)) }));
+    const approvals = (await S.driver.list('approval')).filter(visible).map((a) => ({ ...a, initiative: names[a.initiativeId] || '' }));
+    const awaiting = sortBy(approvals.filter((a) => a.status === 'pending' && asArray(a.approvers).some((x) => x.userId === actor.id && !x.decision)), 'requestedAt');
+    const requested = sortBy(approvals.filter((a) => a.requestedBy === actor.id), '-requestedAt').slice(0, 30);
+    const engagements = [];
+    const alerts = [];
+    const summaries = [];
+    for (const i of initiatives) {
+      const m = await S.model(i.id);
+      summaries.push(initiativeSummary(m));
+      if (i.status === 'closed') continue;
+      for (const e of m.engagements) {
+        if (!e.open || !e.plannedDate || e.plannedDate > until) continue;
+        const mine = asArray(e.internalParticipantIds).includes(actor.id) || e.planItem?.relationshipOwnerId === actor.id || (!e.planItemId && e.createdBy === actor.id);
+        if (mine) engagements.push({ id: e.id, code: e.code, initiativeId: i.id, initiative: names[i.id], label: e.label, audience: e.audienceLabel, plannedDate: e.plannedDate, plannedTime: e.plannedTime || '', status: e.status, overdue: e.plannedDate < today });
+      }
+      for (const a of m.alerts) if (asArray(a.recipients).includes(actor.id)) alerts.push({ ...a, initiativeId: i.id, initiative: names[i.id] });
+    }
+    const rank = { critical: 0, warning: 1, info: 2 };
+    return {
+      today, days, tasks, awaiting, requested,
+      engagements: sortBy(engagements, 'plannedDate', 'plannedTime'),
+      alerts: sortBy(alerts, (a) => rank[a.severity] ?? 3, 'date').slice(0, 100),
+      initiatives: sortBy(summaries, (x) => (x.status === 'closed' ? 1 : 0), 'name'),
+    };
+  });
+
+  // AIA-004: AI-drafted content stays marked as such until a person has reviewed and accepted it.
+  const AI_TYPES = ['narrative', 'activity', 'keyMessage', 'engagement'];
+  S.op('acceptAiDraft', { area: 'workflow', summary: 'Accept AI-drafted content after review (AIA-004)' }, async (actor, { type, id }) => {
+    if (!AI_TYPES.includes(type)) throw new AppError(422, 'This record type has no AI-drafted content.');
+    const cur = await S.driver.get(type, id);
+    if (!cur || cur.deleted) throw new AppError(404, 'Record not found.');
+    S.assertCan(actor, 'U', type, cur, await S.accessCtx(actor, cur.initiativeId));
+    if (!cur.aiDrafted) return cur;
+    const patch = { aiDrafted: false, ...(type === 'narrative' ? { acceptedBy: actor.id, acceptedAt: S.nowIso() } : {}) };
+    const rec = await S.update(actor, type, id, patch, { system: true, skipValidation: true, auditAction: 'aiAccept' });
+    await S.audit(actor, { action: 'ai', type, recordId: id, initiativeId: cur.initiativeId, summary: `Accepted AI-drafted content in ${cur.code || entity(type).label} after review` });
+    return rec;
+  });
+
+  // WFL-003: each person chooses how they are notified; they may also set their own time zone (USE-06).
+  S.op('setMyPreferences', { area: 'workflow', summary: 'Change my notification preferences and time zone' }, async (actor, { notify, timeZone } = {}) => {
+    if (actor.system || actor.api) throw new AppError(422, 'Preferences belong to a person.');
+    const patch = {};
+    if (notify) patch.notify = { inApp: true, email: !!notify.email, teams: !!notify.teams, mute: asArray(notify.mute).filter((k) => typeof k === 'string') };
+    if (timeZone !== undefined) {
+      try { new Intl.DateTimeFormat('en-AU', { timeZone }); } catch { throw new AppError(422, `Unknown time zone ${timeZone}.`); }
+      patch.timeZone = timeZone;
+    }
+    const saved = await S.update(actor, 'user', actor.id, patch, { system: true, auditAction: 'preferences' });
+    return { ...S.publicUser(saved), notify: saved.notify || {} };
   });
 
   S.op('listNotifications', { area: 'workflow', summary: 'List my notifications' }, async (actor) => {

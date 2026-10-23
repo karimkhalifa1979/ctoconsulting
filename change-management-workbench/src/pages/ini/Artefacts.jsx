@@ -245,7 +245,12 @@ function GeneratedFiles({ a, onClose }) {
 // --- Library ----------------------------------------------------------------------------------------
 function Library() {
   const { m, config, usersById, api } = useIniPage();
-  const [open, setOpen] = useState(null);
+  const [params, setParams] = useSearchParams();
+  const [open, setOpenState] = useState(() => params.get('artefact'));
+  const setOpen = (id) => {
+    setOpenState(id);
+    if (!id && params.get('artefact')) { const p = new URLSearchParams(params); p.delete('artefact'); setParams(p, { replace: true }); }
+  };
   const rows = sortBy(m.artefacts, '-createdAt');
   const cols = [
     { key: 'title', label: 'Artefact', render: (a) => <span><strong>{a.title}</strong><span className="tiny muted sub-line">{scopeLabel(a, m)}</span></span>, value: (a) => a.title },
@@ -388,9 +393,9 @@ function whenLabel(s) {
 
 // --- Narratives (ART-021) -----------------------------------------------------------------------------
 function Narratives() {
-  const { m, mut, toast, user, canDo } = useIniPage();
+  const { m, mut, toast, canDo } = useIniPage();
   const accept = async (n) => {
-    await mut.update('narrative', n.id, { aiDrafted: false, acceptedBy: user.id, acceptedAt: new Date().toISOString() }, { version: n.version });
+    await mut.op('acceptAiDraft', { type: 'narrative', id: n.id });
     toast.success('Accepted; it no longer carries the AI-drafted marking');
   };
   const missing = NARRATIVE_KEYS.filter((k) => !m.narratives.some((n) => n.key === k.id));

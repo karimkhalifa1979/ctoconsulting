@@ -71,7 +71,7 @@ function cmp(a, b) {
 
 export default function DataGrid({
   id, type, rows = [], columns, onRowClick, selectable = false, bulkFields = [], bulkActions = [], facets = [], searchKeys,
-  defaultSort, pageSize = 50, exportName, toolbar, empty, title, savedViews = true, rowClass, initialFacets = {}, compact = false,
+  defaultSort, pageSize = 50, exportName, toolbar, empty, title, savedViews = true, rowClass, initialFacets = {}, compact = false, onChanged,
 }) {
   const { api, user, config } = useApp();
   const toast = useToast();
@@ -140,6 +140,7 @@ export default function DataGrid({
     if (failed.length) toast.warn(`${asArray(res).length - failed.length} updated; ${failed.length} could not be changed: ${failed[0].error}`);
     else toast.success(`${asArray(res).length} records updated`);
     setSelected(new Set());
+    onChanged?.();
   };
 
   const saveView = async () => {
@@ -202,7 +203,7 @@ export default function DataGrid({
             const fd = fieldsOf(type, config).find((f) => f.key === k);
             return fd ? <button key={k} type="button" className="btn btn-sm" onClick={() => bulkEdit(fd)}>Set {fd.label.toLowerCase()}</button> : null;
           })}
-          {bulkActions.map((a) => <button key={a.label} type="button" className={`btn btn-sm ${a.danger ? 'btn-danger' : ''}`} onClick={async () => { await a.run([...selected], sorted.filter((r) => selected.has(r.id))); setSelected(new Set()); }}>{a.label}</button>)}
+          {bulkActions.map((a) => <button key={a.label} type="button" className={`btn btn-sm ${a.danger ? 'btn-danger' : ''}`} onClick={async () => { await a.run([...selected], sorted.filter((r) => selected.has(r.id))); setSelected(new Set()); onChanged?.(); }}>{a.label}</button>)}
           <button type="button" className="btn btn-sm btn-ghost" onClick={() => setSelected(new Set())}>Clear</button>
         </div>
       )}

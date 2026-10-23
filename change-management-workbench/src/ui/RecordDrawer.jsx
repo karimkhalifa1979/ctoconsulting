@@ -11,6 +11,7 @@ import { useApp, useToast } from '../state/app.jsx';
 import { useIniOptional, useMutator } from '../state/initiative.jsx';
 import { downloadFile } from '../data/client.js';
 import { fmtDateTime } from '../lib/format.js';
+import { rememberRecent } from '../lib/recent.js';
 
 const DrawerCtx = createContext(null);
 export const useRecordDrawer = () => useContext(DrawerCtx);
@@ -30,7 +31,7 @@ export function RecordDrawerHost({ children }) {
 }
 
 function RecordDrawerView({ spec, onClose }) {
-  const { api, config } = useApp();
+  const { api, config, user, settings } = useApp();
   const ini = useIniOptional();
   const [record, setRecord] = useState(spec.record || null);
   const [error, setError] = useState(null);
@@ -54,6 +55,9 @@ function RecordDrawerView({ spec, onClose }) {
     } else title = meta.label;
   }
   const canDiscuss = !isNew && !['comment', 'attachment', 'notification'].includes(spec.type);
+  useEffect(() => {
+    if (record?.id && !isNew && !['comment', 'attachment', 'notification', 'savedView'].includes(spec.type)) rememberRecent(user?.id, { type: spec.type, id: record.id, code: record.code, title, initiativeId: record.initiativeId });
+  }, [record?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <Drawer title={title} sub={`${meta.label}${record?.code ? ` · ${record.code}` : ''}`} onClose={onClose} wide={spec.wide}>
       {error && <div className="callout bad">{error.message}</div>}
@@ -73,7 +77,7 @@ function RecordDrawerView({ spec, onClose }) {
           )}
           {tab === 'comments' && <Comments recordType={spec.type} record={record} />}
           {tab === 'files' && <Attachments recordType={spec.type} record={record} />}
-          {tab === 'history' && <History recordType={spec.type} record={record} tz={config?.settings?.timeZone} />}
+          {tab === 'history' && <History recordType={spec.type} record={record} tz={settings.timeZone} />}
         </>
       )}
     </Drawer>
@@ -90,7 +94,7 @@ function useActivity(recordType, record) {
 }
 
 function Comments({ recordType, record }) {
-  const { user, usersById, config } = useApp();
+  const { user, usersById, config, settings } = useApp();
   const lookups = useLookups();
   const mut = useMutator();
   const { data, error, reload } = useActivity(recordType, record);
@@ -112,7 +116,7 @@ function Comments({ recordType, record }) {
         <ul className="timeline">
           {data.comments.sort((a, b) => a.createdAt.localeCompare(b.createdAt)).map((c) => (
             <li key={c.id} className="done">
-              <div className="tl-date">{usersById[c.createdBy]?.name || 'Someone'} · {fmtDateTime(c.createdAt, config?.settings?.timeZone)}</div>
+              <div className="tl-date">{usersById[c.createdBy]?.name || 'Someone'} · {fmtDateTime(c.createdAt, settings.timeZone)}</div>
               <div style={{ whiteSpace: 'pre-wrap' }}>{c.body}</div>
               {c.mentions?.length > 0 && <div className="small muted">Mentioned: {c.mentions.map((m) => usersById[m]?.name || m).join(', ')}</div>}
             </li>
