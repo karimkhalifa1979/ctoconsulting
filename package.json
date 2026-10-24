@@ -10,7 +10,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "start": "node server/index.mjs",
-    "check": "node scripts/check.mjs"
+    "check": "node scripts/check.mjs",
+    "build:offline": "node scripts/build-offline.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.129.0",

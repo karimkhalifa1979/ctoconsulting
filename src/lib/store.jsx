@@ -9,13 +9,21 @@ const BASE = import.meta.env.BASE_URL;
 export const SEED_ID = 'ndia';
 export const SEED_NAME = 'National Insurance Disability Agency';
 
+// The offline single-file build embeds the data in the page (window.__CTO_DATA__),
+// because browsers block fetch() for pages opened directly from disk.
+function getData(f) {
+  const embedded = typeof window !== 'undefined' && window.__CTO_DATA__;
+  if (embedded && f in embedded) return Promise.resolve(embedded[f]);
+  return fetch(`${BASE}data/ndia/${f}`).then((r) => {
+    if (!r.ok) throw new Error(`Failed to load ${f}`);
+    return r.json();
+  });
+}
+
 let libraryPromise = null;
 export function loadLibrary() {
   if (!libraryPromise) {
-    const j = (f) => fetch(`${BASE}data/ndia/${f}`).then((r) => {
-      if (!r.ok) throw new Error(`Failed to load ${f}`);
-      return r.json();
-    });
+    const j = getData;
     libraryPromise = Promise.all([j('requirements.json'), j('obligations.json'), j('exemptions.json'), j('pspf.json'), j('meta.json')])
       .then(([requirements, obligations, exemptions, pspf, meta]) => ({ requirements, obligations, exemptions, pspf, meta }));
   }
@@ -23,10 +31,10 @@ export function loadLibrary() {
 }
 
 export async function loadSheetIndex() {
-  return fetch(`${BASE}data/ndia/sheets/index.json`).then((r) => r.json());
+  return getData('sheets/index.json');
 }
 export async function loadSheet(file) {
-  return fetch(`${BASE}data/ndia/${file}`).then((r) => r.json());
+  return getData(file);
 }
 
 function seedOrg(library) {

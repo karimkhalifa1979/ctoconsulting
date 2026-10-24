@@ -6,6 +6,8 @@ const BASE = import.meta.env.BASE_URL;
 let status = null;
 export async function aiStatus() {
   if (status) return status;
+  // Opened from disk (offline build): there is no server, so AI features are off.
+  if (typeof location !== 'undefined' && location.protocol === 'file:') return (status = { ai: false });
   try {
     const r = await fetch(`${BASE}api/health`);
     status = r.ok ? await r.json() : { ai: false };

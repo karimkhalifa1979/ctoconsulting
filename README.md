@@ -36,6 +36,12 @@ For development with hot reload run `npm run dev` (and `npm start` in another te
 
 `dist/` is a static site: it can also be hosted on any static host (e.g. GitHub Pages, Azure Static Web Apps, S3). Without the Node server the tool runs on its built-in rules engine.
 
+### Offline version (no install)
+
+`offline/CTO_Regulatory_Assessment_Offline.html` is the whole tool, including the NDIA register, in one file. Download it and double-click it: it opens in your browser with no server, install or internet connection. Work is saved in that browser on that computer; use **Organisations → Download backup** to move it. AI features need the server version.
+
+Rebuild it after changes with `npm run build:offline`.
+
 ### AI-assisted discovery and drafting (optional)
 
 Set an Anthropic API key before `npm start`:
