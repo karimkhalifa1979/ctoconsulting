@@ -52,5 +52,7 @@ export function createFiles(app) {
     return { meta: m, buffer: fs.readFileSync(abs) };
   }
 
-  return { save, meta, read };
+  const rename = (id, name) => db.prepare('UPDATE files SET name = ? WHERE id = ?').run(name, id);
+
+  return { save, meta, read, rename };
 }

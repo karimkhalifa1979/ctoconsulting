@@ -162,7 +162,7 @@ export function createBilling(app) {
   // Simulated accounting adapter (INT-005): returns the invoice number the ledger would assign.
   function accountingCreate(id) {
     const n = app.sequence('accounting', 'invoice');
-    return { id: `ACC-${id.slice(-6).toUpperCase()}`, number: `INV-${new Date().getFullYear()}-${String(1000 + n).padStart(5, '0')}` };
+    return { id: `ACC-${id.slice(-6).toUpperCase()}`, number: `INV-${today().slice(0, 4)}-${String(1000 + n).padStart(5, '0')}` };
   }
 
   // FIN-036: status sync — past-due issued invoices become Overdue (paid status comes from the ledger).

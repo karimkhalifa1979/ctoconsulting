@@ -3,6 +3,7 @@ import { deriveRag, engagementHealth as healthRule, isBetter, DIMENSIONS, worstR
 import { weekEnding, addDays, todayIn, zonedToUtc, dayOfWeek, businessDayDiff } from '../../shared/dates.js';
 import { badRequest, forbidden, unprocessable, notFound } from '../http.mjs';
 import { nowIso } from '../db.mjs';
+import { now } from '../../shared/clock.js';
 
 const NARRATIVE = ['executive_summary', 'achievements', 'next_period', 'decisions_required', 'escalations', 'client_actions'];
 const REPORTABLE_STATES = ['Initiation', 'In delivery', 'Stage boundary', 'Closing'];
@@ -219,7 +220,7 @@ export function createStatus(app) {
     if (!String(su.next_period || '').trim()) errors.next_period = 'Required';
     for (const d of DIMENSIONS.map((x) => x.key)) if (su.ratings?.[d]?.rag !== 'Green' && !String(su.ratings?.[d]?.commentary || '').trim()) errors[`ratings.${d}.commentary`] = 'Commentary required for Amber and Red';
     if (Object.keys(errors).length) throw unprocessable('Complete the required fields (STS-002).', errors);
-    const late = new Date() > new Date(cutoff(su.period_end));
+    const late = now() > new Date(cutoff(su.period_end));
     const out = repo.patch(id, { status: 'Submitted', submitted_at: nowIso(), submitted_by: ctx.user.id, late, overrides: ov }, ctx.user.id);
     const e = repos.engagement.get(su.engagement_id);
     const p = repos.project.get(su.project_id);
@@ -227,7 +228,7 @@ export function createStatus(app) {
     app.workflow.request(ctx, {
       kind: 'status_update', entity: 'status_update', entityId: id, engagementId: su.engagement_id, projectId: su.project_id,
       title: `Status update: ${p.name}, w/e ${su.period_end}${ov.length ? ` — ${ov.length} override${ov.length > 1 ? 's' : ''}` : ''}`, link: `/projects/${p.id}/status`,
-      steps: [{ name: 'Engagement manager review (STS-006)', mode: 'any', approvers: [e.manager_id] }],
+      steps: [{ name: e.manager_id === ctx.user.id ? 'Engagement executive review (STS-006, own update)' : 'Engagement manager review (STS-006)', mode: 'any', approvers: [e.manager_id === ctx.user.id ? e.executive_id : e.manager_id] }],
     });
     if (ov.length) {
       notify.send([e.manager_id], {
@@ -279,7 +280,7 @@ export function createStatus(app) {
       for (const p of repos.project.find({ engagement_id: id }).filter(isDue)) {
         if (!ctx.access.can(id, 'status', 'R', { projectId: p.id })) continue;
         const su = latestFor(p.id, pe);
-        const past = new Date() > new Date(cutoff(pe));
+        const past = now() > new Date(cutoff(pe));
         let state = su ? su.status : 'Not started';
         if ((!su || ['Draft', 'Not started', 'Returned'].includes(su.status)) && past) state = 'Late';
         rows.push({
@@ -294,7 +295,7 @@ export function createStatus(app) {
 
   // BR-17 / UC-02: reminders before the cut-off; late updates notified to PM and EM.
   function cutoffJob() {
-    const now = new Date();
+    const at = now();
     let reminded = 0, late = 0;
     for (const e of repos.engagement.find({}).filter((x) => x.status === 'Active')) {
       const pe = currentPeriod(e);
@@ -303,10 +304,10 @@ export function createStatus(app) {
       for (const p of repos.project.find({ engagement_id: e.id }).filter(isDue)) {
         const su = latestFor(p.id, pe);
         if (su && !['Draft', 'Returned'].includes(su.status)) continue;
-        if (now >= remindFrom && now < cut) {
+        if (at >= remindFrom && at < cut) {
           notify.send([p.manager_id], { kind: 'status', title: `Status update due ${new Date(cut).toLocaleString('en-AU', { timeZone: settings.tz(), weekday: 'long', hour: 'numeric', minute: '2-digit' })}: ${p.name}`, link: `/projects/${p.id}/status`, dedupe: `su-remind:${p.id}:${pe}` });
           reminded++;
-        } else if (now >= cut) {
+        } else if (at >= cut) {
           notify.send([p.manager_id, e.manager_id], { kind: 'status', title: `Late status update: ${p.name}, week ending ${pe}`, link: `/reports/tracker`, mandatory: true, severity: 'high', dedupe: `su-late:${p.id}:${pe}` });
           late++;
         }

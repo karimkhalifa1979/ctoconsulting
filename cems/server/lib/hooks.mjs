@@ -3,6 +3,7 @@ import { rateRisk, expectedValue } from '../../shared/risk.js';
 import { addBusinessDays, addDays, todayIn, diffDays } from '../../shared/dates.js';
 import { fmtMoney } from '../../shared/format.js';
 import { badRequest, forbidden, unprocessable } from '../http.mjs';
+import { nowIso } from '../db.mjs';
 
 export function registerHooks(app) {
   const { entities, settings, notify, audit, repos } = app;
@@ -63,12 +64,30 @@ export function registerHooks(app) {
       override_health(ctx, rec, { rag, justification }) {
         if (!ctx.access.can(rec.id, 'setup', 'U') && !ctx.access.rolesOn(rec.id).includes('engagement_manager')) throw forbidden();
         if (rag && !String(justification || '').trim()) throw badRequest('A justification is required to override engagement health (ENG-011).');
-        entities.patch(ctx, 'engagement', rec.id, { health_override: rag ? { rag, justification, by: ctx.user.id, at: new Date().toISOString() } : null }, rag ? `Health overridden to ${rag}` : 'Health override removed');
+        entities.patch(ctx, 'engagement', rec.id, { health_override: rag ? { rag, justification, by: ctx.user.id, at: nowIso() } : null }, rag ? `Health overridden to ${rag}` : 'Health override removed');
       },
       transition(ctx, rec, { to, reason }) {
         if (!ctx.access.can(rec.id, 'setup', 'U')) throw forbidden();
         return app.projects.engagementTransition(ctx, rec, to, reason);
       },
+    },
+  });
+
+  // ---------- Projects (ADM-006) ----------
+  entities.register('project', {
+    beforeSave(ctx, { next, isNew }) {
+      if (isNew && !next.code) {
+        const n = app.sequence(`engagement:${next.engagement_id}`, 'project');
+        next.code = `${eng(next.engagement_id)?.code || 'ENG'}-P${String(n).padStart(2, '0')}`;
+      }
+      return next;
+    },
+  });
+
+  // ---------- Contracts (FIN-003, CHG-005) ----------
+  entities.register('contract', {
+    afterSave(ctx, { before, after }) {
+      if (after.kind === 'Variation' && after.status === 'Signed' && before?.status !== 'Signed') app.changes.onVariationSigned(ctx, after);
     },
   });
 
@@ -105,6 +124,13 @@ export function registerHooks(app) {
       rec.status = app.schedule.milestoneStatus(rec, today());
       return rec;
     },
+    actions: {
+      // PLN-005: the project manager confirms the forecast is still current, with or without a change.
+      confirm_forecast(ctx, rec, { forecast_date: forecast, note } = {}) {
+        if (!ctx.access.can(rec.engagement_id, 'plan', 'U', { projectId: rec.project_id })) throw forbidden();
+        entities.patch(ctx, 'milestone', rec.id, { forecast_date: forecast || rec.forecast_date, forecast_updated: today(), notes: note || rec.notes }, `Milestone forecast confirmed: ${rec.name}`);
+      },
+    },
   });
 
   // ---------- Work items (PLN-003, PLN-013) ----------
@@ -114,7 +140,7 @@ export function registerHooks(app) {
       if (Number(next.percent_complete) >= 1 && next.status !== 'Done') { next.status = 'Done'; next.completed_at = next.completed_at || today(); }
       if (next.status === 'In progress' && !Number(next.percent_complete)) next.percent_complete = Math.max(Number(next.percent_complete) || 0, 0.05);
       if (next.percent_complete > 1) next.percent_complete = next.percent_complete / 100;
-      if (next.parent_id === next.id) throw unprocessable('A work item cannot be its own parent', { parent_id: 'Invalid' });
+      if (next.parent_id && next.parent_id === next.id) throw unprocessable('A work item cannot be its own parent', { parent_id: 'Invalid' });
       return next;
     },
   });
@@ -171,7 +197,7 @@ export function registerHooks(app) {
           if (!evidence_document_id && !comments) throw badRequest('Record the client’s acceptance evidence or comments (SCP-003).');
         }
         deliverableTransition(sys(ctx), rec, {
-          status: 'Accepted', actual_date: today(), decided_at: new Date().toISOString(), decided_by: ctx.user?.id || null,
+          status: 'Accepted', actual_date: today(), decided_at: nowIso(), decided_by: ctx.user?.id || null,
           decision_comments: deemed ? `Deemed accepted: review period ended ${rec.review_due}` : comments, acceptance_evidence: evidence_document_id,
         }, deemed ? 'Deliverable deemed accepted (SCP-003)' : `Deliverable accepted${asClient ? ' by the client in the portal' : ''}`);
         app.finance?.onDeliverableAccepted?.(ctx, repos.deliverable.get(rec.id));
@@ -182,7 +208,7 @@ export function registerHooks(app) {
         if (!String(comments || '').trim()) throw badRequest('Comments are required when rejecting.');
         if (ctx.access.isExternal && !app.memberships.isClientApprover(ctx.user, rec)) throw forbidden();
         if (!ctx.access.isExternal) requirePlanWrite(ctx, rec);
-        deliverableTransition(sys(ctx), rec, { status: 'Rejected', decided_at: new Date().toISOString(), decided_by: ctx.user.id, decision_comments: comments, rework_count: (rec.rework_count || 0) + 1 }, 'Deliverable rejected');
+        deliverableTransition(sys(ctx), rec, { status: 'Rejected', decided_at: nowIso(), decided_by: ctx.user.id, decision_comments: comments, rework_count: (rec.rework_count || 0) + 1 }, 'Deliverable rejected');
         notify.send([rec.owner_id, eng(rec.engagement_id)?.manager_id, proj(rec.project_id)?.manager_id], { kind: 'acceptance', title: `Deliverable rejected: ${rec.title}`, body: comments, link: link(rec, 'scope'), engagementId: rec.engagement_id, severity: 'high', mandatory: true });
       },
       rework(ctx, rec) { requirePlanWrite(ctx, rec); deliverableTransition(ctx, rec, { status: 'In progress' }, 'Deliverable returned to rework'); },

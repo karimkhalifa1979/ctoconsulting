@@ -6,12 +6,24 @@ import { LISTS } from '../../shared/defaults.js';
 export function createRates(app) {
   const { repos } = app;
 
+  // Rate cards and each engagement's agreements are cached until the next write (clearCache).
+  let cardCache = null;
+  const engCache = new Map();
+  const rateCache = new Map();
+  function engagementInfo(engagementId) {
+    if (!engCache.has(engagementId)) {
+      const eng = engagementId ? repos.engagement.get(engagementId) : null;
+      const agreementIds = new Set(eng ? repos.contract.find({ engagement_id: eng.id }).map((k) => k.agreement_id).filter(Boolean) : []);
+      if (eng) for (const a of repos.agreement.find({ client_id: eng.client_id })) if (a.status === 'Active') agreementIds.add(a.id);
+      engCache.set(engagementId, { eng, agreementIds });
+    }
+    return engCache.get(engagementId);
+  }
+
   function cardsFor(engagementId, date) {
-    const eng = engagementId ? repos.engagement.get(engagementId) : null;
-    const cards = repos.rate_card.find({}).filter((c) => c.status !== 'Retired' && c.status !== 'Draft'
-      && (!c.effective_from || c.effective_from <= date) && (!c.effective_to || c.effective_to >= date));
-    const agreementIds = new Set(eng ? repos.contract.find({ engagement_id: eng.id }).map((k) => k.agreement_id).filter(Boolean) : []);
-    if (eng) for (const a of repos.agreement.find({ client_id: eng.client_id })) if (a.status === 'Active') agreementIds.add(a.id);
+    const { eng, agreementIds } = engagementInfo(engagementId);
+    cardCache ||= repos.rate_card.find({}).filter((c) => c.status !== 'Retired' && c.status !== 'Draft');
+    const cards = cardCache.filter((c) => (!c.effective_from || c.effective_from <= date) && (!c.effective_to || c.effective_to >= date));
     const tiers = [
       cards.filter((c) => c.level === 'Engagement' && eng && c.engagement_ref === eng.id),
       cards.filter((c) => c.level === 'Agreement' && agreementIds.has(c.agreement_id)),
@@ -33,7 +45,12 @@ export function createRates(app) {
   }
 
   // Returns the hourly and daily charge-out rate with its source.
-  function chargeRate({ engagementId, role, personId, date }) {
+  function chargeRate(args) {
+    const key = `${args.engagementId}|${args.role}|${args.personId}|${args.date}`;
+    if (!rateCache.has(key)) rateCache.set(key, resolveRate(args));
+    return rateCache.get(key);
+  }
+  function resolveRate({ engagementId, role, personId, date }) {
     const { eng, tiers } = cardsFor(engagementId, date);
     const dayLength = Number(eng?.day_length) || 7.5;
     const levels = ['Engagement', 'Agreement or panel', 'Client', 'Firm standard'];
@@ -68,10 +85,16 @@ export function createRates(app) {
     const row = costCache.get(personId).find((r) => r.effective_from <= date);
     return row ? Number(row.rate) : null;
   }
-  const clearCache = () => costCache.clear();
+  const gradeCache = new Map();
+  const clearCache = () => { costCache.clear(); cardCache = null; engCache.clear(); rateCache.clear(); gradeCache.clear(); };
 
   // Average cost rate of active people in a grade, for placeholder roles (RES-008).
   function gradeCost(grade, date) {
+    const key = `${grade}|${date}`;
+    if (!gradeCache.has(key)) gradeCache.set(key, averageGradeCost(grade, date));
+    return gradeCache.get(key);
+  }
+  function averageGradeCost(grade, date) {
     const people = repos.person.find({}).filter((p) => p.grade === grade && p.active !== false);
     const rates = people.map((p) => costRate(p.id, date)).filter((r) => r !== null);
     if (rates.length) return rates.reduce((a, b) => a + b, 0) / rates.length;

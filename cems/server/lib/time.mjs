@@ -5,6 +5,7 @@ import { addDays, weekStart, todayIn, zonedToUtc, dayOfWeek } from '../../shared
 import { LISTS } from '../../shared/defaults.js';
 import { badRequest, forbidden, unprocessable } from '../http.mjs';
 import { nowIso } from '../db.mjs';
+import { now } from '../../shared/clock.js';
 
 const OPEN_STATES = ['In delivery', 'Stage boundary', 'Closing', 'On hold', 'Initiation', 'Proposed'];
 
@@ -64,6 +65,7 @@ export function createTime(app) {
     const add = (bag, i, msg) => { (bag[i] ||= []).push(msg); };
     const currentWeekEnd = addDays(weekStart(today()), 6);
     const byDay = {};
+    const projectChecks = new Map();
     entries.forEach((e, i) => {
       if (!e.date || e.date < ws || e.date > addDays(ws, 6)) add(errors, i, 'Date is outside this week');
       if (e.date > currentWeekEnd) add(errors, i, 'Time cannot be recorded for future weeks (BR-08)');
@@ -87,10 +89,14 @@ export function createTime(app) {
         const ch = repos.change.get(task.change_id);
         if (ch && !['Approved', 'Implemented', 'Closed'].includes(ch.status)) add(warnings, i, `Work linked to unapproved change ${ch.ref} is a commercial risk (CHG-008)`);
       }
-      const pos = finance.position(e.project_id);
+      if (!projectChecks.has(e.project_id)) {
+        const pos = finance.position(e.project_id);
+        const poOver = (pos ? app.repos.funding.find({ engagement_id: tc.engagement_id }).filter((f) => f.project_id === e.project_id && f.instrument_kind === 'po') : [])
+          .map((f) => finance.poStatus(app.repos.po.get(f.instrument_id))).find((p) => p.consumedPct >= 1);
+        projectChecks.set(e.project_id, { pos, poOver });
+      }
+      const { pos, poOver } = projectChecks.get(e.project_id);
       if (pos?.bac && pos.ac >= pos.bac) add(mode('beyondBudget') === 'block' ? errors : warnings, i, 'The project has used its budget');
-      const poOver = (pos ? app.repos.funding.find({ engagement_id: tc.engagement_id }).filter((f) => f.project_id === e.project_id && f.instrument_kind === 'po') : [])
-        .map((f) => finance.poStatus(app.repos.po.get(f.instrument_id))).find((p) => p.consumedPct >= 1);
       if (poOver) add(mode('beyondPo') === 'block' ? errors : warnings, i, `PO ${poOver.number} is fully consumed`);
     });
     entries.forEach((e, i) => {
@@ -109,7 +115,7 @@ export function createTime(app) {
     const list = timeCodes(person, start);
     return {
       person: { id: person.id, name: person.name, standard_hours: person.standard_hours },
-      week_start: start, week_end: addDays(start, 6), deadline: deadline(start), late: !ts?.submitted_at && new Date() > new Date(deadline(start)),
+      week_start: start, week_end: addDays(start, 6), deadline: deadline(start), late: !ts?.submitted_at && now() > new Date(deadline(start)),
       status: ts?.status || (entries.length ? 'Draft' : 'Not started'), timesheet: ts, entries, codes: list, nonProject: codes(),
       validation: validateWeek(person, start, entries.filter((e) => !e.adjustment_of), list),
     };
@@ -156,10 +162,13 @@ export function createTime(app) {
   // The approver and anyone they have delegated to during leave (WFL-006).
   const actorsFor = (userId) => [userId, ...app.workflow.delegations.find({}).filter((d) => d.to_user === userId && d.from <= today() && (!d.to || d.to >= today())).map((d) => d.from_user)];
 
+  // Project manager first, engagement manager as alternate; nobody approves their own time, so a
+  // manager's own lines go to the other manager, or to the engagement executive when they are both.
   function approversFor(entry) {
     const p = repos.project.get(entry.project_id);
     const e = repos.engagement.get(p?.engagement_id);
-    return [p?.manager_id, e?.manager_id].filter(Boolean);
+    const list = [...new Set([p?.manager_id, e?.manager_id].filter(Boolean))].filter((u) => u !== entry.user_id);
+    return list.length ? list : [e?.executive_id].filter(Boolean);
   }
 
   function submitWeek(ctx, { week_start: ws }) {
@@ -180,7 +189,7 @@ export function createTime(app) {
         for (const a of approversFor(t).slice(0, 1)) notifyMap.set(a, [...(notifyMap.get(a) || []), t]);
       }
       const ts = timesheet(person.id, start);
-      const late = new Date() > new Date(deadline(start));
+      const late = now() > new Date(deadline(start));
       const rec = { status: 'Submitted', submitted_at: nowIso(), late_submission: late };
       if (ts) repos.timesheets.patch(ts.id, rec, ctx.user.id); else repos.timesheets.insert({ person_id: person.id, user_id: ctx.user.id, week_start: start, ...rec }, ctx.user.id);
       audit.record({ userId: ctx.user.id, ip: ctx.ip, action: 'submit', entity: 'timesheet', entityId: `${person.id}:${start}`, summary: `Timesheet submitted for week of ${start}${late ? ' (late)' : ''}` });
@@ -293,7 +302,7 @@ export function createTime(app) {
 
   // TEX-003: reminders before the deadline and escalation for late timesheets.
   function deadlineJob() {
-    const now = new Date();
+    const at = now();
     const lastWeek = addDays(weekStart(today()), -7);
     const due = new Date(deadline(lastWeek));
     const people = repos.person.find({}).filter((p) => p.active !== false && p.user_id && p.employment_type !== 'Subcontractor');
@@ -303,7 +312,7 @@ export function createTime(app) {
       if (ts && ['Submitted', 'Approved', 'Partially approved'].includes(ts.status)) continue;
       const allocated = repos.allocation.find({ person_id: p.id }).some((a) => a.start_date <= addDays(lastWeek, 6) && a.end_date >= lastWeek);
       if (!allocated) continue;
-      if (now < due) {
+      if (at < due) {
         notify.send([p.user_id], { kind: 'timesheet', title: `Timesheet due by Monday 10:00 am for week of ${lastWeek}`, link: `/time?week=${lastWeek}`, dedupe: `ts-remind:${p.id}:${lastWeek}` });
         reminded++;
       } else {

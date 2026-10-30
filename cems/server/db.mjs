@@ -5,6 +5,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 import { ENTITIES } from '../shared/schema.js';
+import { now } from '../shared/clock.js';
 
 // Tables used by specialised modules, stored in the same document shape as entities.
 export const DOC_TABLES = {
@@ -147,7 +148,7 @@ export function newId(prefix = 'id') {
   return `${prefix}_${s}`;
 }
 
-export const nowIso = () => new Date().toISOString();
+export const nowIso = () => now().toISOString();
 
 export function nextSequence(db, scope, key) {
   const row = db.prepare('SELECT value FROM sequences WHERE scope = ? AND key = ?').get(scope, key);

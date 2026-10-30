@@ -295,7 +295,7 @@ export function createReports(app) {
   }
 
   function resolveScope(engagementId, scope) {
-    const all = repos.project.find({ engagement_id: engagementId }).filter((p) => !['Cancelled', 'Proposed'].includes(p.state));
+    const all = repos.project.find({ engagement_id: engagementId }).filter((p) => !['Cancelled', 'Proposed', 'Closed', 'Archived'].includes(p.state));
     if (!scope || scope === 'all') return all.map((p) => p.id);
     const ids = Array.isArray(scope) ? scope : [scope];
     return ids.filter((id) => all.some((p) => p.id === id));
@@ -481,13 +481,16 @@ export function createReports(app) {
     if (!(r.status === 'Approved' || (r.status === 'Draft' && !needsApproval(r)))) throw badRequest(needsApproval(r) ? 'This report needs approval before it is issued (RPT-040).' : 'Only drafts or approved reports can be issued.');
     const snap = snapshots.get(r.snapshot_id);
     snapshots.patch(snap.id, { locked: true }, ctx.user.id);
-    reports.patch(id, { status: 'Issued', issued_at: nowIso(), issued_by: ctx.user.id, locked: true, history: [...(r.history || []), { at: nowIso(), by: ctx.user.id, event: 'Issued' }] }, ctx.user.id);
+    // The issued report carries its final file name (RPT-042); draft numbers belong to drafts.
+    const finalName = String(r.name).replace(/_draft\d+$/, '');
+    for (const [kind, fid] of Object.entries(r.files || {})) if (fid) files.rename(fid, `${finalName}.${kind}`);
+    reports.patch(id, { name: finalName, status: 'Issued', issued_at: nowIso(), issued_by: ctx.user.id, locked: true, history: [...(r.history || []), { at: nowIso(), by: ctx.user.id, event: 'Issued' }] }, ctx.user.id);
     app.status.markReported(r.status_update_ids || [], id);
     if (r.supersedes_id) {
       const old = reports.get(r.supersedes_id);
       reports.patch(old.id, { status: 'Superseded', superseded_by_id: id, history: [...(old.history || []), { at: nowIso(), by: ctx.user.id, event: `Superseded by ${r.name}: ${r.correction_reason}` }] }, ctx.user.id);
     }
-    audit.record({ userId: ctx.user.id, ip: ctx.ip, action: 'issue', entity: 'report', entityId: id, engagementId: r.engagement_id, summary: `Report ${r.name} issued; snapshot ${snap.sha256.slice(0, 12)} locked (RPT-041)` });
+    audit.record({ userId: ctx.user.id, ip: ctx.ip, action: 'issue', entity: 'report', entityId: id, engagementId: r.engagement_id, summary: `Report ${finalName} issued; snapshot ${snap.sha256.slice(0, 12)} locked (RPT-041)` });
     app.integrations.emitEvent('report.issued', { id, name: r.name });
     let dist = null;
     if (distribute) dist = await distributeReport(ctx, id, { channel, message, extra, exceptionReason });

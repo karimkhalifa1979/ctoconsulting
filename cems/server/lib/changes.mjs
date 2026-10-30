@@ -133,15 +133,22 @@ export function createChanges(app) {
           value: Number(rec.variation_value || rec.impact_price), start_date: today(), end_date: sow.end_date, commercial_model: sow.commercial_model, status: 'Draft', change_id: rec.id,
         });
         entities.patch(sys, 'change', rec.id, { variation_contract_id: variation.id });
-        if (p) {
-          const fund = repos.funding.find({ engagement_id: rec.engagement_id }).find((f) => f.project_id === p.id && f.instrument_id === sow.id);
-          if (fund) entities.patch(sys, 'funding', fund.id, { amount: Number(fund.amount) + Number(rec.variation_value || rec.impact_price) });
-        }
       }
     }
     notify.send([p?.manager_id, repos.engagement.get(rec.engagement_id)?.manager_id], { kind: 'change', title: `Change approved: ${rec.ref} ${rec.title}`, body: 'Baselines updated; a draft variation was created for signature.', link: `/projects/${rec.project_id}/changes?open=${rec.id}`, engagementId: rec.engagement_id });
     app.integrations.emitEvent('change.approved', { id: rec.id, ref: rec.ref, price: rec.impact_price });
     audit.record({ userId: ctx.user?.id, action: 'baseline', entity: 'change', entityId: rec.id, engagementId: rec.engagement_id, summary: `Baselines updated for approved change ${rec.ref} (CHG-004)` });
+    app.finance.clearMemo();
+  }
+
+  // The project's SOW funding grows when the variation is signed, not when the change is approved:
+  // until then the contract value (FIN-003) does not include it (ENG-006).
+  function onVariationSigned(ctx, variation) {
+    const rec = variation.change_id ? repos.change.get(variation.change_id) : null;
+    if (!rec?.project_id) return;
+    const fund = repos.funding.find({ engagement_id: rec.engagement_id }).find((f) => f.project_id === rec.project_id && f.instrument_id === variation.parent_id);
+    if (fund) entities.patch({ ...ctx, system: true }, 'funding', fund.id, { amount: Number(fund.amount) + Number(variation.value) }, `Funding increased by signed variation ${variation.reference}`);
+    if (!rec.variation_ref) entities.patch({ ...ctx, system: true }, 'change', rec.id, { variation_ref: variation.reference, variation_value: variation.value, variation_date: variation.signed_date || today() });
     app.finance.clearMemo();
   }
 
@@ -173,5 +180,5 @@ export function createChanges(app) {
     return { original, approvedVariations: cumulative, current: original + cumulative, rows };
   }
 
-  return { price, authority, setStatus, submit, recordClientApproval, implement, variationDocument, changeLog, applyApproved };
+  return { price, authority, setStatus, submit, recordClientApproval, implement, variationDocument, changeLog, applyApproved, onVariationSigned };
 }

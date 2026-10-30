@@ -115,6 +115,14 @@ export function createEntities(app) {
     return null;
   }
 
+  // ACC-003: whether the caller sees (or may write) cost-sensitive fields on this record.
+  function costsVisible(ctx, d, rec, mode) {
+    const a = ctx.access;
+    if (d.scope === 'global') return a.canGlobal(mode === 'write' ? 'costrates.write' : 'costrates.read');
+    if (d.scope === 'client') return a.hasGlobal('finance') || a.hasGlobal('engagement_executive') || a.hasRoleAnywhere('engagement_manager');
+    return a.canSeeCosts(scopeOf(d, rec).engId);
+  }
+
   // Field-level filtering on the way out (ACC-003, CPT-005).
   function serialize(ctx, d, rec, { decorate = true } = {}) {
     let out = { ...rec };
@@ -126,8 +134,7 @@ export function createEntities(app) {
       out = Object.fromEntries(Object.entries(out).filter(([k]) => allowed.has(k)));
       return out;
     }
-    const { engId } = scopeOf(d, rec);
-    const costs = d.scope === 'global' ? a.canGlobal('costrates.read') : a.canSeeCosts(engId);
+    const costs = costsVisible(ctx, d, rec, 'read');
     if (!costs) for (const fld of d.fields) if (fld.sensitive) delete out[fld.key];
     if (!costs) for (const k of Object.keys(out)) if (k.startsWith('_cost') || k.startsWith('_margin')) delete out[k];
     return out;
@@ -203,6 +210,7 @@ export function createEntities(app) {
 
   function resolveScope(ctx, d, input) {
     const s = {};
+    if (d.name === 'client') return s;
     if (d.scope === 'client') {
       if (!input.client_id) throw unprocessable('Client is required', { client_id: 'Required' });
       if (!repos.client.get(input.client_id)) throw notFound('Client not found');
@@ -239,7 +247,7 @@ export function createEntities(app) {
     if (ctx.system) return input;
     const a = ctx.access;
     const { engId, projectId } = scopeOf(d, rec);
-    const costs = d.scope === 'global' ? a.canGlobal('costrates.write') : a.canSeeCosts(engId);
+    const costs = costsVisible(ctx, d, rec, 'write');
     const ownOnly = d.scope !== 'global' && d.scope !== 'client' && a.qualifier(engId, d.fn, 'U', projectId) === 'own';
     const out = {};
     for (const [k, v] of Object.entries(input)) {
@@ -304,7 +312,7 @@ export function createEntities(app) {
         update: !lockedReason(d, rec) && canWrite(ctx, d, rec, 'U'),
         delete: !lockedReason(d, rec) && canWrite(ctx, d, rec, 'U') && d.name !== 'engagement',
         locked: lockedReason(d, rec),
-        costs: d.scope === 'global' ? ctx.access.canGlobal('costrates.read') : ctx.access.canSeeCosts(scopeOf(d, rec).engId),
+        costs: costsVisible(ctx, d, rec, 'read'),
       };
     }
     return out;
@@ -332,6 +340,7 @@ export function createEntities(app) {
       checkRefs(ctx, d, rec);
       rec.ref = rec.ref || nextRef(d, rec);
       let saved = repos[name].insert(rec, ctx.user?.id || null);
+      if (d.name === 'client') saved = repos[name].replace(saved.id, { ...saved, client_id: saved.id }, ctx.user?.id);
       if (d.name === 'engagement') saved = repos[name].replace(saved.id, { ...saved, engagement_id: saved.id }, ctx.user?.id);
       if (d.name === 'project') saved = repos[name].replace(saved.id, { ...saved, project_id: saved.id }, ctx.user?.id);
       if (doAudit) audit.change(ctx, { action: 'create', entity: name, rec: saved, before: null, after: saved, summary: `Created ${d.label.toLowerCase()} ${saved.ref || saved[d.title] || ''}`.trim() });

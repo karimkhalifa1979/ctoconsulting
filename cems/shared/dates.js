@@ -2,6 +2,8 @@
 // Calendar dates are ISO strings ('YYYY-MM-DD') with no time zone; instants are ISO UTC timestamps.
 // Reporting weeks end on Friday (BR-01); the financial year runs 1 July – 30 June (FIN-041).
 
+import { now as clockNow } from './clock.js';
+
 const DAY = 86_400_000;
 
 export function parseISO(iso) {
@@ -124,7 +126,7 @@ export function zonedToUtc(iso, time, tz) {
 }
 
 // Today's calendar date in a time zone.
-export function todayIn(tz = 'Australia/Sydney', now = new Date()) {
+export function todayIn(tz = 'Australia/Sydney', now = clockNow()) {
   return new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
 }
 

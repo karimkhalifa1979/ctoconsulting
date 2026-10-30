@@ -5,6 +5,7 @@ import { trendOf, RAG_DEFINITIONS, DIMENSIONS } from '../../../shared/rag.js';
 import { RAID_TYPES } from '../../../shared/schema.js';
 import { isBlankRich } from '../../../shared/markdown.js';
 import { fmtDate } from '../../../shared/format.js';
+import { nowIso } from '../../db.mjs';
 
 const CLOSED = { risk: ['Closed', 'Occurred'], issue: ['Resolved', 'Closed'], assumption: ['Validated', 'Invalid'], dependency: ['Delivered', 'Closed'], decision: ['Made', 'Superseded'], action: ['Done', 'Cancelled'] };
 const DIM_TOKEN = { overall: 'overall', schedule: 'schedule', budget: 'budget', scope: 'scope', risk: 'risk', resource: 'resource', quality: 'quality' };
@@ -26,16 +27,18 @@ export function createReportContext(app) {
       key: 'status', label: 'Status updates submitted and approved', ok: !notApproved.length,
       items: notApproved.map(({ p, su }) => ({ project_id: p.id, text: `${p.name}: ${su ? su.status : 'not started'}`, status_update_id: su?.id || null })),
     });
-    const ws = weekStart(periodEnd);
+    // Financials are as at the last fully approved timesheet week (BR-02), so that week's timesheets
+    // must be submitted and approved; the current week's are not due until Monday.
+    const ws = addDays(weekStart(periodEnd), -7);
     const missingTs = [];
     for (const p of projects) {
-      for (const a of repos.allocation.find({ project_id: p.id }).filter((x) => x.person_id && x.start_date <= periodEnd && x.end_date >= ws)) {
+      for (const a of repos.allocation.find({ project_id: p.id }).filter((x) => x.person_id && x.status === 'Confirmed' && x.start_date <= addDays(ws, 6) && x.end_date >= ws)) {
         const ts = repos.timesheets.findOne({ person_id: a.person_id, week_start: ws });
-        if (!ts || ['Draft', 'Rejected'].includes(ts.status)) missingTs.push({ text: `${personName(a.person_id)} (${p.name}): ${ts?.status || 'not started'}` });
+        if (!ts || !['Approved'].includes(ts.status)) missingTs.push({ text: `${personName(a.person_id)} (${p.name}): ${ts ? (ts.status === 'Submitted' ? 'awaiting approval' : ts.status.toLowerCase()) : 'not submitted'}` });
       }
     }
     const uniqueTs = [...new Map(missingTs.map((x) => [x.text.split(' (')[0], x])).values()];
-    checks.push({ key: 'timesheets', label: 'Timesheets for the period', ok: !uniqueTs.length, items: uniqueTs });
+    checks.push({ key: 'timesheets', label: `Timesheets for the week of ${fmtDate(ws)} approved (financials as at)`, ok: !uniqueTs.length, items: uniqueTs });
     const overdue = [];
     for (const t of RAID_TYPES) {
       for (const r of repos[t].find({ engagement_id: engagementId }).filter((x) => !x.project_id || projectIds.includes(x.project_id))) {
@@ -189,7 +192,7 @@ export function createReportContext(app) {
     const allMilestones = projectCtxs.flatMap((c) => c.milestones);
     const snap = {
       report: {
-        week_ending: periodEnd, period_start: periodStart, as_at: new Date().toISOString(), financials_as_at: engInScope.asAt, version, prepared_by: preparedBy,
+        week_ending: periodEnd, period_start: periodStart, as_at: nowIso(), financials_as_at: engInScope.asAt, version, prepared_by: preparedBy,
         classification: e.classification || 'Confidential', type: reportType, audience: audience === 'client' ? 'Client' : 'Internal', name,
       },
       firm: { name: settings.get('firm').name },

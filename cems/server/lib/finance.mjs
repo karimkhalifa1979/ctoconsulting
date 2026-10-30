@@ -6,6 +6,7 @@ import {
   businessDaysBetween, isBusinessDay, fyOf, fyMonths, nthBusinessDay, maxDate, minDate,
 } from '../../shared/dates.js';
 import { badRequest, forbidden } from '../http.mjs';
+import { nowIso } from '../db.mjs';
 
 const ISSUED = ['Sent to accounting', 'Issued', 'Paid', 'Overdue', 'Disputed'];
 const round2 = (v) => Math.round(v * 100) / 100;
@@ -460,7 +461,7 @@ export function createFinance(app) {
       if (a.model === 'T&M' || a.model === 'Capped T&M' || (a.model === 'Fixed price' && !hasEvents)) {
         for (const [m, v] of Object.entries(a.recog)) {
           if (billedMonths.has(m) || v <= 0.005) continue;
-          out.push({ date: maxDate(nthBusinessDay(addMonths(m, 1), 1, holidays), from), amount: v, kind: 'T&M period', description: `${a.label}: ${m} (unbilled)` });
+          out.push({ date: maxDate(nthBusinessDay(addMonths(m, 1), 1, holidays), from), amount: v, kind: 'T&M period', description: `${a.label}: ${m} (unbilled)`, unbilled: true });
         }
         for (const [m, v] of Object.entries(a.fcRev)) if (v > 0.005) out.push({ date: nthBusinessDay(addMonths(m, 1), 1, holidays), amount: v, kind: a.model === 'Fixed price' ? 'Progress claim' : 'T&M period', description: `${a.label}: ${m} (forecast)` });
       } else if (a.model === 'Retainer') {
@@ -512,12 +513,24 @@ export function createFinance(app) {
       }
     };
     const pctComplete = sum(leaves, (t) => weight(t) * earned(t)) / totalW;
-    // PV from the time-phased budget, pro rata within the current month.
     let pv = 0;
-    const am = monthOf(asAt);
-    for (const l of lines.filter((x) => x.cost_type !== 'contingency')) {
-      if (l.month < am) pv += Number(l.cost) || 0;
-      else if (l.month === am) pv += (Number(l.cost) || 0) * (Number(asAt.slice(8, 10)) / daysInMonth(am));
+    const costed = leaves.filter((t) => Number(t.budget_cost) > 0);
+    if (costed.length && sum(costed, (t) => t.budget_cost) >= 0.9 * bac) {
+      // Cost accounts on the tasks: PV is each task's budget earned on its baseline dates, so PV and
+      // EV use the same weights.
+      const planned = (t) => {
+        const s = t.baseline_start || t.start_date, f = t.baseline_finish || t.finish_date;
+        if (!s || !f) return 0;
+        return Math.max(0, Math.min(1, (diffDays(s, asAt) + 1) / (diffDays(s, f) + 1)));
+      };
+      pv = (sum(costed, (t) => Number(t.budget_cost) * planned(t)) / sum(costed, (t) => t.budget_cost)) * bac;
+    } else {
+      // PV from the time-phased budget, pro rata within the current month.
+      const am = monthOf(asAt);
+      for (const l of lines.filter((x) => x.cost_type !== 'contingency')) {
+        if (l.month < am) pv += Number(l.cost) || 0;
+        else if (l.month === am) pv += (Number(l.cost) || 0) * (Number(asAt.slice(8, 10)) / daysInMonth(am));
+      }
     }
     if (!lines.length && bac && d.p.start_date && d.p.end_date) {
       const span = diffDays(d.p.start_date, d.p.end_date) + 1;
@@ -574,7 +587,8 @@ export function createFinance(app) {
       const allPo = repos.funding.find({ engagement_id: po.engagement_id }).filter((x) => x.project_id === f.project_id && x.instrument_kind === 'po');
       const share = sum(allPo, (x) => x.amount) ? Number(f.amount) / sum(allPo, (x) => x.amount) : 1;
       unbilled += pos.wip * share;
-      for (const b of pos.billingForecast) future[b.date] = (future[b.date] || 0) + b.amount * share;
+      // Unbilled revenue is already in consumption; only future billing adds to it.
+      for (const b of pos.billingForecast.filter((x) => !x.unbilled)) future[b.date] = (future[b.date] || 0) + b.amount * share;
       const pend = repos.project.get(f.project_id)?.end_date;
       if (pend && (!plannedEnd || pend > plannedEnd)) plannedEnd = pend;
     }
@@ -584,11 +598,11 @@ export function createFinance(app) {
     const consumedPct = value ? consumed / value : null;
     // Forecast exhaustion: walk the billing forecast until consumption reaches the PO value.
     let cum = consumed;
-    let exhaustion = consumed >= value ? today() : null;
+    let exhaustion = consumed > value + 0.5 ? today() : null;
     for (const date of Object.keys(future).sort()) {
       if (exhaustion) break;
       const add = future[date] * factor;
-      if (cum + add >= value) exhaustion = date;
+      if (cum + add > value + 0.5) exhaustion = date; // fully used at completion is not running out
       cum += add;
     }
     const thresholds = F().poAlerts;
@@ -673,8 +687,8 @@ export function createFinance(app) {
     if (earlierOpen.length) throw badRequest(`Lock ${earlierOpen[0].id} first.`);
     const unapproved = repos.time_entries.find({}).filter((t) => monthOf(t.date) === month && t.status === 'Submitted').length;
     const cur = repos.periods.get(month);
-    const rec = cur ? repos.periods.patch(month, { status: 'locked', locked_at: new Date().toISOString(), locked_by: ctx.user.id }, ctx.user.id)
-      : repos.periods.insert({ id: month, status: 'locked', locked_at: new Date().toISOString(), locked_by: ctx.user.id }, ctx.user.id);
+    const rec = cur ? repos.periods.patch(month, { status: 'locked', locked_at: nowIso(), locked_by: ctx.user.id }, ctx.user.id)
+      : repos.periods.insert({ id: month, status: 'locked', locked_at: nowIso(), locked_by: ctx.user.id }, ctx.user.id);
     app.audit.record({ userId: ctx.user.id, ip: ctx.ip, action: 'period-lock', entity: 'period', entityId: month, summary: `Locked financial period ${month}${unapproved ? ` with ${unapproved} unapproved entries (they will post to the next open period)` : ''}` });
     clearMemo();
     return rec;

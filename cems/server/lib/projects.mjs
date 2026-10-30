@@ -3,6 +3,7 @@
 import { DELIVERY_PROFILES, PROJECT_TEMPLATES, CLOSURE_CHECKLIST, ENGAGEMENT_CLOSURE } from '../../shared/defaults.js';
 import { addBusinessDays, addDays, todayIn, monthOf, monthsBetween, businessDaysBetween } from '../../shared/dates.js';
 import { badRequest, forbidden, unprocessable, notFound } from '../http.mjs';
+import { nowIso } from '../db.mjs';
 
 const ACTIVE = ['Initiation', 'In delivery', 'Stage boundary'];
 
@@ -216,7 +217,7 @@ export function createProjects(app) {
     for (const b of existing.filter((x) => x.is_current)) repos.baselines.patch(b.id, { is_current: false }, ctx.user?.id);
     const rec = repos.baselines.insert({
       project_id: projectId, engagement_id: p.engagement_id, version_no: existing.length + 1, label: label || (existing.length ? `Re-baseline ${existing.length}` : 'Original'),
-      reason: reason || null, change_id: changeId, approval_id: approvalId, approved_by: ctx.user?.id || null, approved_at: new Date().toISOString(), is_current: true, kind: 'all',
+      reason: reason || null, change_id: changeId, approval_id: approvalId, approved_by: ctx.user?.id || null, approved_at: nowIso(), is_current: true, kind: 'all',
       data: {
         end_date: p.end_date, budget_version_id: budget?.id || null, bac: budget ? budget.lines.filter((l) => l.cost_type !== 'contingency').reduce((a, l) => a + Number(l.cost || 0), 0) : null,
         work_items: items.map((t) => ({ id: t.id, start: t.start_date, finish: t.finish_date })),
