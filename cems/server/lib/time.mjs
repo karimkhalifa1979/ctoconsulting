@@ -5,7 +5,7 @@ import { addDays, weekStart, todayIn, zonedToUtc, dayOfWeek } from '../../shared
 import { LISTS } from '../../shared/defaults.js';
 import { badRequest, forbidden, unprocessable } from '../http.mjs';
 import { nowIso } from '../db.mjs';
-import { now } from '../../shared/clock.js';
+import { now as clockNow } from '../../shared/clock.js';
 
 const OPEN_STATES = ['In delivery', 'Stage boundary', 'Closing', 'On hold', 'Initiation', 'Proposed'];
 
@@ -115,7 +115,7 @@ export function createTime(app) {
     const list = timeCodes(person, start);
     return {
       person: { id: person.id, name: person.name, standard_hours: person.standard_hours },
-      week_start: start, week_end: addDays(start, 6), deadline: deadline(start), late: !ts?.submitted_at && now() > new Date(deadline(start)),
+      week_start: start, week_end: addDays(start, 6), deadline: deadline(start), late: !ts?.submitted_at && clockNow() > new Date(deadline(start)),
       status: ts?.status || (entries.length ? 'Draft' : 'Not started'), timesheet: ts, entries, codes: list, nonProject: codes(),
       validation: validateWeek(person, start, entries.filter((e) => !e.adjustment_of), list),
     };
@@ -189,7 +189,7 @@ export function createTime(app) {
         for (const a of approversFor(t).slice(0, 1)) notifyMap.set(a, [...(notifyMap.get(a) || []), t]);
       }
       const ts = timesheet(person.id, start);
-      const late = now() > new Date(deadline(start));
+      const late = clockNow() > new Date(deadline(start));
       const rec = { status: 'Submitted', submitted_at: nowIso(), late_submission: late };
       if (ts) repos.timesheets.patch(ts.id, rec, ctx.user.id); else repos.timesheets.insert({ person_id: person.id, user_id: ctx.user.id, week_start: start, ...rec }, ctx.user.id);
       audit.record({ userId: ctx.user.id, ip: ctx.ip, action: 'submit', entity: 'timesheet', entityId: `${person.id}:${start}`, summary: `Timesheet submitted for week of ${start}${late ? ' (late)' : ''}` });
@@ -302,7 +302,7 @@ export function createTime(app) {
 
   // TEX-003: reminders before the deadline and escalation for late timesheets.
   function deadlineJob() {
-    const at = now();
+    const at = clockNow();
     const lastWeek = addDays(weekStart(today()), -7);
     const due = new Date(deadline(lastWeek));
     const people = repos.person.find({}).filter((p) => p.active !== false && p.user_id && p.employment_type !== 'Subcontractor');

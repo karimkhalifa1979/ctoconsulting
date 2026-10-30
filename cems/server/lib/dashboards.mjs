@@ -3,7 +3,7 @@ import { addDays, todayIn, weekStart, diffDays } from '../../shared/dates.js';
 import { DIMENSIONS, worstRag, RAG_RANK } from '../../shared/rag.js';
 import { RAID_TYPES, ENTITIES } from '../../shared/schema.js';
 import { forbidden, notFound } from '../http.mjs';
-import { now } from '../../shared/clock.js';
+import { now as clockNow } from '../../shared/clock.js';
 
 const pickFin = (pos, costs) => {
   if (!pos) return null;
@@ -224,7 +224,7 @@ export function createDashboards(app) {
       for (let i = 1; i >= 0; i--) {
         const ws = addDays(weekStart(now), -7 * i);
         const ts = repos.timesheets.findOne({ person_id: person.id, week_start: ws });
-        if (!ts || ['Draft', 'Rejected'].includes(ts.status)) timesheets.push({ week_start: ws, status: ts?.status || 'Not started', deadline: app.time.deadline(ws), late: now() > new Date(app.time.deadline(ws)) });
+        if (!ts || ['Draft', 'Rejected'].includes(ts.status)) timesheets.push({ week_start: ws, status: ts?.status || 'Not started', deadline: app.time.deadline(ws), late: clockNow() > new Date(app.time.deadline(ws)) });
       }
     }
     const statusDue = status.tracker(ctx).filter((r) => r.manager_id === uid && ['Not started', 'Draft', 'Returned', 'Late'].includes(r.status));
