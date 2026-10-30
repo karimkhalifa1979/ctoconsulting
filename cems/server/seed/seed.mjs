@@ -102,7 +102,7 @@ export async function seed(app, opts = {}) {
     for (const p of PEOPLE.filter((x) => !x.noPerson)) {
       people[p.key] = entities.create(as('grace'), 'person', {
         name: p.name, email: emailOf(p.name), user_id: users[p.key], role_title: p.title, grade: p.grade, practice: p.practice, location_state: p.state, employment_type: p.type || 'Employee',
-        standard_hours: 37.5, fte: 1, active: true, skills: [...new Set([...(SKILLS[p.grade] || []), ...(EXTRA_SKILLS[p.key] || [])])].map((s, i) => ({ name: s, level: Math.max(2, 5 - (i % 3)) })),
+        standard_hours: 37.5, fte: 1, active: true, delivery: !['grace', 'daniel', 'sophie'].includes(p.key), skills: [...new Set([...(SKILLS[p.grade] || []), ...(EXTRA_SKILLS[p.key] || [])])].map((s, i) => ({ name: s, level: Math.max(2, 5 - (i % 3)) })),
         certifications: p.key === 'priya' ? [{ name: 'PRINCE2 Practitioner', expiry: addDays(T, 400) }] : p.key === 'lucas' ? [{ name: 'CISSP', expiry: addDays(T, 45) }] : p.key === 'marcus' ? [{ name: 'SAFe Program Consultant', expiry: addDays(T, 210) }] : [],
         clearances: ['marcus', 'priya', 'aisha', 'noah', 'liam', 'tom', 'hannah', 'emily', 'chloe', 'olivia'].includes(p.key)
           ? [{ level: p.key === 'noah' ? 'NV1' : 'Baseline', expiry: p.key === 'liam' ? addDays(T, 40) : addDays(T, 900), sponsor: 'Department of Regional Services' }] : [],

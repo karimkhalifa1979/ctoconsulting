@@ -142,7 +142,7 @@ function Settings() {
   const [open, setOpen] = useState(null);
   return (
     <Async q={q}>{(rows) => (
-      <div className="split-r">
+      <div className="split-nav">
         <Card title="Settings" flush>
           <ul className="list selectable">
             {rows.map((s) => <li key={s.key} className={open === s.key ? 'active' : ''} onClick={() => setOpen(s.key)}><div className="grow"><div className="strong">{s.key}</div><div className="tiny muted">{SETTING_HELP[s.key] || ''}</div></div>{s.customised ? <Badge tone="teal">Customised</Badge> : <Badge tone="grey">Default</Badge>}</li>)}
@@ -351,7 +351,7 @@ function System() {
       )}</Async>
       <Card title="Integration log (INT-015)" sub="Calls to Entra ID, Microsoft 365, the accounting system, CRM and SharePoint, with retries and a dead-letter state." flush actions={<button className="btn btn-sm" disabled={busy} onClick={retry}>Retry failed</button>}>
         <Async q={integ}>{(rows) => (
-          <Table rows={rows} empty="No integration calls yet." columns={[
+          <Table rows={rows} pageSize={15} empty="No integration calls yet." columns={[
             { key: 'updated_at', label: 'When', render: (r) => <DT v={r.updated_at} /> }, { key: 'system', label: 'System' }, { key: 'operation', label: 'Operation' },
             { key: 'status', label: 'Status', render: (r) => <Status v={r.status} /> }, { key: 'attempts', label: 'Attempts', num: true }, { key: 'error', label: 'Error', render: (r) => <span className="small">{r.error || ''}</span> },
           ]} />
@@ -359,7 +359,7 @@ function System() {
       </Card>
       <Card title="Email outbox" sub="Notifications and report distribution; sent through Microsoft 365 when configured." flush>
         <Async q={outbox}>{(rows) => (
-          <Table rows={rows} empty="No emails." columns={[
+          <Table rows={rows} pageSize={15} empty="No emails." columns={[
             { key: 'created_at', label: 'Queued', render: (m) => <DT v={m.created_at} /> }, { key: 'subject', label: 'Subject' },
             { key: 'to', label: 'To', sort: false, render: (m) => <span className="small">{(m.to || []).slice(0, 3).join(', ')}{m.to?.length > 3 ? ` +${m.to.length - 3}` : ''}</span> },
             { key: 'status', label: 'Status', render: (m) => <Status v={m.status} /> }, { key: 'sent_at', label: 'Sent', render: (m) => (m.sent_at ? <DT v={m.sent_at} /> : '—') },

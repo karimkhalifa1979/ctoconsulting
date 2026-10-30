@@ -127,7 +127,7 @@ function Cycle() {
     <Async q={cycles}>{(list) => {
       const id = sel || list[0]?.id;
       return (
-        <div className="split-r">
+        <div className="split-nav">
           <Card title="Cycles" flush actions={me.can.finance && <button className="btn btn-sm btn-primary" disabled={busy} onClick={open}><Icon name="plus" /> Open cycle</button>}>
             {!list.length ? <Empty>No cycles yet.</Empty> : (
               <ul className="list selectable">
@@ -188,7 +188,7 @@ function CycleView({ id }) {
                   { key: 'eacRevenue', label: 'Fees at completion', num: true, render: (v) => <Money v={v.eacRevenue} /> },
                   { key: 'forecastMargin', label: 'Margin', num: true, render: (v) => (v.forecastMargin === undefined ? '—' : <Pct v={v.forecastMargin} d={1} />) },
                   { key: 'movement', label: 'EAC movement', num: true, sort: (v) => v.movement?.eac || 0, render: (v) => (v.movement ? <span className={v.movement.requiresCommentary ? 'flag' : ''} title={v.movement.requiresCommentary ? 'Above the BR-14 threshold' : ''}>{v.movement.eac >= 0 ? '+' : ''}{fmtMoneyShort(v.movement.eac)}</span> : '—') },
-                  { key: 'commentary', label: 'Commentary', render: (v) => <span className="small">{v.finance_query ? <><b>Query:</b> {v.finance_query}<br /></> : null}{v.commentary || <span className="muted">—</span>}</span> },
+                  { key: 'commentary', label: 'Commentary', render: (v) => <span className="small" style={{ display: 'block', minWidth: 260 }}>{v.finance_query ? <><b>Query:</b> {v.finance_query}<br /></> : null}{v.commentary || <span className="muted">—</span>}</span> },
                   me.can.finance && { key: 'act', label: '', sort: false, render: (v) => (v.status === 'Submitted (EM)' ? <span className="flex"><button className="btn btn-xs" disabled={busy} onClick={() => decide(v, 'query')}>Query</button><button className="btn btn-xs btn-primary" disabled={busy} onClick={() => decide(v, 'approve')}>Approve</button></span> : null) },
                 ].filter(Boolean)} />
               </Card>

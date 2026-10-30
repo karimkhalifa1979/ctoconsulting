@@ -178,7 +178,12 @@ export function createStatus(app) {
     if (!su) throw notFound();
     if (!ctx.access.can(su.engagement_id, 'status', 'U', { projectId: su.project_id })) throw forbidden();
     if (!['Draft', 'Returned'].includes(su.status)) throw badRequest(`This update is ${su.status.toLowerCase()} and locked${su.status === 'Reported' ? ' because it was used in an issued report; create a new version to correct it (STS-011)' : ''}.`);
-    const next = { ...su };
+    // Concurrency is checked on what people edit (ratings and narrative), so refreshing the system
+    // data while the editor is open does not cause a false conflict.
+    if (input.content_rev !== undefined && input.content_rev !== null && Number(input.content_rev) !== (su.content_rev || 0)) {
+      throw Object.assign(new Error('This update was changed by someone else. Reload and try again.'), { status: 409 });
+    }
+    const next = { ...su, content_rev: (su.content_rev || 0) + 1 };
     for (const k of NARRATIVE) if (k in input && input[k] !== su[k]) { next[k] = input[k]; next.carried_over = (next.carried_over || []).filter((x) => x !== k); }
     if (input.ratings) {
       next.ratings = { ...su.ratings };
@@ -188,7 +193,7 @@ export function createStatus(app) {
       }
     }
     if ('raid_inclusions' in input) next.raid_inclusions = input.raid_inclusions;
-    const out = repo.replace(id, next, ctx.user.id, { expectRev: input.rev });
+    const out = repo.replace(id, next, ctx.user.id, input.content_rev === undefined ? { expectRev: input.rev } : {});
     return strip(out, ctx);
   }
 
@@ -261,12 +266,23 @@ export function createStatus(app) {
     return rec;
   }
 
+  // RPT-041 / STS-011: approved updates used in an issued report are locked as reported. An update
+  // still in draft or review (the report was issued with readiness warnings, RPT-029) keeps its
+  // workflow so it can be submitted and reviewed; the report is recorded against it.
   function markReported(ids, reportId) {
     for (const id of ids) {
       const su = repo.get(id);
       if (!su) continue;
-      repo.patch(id, { status: 'Reported', locked: true, reported_in: [...(su.reported_in || []), reportId] }, null);
+      const reportedIn = [...(su.reported_in || []), reportId];
+      if (['Approved', 'Reported'].includes(su.status)) repo.patch(id, { status: 'Reported', locked: true, reported_in: reportedIn }, null);
+      else repo.patch(id, { reported_in: reportedIn, reported_unapproved: true }, null);
     }
+  }
+
+  // The version of a period's update a report uses: approved first, then submitted, then the draft.
+  function forReport(projectId, periodEnd) {
+    const all = repo.find({ project_id: projectId, period_end: periodEnd }).sort((a, b) => (b.version || 1) - (a.version || 1));
+    return all.find((s) => ['Approved', 'Reported'].includes(s.status)) || all.find((s) => s.status === 'Submitted') || all[0] || null;
   }
 
   // STS-010 submission tracker.
@@ -379,6 +395,6 @@ export function createStatus(app) {
 
   return {
     currentPeriod, cutoff, metrics, suggested, systemData, list, open, save, submit, newVersion, markReported, overrides, tracker, cutoffJob,
-    exceptions, exceptionJob, latestRag, history, engagementHealth, latestFor, isDue, worstRag, RAG_RANK,
+    exceptions, exceptionJob, latestRag, history, engagementHealth, latestFor, forReport, isDue, worstRag, RAG_RANK,
   };
 }

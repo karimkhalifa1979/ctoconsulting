@@ -19,7 +19,7 @@ export default function GenerateReport() {
   const [params] = useSearchParams();
   const nav = useNavigate();
   const lookups = useLookups();
-  const engagements = (lookups?.engagements || []).filter((e) => canOn(me, e.id, 'report', 'C'));
+  const engagements = (lookups?.engagements || []).filter((e) => canOn(me, e.id, 'report', 'C') || Object.keys(me.access?.[e.id]?.projects || {}).some((pid) => canOn(me, e.id, 'report', 'C', pid)));
   const [f, setF] = useState({
     engagement_id: params.get('engagement') || '', report_type: 'Weekly status', audience: 'client', scope: params.get('project') ? [params.get('project')] : 'all',
     period_end: weekEnding(todayIn(me.settings.firm?.timezone || 'Australia/Sydney'), me.settings.reporting?.weekEndDow ?? 5), template_id: '', pair: false, internal_template_id: '', formats: ['docx', 'pdf'], narrative: {},
@@ -40,7 +40,11 @@ export default function GenerateReport() {
     set('internal_template_id', internal[0]?.id || '');
   }, [templates.data, f.report_type, f.audience, eng.data]); // eslint-disable-line react-hooks/exhaustive-deps
   const tpl = options.find((t) => t.id === f.template_id);
-  const active = (projects.data || []).filter((p) => ['In delivery', 'Stage boundary', 'Initiation', 'Closing'].includes(p.state));
+  // A project manager reports on their own projects, one at a time.
+  const engWide = f.engagement_id ? canOn(me, f.engagement_id, 'report', 'C') : true;
+  const mine = Object.keys(me.access?.[f.engagement_id]?.projects || {}).filter((pid) => canOn(me, f.engagement_id, 'report', 'C', pid));
+  const active = (projects.data || []).filter((p) => ['In delivery', 'Stage boundary', 'Initiation', 'Closing'].includes(p.state) && (engWide || mine.includes(p.id)));
+  useEffect(() => { if (!engWide && f.scope === 'all' && active[0]) set('scope', [active[0].id]); }, [engWide, active.length]); // eslint-disable-line react-hooks/exhaustive-deps
   const [ready, setReady] = useState(null);
   const [run, busy] = useAction();
   useEffect(() => setReady(null), [f.engagement_id, f.scope, f.period_end, f.template_id, f.audience, f.report_type]);
@@ -55,7 +59,7 @@ export default function GenerateReport() {
     if (!out.generated) { setReady(out.readiness); return; }
     nav(`/reports/${out.report.id}`);
   };
-  const projectLevel = tpl?.level === 'project';
+  const projectLevel = tpl?.level === 'project' || !engWide;
   return (
     <>
       <PageHead title="Generate a report" crumbs={<><Link to="/reports">Reports</Link><span>›</span></>}

@@ -5,7 +5,7 @@ import { useProject } from './Project.jsx';
 import { Card, Tile, Rag, Status, Empty, Alert, Table, D, Badge } from '../../components/ui.jsx';
 import { LineChart, RagStrip, RiskHeat, BarChart, useFinSeries, monthLabel } from '../../components/charts.jsx';
 import { DIMENSIONS } from '../../../shared/rag.js';
-import { fmtMoneyShort, fmtPct, fmtDate } from '../../../shared/format.js';
+import { fmtMoneyShort, fmtPct, fmtDate, fmtDatePattern } from '../../../shared/format.js';
 import { todayIn, monthOf } from '../../../shared/dates.js';
 import { useSession } from '../../lib/session.jsx';
 
@@ -98,7 +98,7 @@ function RiskTrend({ rows = [] }) {
   return (
     <div className="mt-3">
       <h4 className="mb-1">Open risks by level, last 12 weeks</h4>
-      <BarChart stacked height={150} format={(v) => String(Math.round(v))} categories={rows.map((r) => r.week)} labelX={(w) => fmtDate(w).slice(0, 6)} series={[
+      <BarChart stacked height={150} format={(v) => String(Math.round(v))} categories={rows.map((r) => r.week)} labelX={(w) => fmtDatePattern(w, 'd MMM')} series={[
         // Ordinal levels: one hue, light to dark.
         { name: 'Low', color: '#c6dbf3', values: rows.map((r) => r.Low) },
         { name: 'Medium', color: '#7fb0e8', values: rows.map((r) => r.Medium) },

@@ -352,7 +352,7 @@ export const ENTITIES = {
       f('client_feedback', 'Client feedback', 'textarea', { help: 'QLT-007' }),
       f('client_visible', 'Client-visible', 'bool', { default: true }),
     ],
-    clientFields: ['ref', 'title', 'description', 'planned_date', 'baseline_date', 'forecast_date', 'actual_date', 'status', 'version', 'acceptance_criteria', 'client_approver_id', 'review_due', 'decision_comments', 'client_feedback'],
+    clientFields: ['ref', 'title', 'description', 'planned_date', 'baseline_date', 'forecast_date', 'actual_date', 'status', 'version', 'acceptance_criteria', 'client_approver_id', 'submitted_at', 'review_due', 'decision_comments', 'client_feedback'],
     clientFlag: 'client_visible',
   },
 
@@ -696,6 +696,7 @@ export const ENTITIES = {
       f('employment_type', 'Employment type', 'enum', { options: ['Employee', 'Contractor', 'Subcontractor'], default: 'Employee', list: true, filter: true }),
       f('standard_hours', 'Standard hours per week', 'number', { default: 37.5 }),
       f('fte', 'FTE', 'number', { default: 1 }),
+      f('delivery', 'Delivery capacity', 'bool', { default: true, help: 'Counts in capacity, utilisation and resource matching; untick for Firm operations roles such as finance or PMO (RES-004)' }),
       f('available_from', 'Available from', 'date'),
       f('available_to', 'Available to', 'date'),
       f('skills', 'Skills and proficiency', 'skills', { list: true }),

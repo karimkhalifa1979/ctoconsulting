@@ -47,7 +47,7 @@ export function createResources(app) {
     if (ctx.access.isExternal) throw forbidden();
     const start = weekStart(from);
     const weekStarts = Array.from({ length: Number(weeks) }, (_, i) => addDays(start, i * 7));
-    const people = repos.person.find({}).filter((p) => p.active !== false && (!practice || p.practice === practice) && (!grade || p.grade === grade));
+    const people = repos.person.find({}).filter((p) => p.active !== false && p.delivery !== false && (!practice || p.practice === practice) && (!grade || p.grade === grade));
     const allocs = repos.allocation.find({});
     const leave = repos.leave.find({});
     const rows = people.map((p) => {
@@ -85,7 +85,7 @@ export function createResources(app) {
   // RES-006: planned (allocations) and actual (approved time) utilisation, billable and non-billable.
   function utilisation(ctx, { from = addDays(today(), -84), to = addDays(weekStart(today()), -1), group = 'person' } = {}) {
     if (ctx.access.isExternal) throw forbidden();
-    const people = repos.person.find({}).filter((p) => p.active !== false);
+    const people = repos.person.find({}).filter((p) => p.active !== false && p.delivery !== false);
     const entries = repos.time_entries.find({ status: 'Approved' }).filter((t) => t.date >= from && t.date <= to);
     const allocs = repos.allocation.find({});
     const leave = repos.leave.find({});
@@ -120,7 +120,7 @@ export function createResources(app) {
     const leave = repos.leave.find({});
     const allocs = repos.allocation.find({});
     const costs = ctx.access.canGlobal('costrates.read');
-    return repos.person.find({}).filter((p) => p.active !== false).map((p) => {
+    return repos.person.find({}).filter((p) => p.active !== false && p.delivery !== false).map((p) => {
       const skills = (p.skills || []).map((s) => String(s.name).toLowerCase());
       const skillHits = wanted.filter((w) => skills.some((s) => s.includes(w) || w.includes(s)));
       const clearance = (p.clearances || []).filter((c) => !c.expiry || c.expiry >= r.end_date).map((c) => clearanceRank[c.level] || 0).sort().at(-1) || 0;

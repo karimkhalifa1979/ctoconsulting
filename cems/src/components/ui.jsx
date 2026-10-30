@@ -1,5 +1,5 @@
 // UI primitives used across the client.
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, useId, isValidElement, cloneElement } from 'react';
 import { NavLink } from 'react-router-dom';
 import Icon from './Icon.jsx';
 import { fmtDate, fmtDateTime, fmtMoney, fmtMoneyShort, fmtPct, fmtNum } from '../../shared/format.js';
@@ -169,8 +169,9 @@ export function Seg({ options, value, onChange }) {
 
 // ---------- Table ----------
 // columns: [{ key, label, render(row), sort (key or fn), className, num }]
-export function Table({ columns, rows, onRow, empty = 'No records.', rowKey = 'id', initialSort, compact, rowClass, selectable, selected, onSelect, foot }) {
+export function Table({ columns, rows, onRow, empty = 'No records.', rowKey = 'id', initialSort, compact, rowClass, selectable, selected, onSelect, foot, pageSize = 100 }) {
   const [sort, setSort] = useState(initialSort || null);
+  const [limit, setLimit] = useState(pageSize);
   const sorted = useMemo(() => {
     if (!sort) return rows;
     const col = columns.find((c) => c.key === sort.key);
@@ -195,7 +196,7 @@ export function Table({ columns, rows, onRow, empty = 'No records.', rowKey = 'i
           </tr>
         </thead>
         <tbody>
-          {sorted.map((r, i) => (
+          {sorted.slice(0, limit).map((r, i) => (
             <tr key={r[rowKey] ?? i} className={`${onRow ? 'clickable' : ''} ${selected?.has(r[rowKey]) ? 'selected' : ''} ${rowClass ? rowClass(r) : ''}`} onClick={onRow ? () => onRow(r) : undefined}>
               {selectable && (
                 <td className="cb" onClick={(e) => e.stopPropagation()}>
@@ -208,6 +209,13 @@ export function Table({ columns, rows, onRow, empty = 'No records.', rowKey = 'i
         </tbody>
         {foot && <tfoot><tr>{selectable && <td />}{foot}</tr></tfoot>}
       </table>
+      {sorted.length > limit && (
+        <div className="table-more">
+          <span className="small muted">Showing {limit} of {sorted.length}</span>
+          <button className="btn btn-sm" onClick={() => setLimit(limit + pageSize)}>Show {Math.min(pageSize, sorted.length - limit)} more</button>
+          <button className="btn btn-sm btn-ghost" onClick={() => setLimit(sorted.length)}>Show all</button>
+        </div>
+      )}
     </div>
   );
 }
@@ -262,6 +270,7 @@ export function DialogProvider({ children }) {
   const [dlg, setDlg] = useState(null);
   const [text, setText] = useState('');
   const resolver = useRef(null);
+  const inputId = useId();
   const open = useCallback((opts) => new Promise((resolve) => { resolver.current = resolve; setText(opts.initial || ''); setDlg(opts); }), []);
   const close = (v) => { resolver.current?.(v); setDlg(null); };
   return (
@@ -277,8 +286,8 @@ export function DialogProvider({ children }) {
           {dlg.message && <div className="mb-2">{dlg.message}</div>}
           {dlg.input && (
             <div className="field">
-              <label>{dlg.label || 'Reason'} {dlg.required && <span className="req">*</span>}</label>
-              {dlg.input === 'line' ? <input type="text" autoFocus value={text} onChange={(e) => setText(e.target.value)} /> : <textarea autoFocus value={text} onChange={(e) => setText(e.target.value)} rows={3} />}
+              <label htmlFor={inputId}>{dlg.label || 'Reason'} {dlg.required && <span className="req">*</span>}</label>
+              {dlg.input === 'line' ? <input id={inputId} type="text" autoFocus value={text} onChange={(e) => setText(e.target.value)} /> : <textarea id={inputId} autoFocus value={text} onChange={(e) => setText(e.target.value)} rows={3} />}
             </div>
           )}
         </Modal>
@@ -332,11 +341,17 @@ export function useAction() {
   return [run, busy];
 }
 
+// A labelled form row. A single native input, select or textarea child is linked to the label
+// (WCAG 1.3.1 / 4.1.2); other children keep their own accessible names.
 export function Field({ label, required, hint, error, children, full, className = '' }) {
+  const auto = useId();
+  const native = isValidElement(children) && ['input', 'select', 'textarea'].includes(children.type);
+  const id = native ? children.props.id || auto : undefined;
+  const control = native && !children.props.id ? cloneElement(children, { id, 'aria-invalid': error ? true : undefined }) : children;
   return (
     <div className={`field${error ? ' invalid' : ''}${full ? ' full' : ''} ${className}`}>
-      {label && <label>{label}{required && <span className="req">*</span>}</label>}
-      {children}
+      {label && <label htmlFor={id}>{label}{required && <span className="req">*</span>}</label>}
+      {control}
       {hint && !error && <span className="hint">{hint}</span>}
       {error && <span className="err">{error}</span>}
     </div>

@@ -174,11 +174,11 @@ function Week({ ws, today, setWeek }) {
       {future && <Alert tone="info">Time cannot be recorded for future weeks (BR-08).</Alert>}
       <Card flush>
         <div className="table-wrap">
-          <table className="table ts-table">
+          <table className="table ts-table va-middle">
             <thead>
               <tr>
                 <th>Project and task</th>
-                {dates.map((d, i) => <th key={d} className={`num ${d === today ? 'today' : ''}`}>{DAYS[i]}<div className="tiny muted">{d.slice(8)}/{d.slice(5, 7)}</div></th>)}
+                {dates.map((d, i) => <th key={d} className={`day ${i > 4 ? 'weekend' : ''} ${d === today ? 'today' : ''}`}>{DAYS[i]}<div className="tiny muted">{d.slice(8)}/{d.slice(5, 7)}</div></th>)}
                 <th className="num">Total</th>
               </tr>
             </thead>
@@ -196,12 +196,12 @@ function Week({ ws, today, setWeek }) {
                       {m.errors.map((x) => <div key={x} className="tiny flag">{x}</div>)}
                       {m.warnings.map((x) => <div key={x} className="tiny" style={{ color: '#8a5d00' }}>{x}</div>)}
                     </td>
-                    {dates.map((d) => {
+                    {dates.map((d, i) => {
                       const c = r.cells[d];
-                      if (locked(c)) return <td key={d} className="num"><span className={`ts-locked ${c.status}`} title={c.status}>{fmtNum(c.hours, 2)}</span></td>;
+                      if (locked(c)) return <td key={d} className={`day ${i > 4 ? 'weekend' : ''}`}><span className={`ts-locked ${c.status}`} title={c.status}>{fmtNum(c.hours, 2)}</span></td>;
                       return (
-                        <td key={d} className="num">
-                          <input type="number" min="0" max="24" step="0.25" className={`num ${c?.status === 'Rejected' ? 'invalid' : ''}`} value={c?.hours ?? ''} disabled={future || d > addDays(weekStart(today), 6)} title={c?.status === 'Rejected' ? `Rejected: ${c.comment || ''}` : ''}
+                        <td key={d} className={`day ${i > 4 ? 'weekend' : ''}`}>
+                          <input type="number" min="0" max="24" step="0.25" className={c?.status === 'Rejected' ? 'invalid' : ''} value={c?.hours ?? ''} disabled={future || d > addDays(weekStart(today), 6)} title={c?.status === 'Rejected' ? `Rejected: ${c.comment || ''}` : ''}
                             onChange={(e) => setCell(r, d, e.target.value)} aria-label={`${l.title} ${d}`} />
                         </td>
                       );
@@ -214,7 +214,7 @@ function Week({ ws, today, setWeek }) {
             <tfoot>
               <tr>
                 <td className="strong">Total <span className="tiny muted">(standard {std} h)</span></td>
-                {dates.map((d) => <td key={d} className={`num ${dayTotal(d) > (me.settings.timesheets?.dailyMaxHours || 12) ? 'neg' : ''}`}>{fmtNum(dayTotal(d), 2)}</td>)}
+                {dates.map((d, i) => <td key={d} className={`day ${i > 4 ? 'weekend' : ''} ${dayTotal(d) > (me.settings.timesheets?.dailyMaxHours || 12) ? 'neg' : ''}`}>{fmtNum(dayTotal(d), 2)}</td>)}
                 <td className="num strong">{fmtNum(total, 2)}</td>
               </tr>
             </tfoot>
@@ -224,7 +224,7 @@ function Week({ ws, today, setWeek }) {
       <div className="legend">
         <span><span className="ts-locked Submitted">8</span> Submitted</span>
         <span><span className="ts-locked Approved">8</span> Approved (locked)</span>
-        <span><input type="number" className="num invalid" value="8" readOnly style={{ width: 40 }} tabIndex={-1} aria-hidden="true" /> Rejected — correct and resubmit</span>
+        <span><span className="ts-locked Rejected">8</span> Rejected — correct and resubmit</span>
       </div>
       {adding && <AddRow codes={codes} nonProject={data.nonProject} onClose={() => setAdding(false)} onAdd={(r) => {
         if (rows.some((x) => x.key === r.key)) { toast('That row is already on the timesheet'); return; }

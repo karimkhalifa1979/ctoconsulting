@@ -21,7 +21,7 @@ export function createReportContext(app) {
   function readiness({ engagementId, projectIds, periodEnd, templateTokens = [], narrative = {} }) {
     const checks = [];
     const projects = projectIds.map((id) => repos.project.get(id)).filter(Boolean);
-    const updates = projects.map((p) => ({ p, su: status.latestFor(p.id, periodEnd) }));
+    const updates = projects.map((p) => ({ p, su: status.forReport(p.id, periodEnd) }));
     const notApproved = updates.filter(({ su }) => !su || !['Approved', 'Reported'].includes(su.status));
     checks.push({
       key: 'status', label: 'Status updates submitted and approved', ok: !notApproved.length,
@@ -91,7 +91,7 @@ export function createReportContext(app) {
   function projectContext(p, { periodEnd, periodStart, lookaheadEnd, costs }) {
     const plan = schedule.plan(p.id);
     const pos = finance.position(p.id);
-    const su = status.latestFor(p.id, periodEnd);
+    const su = status.forReport(p.id, periodEnd);
     const projectNames = new Map([[p.id, p.name]]);
     const next = plan.milestones.find((m) => !m.actual_date);
     const ratings = su?.ratings || {};

@@ -5,7 +5,7 @@ import { useSearchParams } from 'react-router-dom';
 import { ENTITIES } from '../../shared/schema.js';
 import { api, get, post, patch, del, download } from '../lib/api.js';
 import { useApi } from '../lib/hooks.js';
-import { useSession } from '../lib/session.jsx';
+import { useSession, canOn } from '../lib/session.jsx';
 import { FieldInput, FieldValue, isVisible, useLookups, useFieldGroups, clearLookups } from './fields.jsx';
 import { Drawer, Table, Tabs, Empty, ErrorBox, Loading, useAction, useDialog, Status, DT, Badge, Level, Field } from './ui.jsx';
 import Icon from './Icon.jsx';
@@ -380,7 +380,7 @@ export function Register({ entity, scope = {}, defaults = {}, title, sub, column
   for (const [k, v] of Object.entries(filters)) if (v) rows = rows.filter((r) => String(r[k] ?? '') === v);
   if (rowFilter) rows = rows.filter(rowFilter);
 
-  const canWrite = canCreate && !me?.user?.external && (scope.engagement_id ? (me.access?.[scope.engagement_id]?.fns?.[d.fn] || []).some((x) => x.startsWith('C')) : true);
+  const canWrite = canCreate && !me?.user?.external && (scope.engagement_id ? canOn(me, scope.engagement_id, d.fn, 'C', scope.project_id) : true);
   const close = () => { setDrawer(null); if (params.get('open')) { params.delete('open'); params.delete('entity'); setParams(params, { replace: true }); } };
   const exportQ = { ...scope, ...query };
   return (
@@ -421,7 +421,7 @@ export function Register({ entity, scope = {}, defaults = {}, title, sub, column
 function defaultColumns(d, lookups) {
   const listFields = d.fields.filter((f) => f.list && f.key !== 'project_id').slice(0, 8);
   return [
-    ...listFields.map((f) => ({ key: f.key, label: f.label, num: ['money', 'number', 'int', 'percent'].includes(f.type), render: (r) => <FieldValue field={f} value={r[f.key]} rec={r} lookups={lookups} /> })),
+    ...listFields.map((f) => ({ key: f.key, label: f.label, num: ['money', 'number', 'int', 'percent'].includes(f.type), render: (r) => (f.key === 'status' && f.type === 'text' ? <Status v={r.status} /> : <FieldValue field={f} value={r[f.key]} rec={r} lookups={lookups} />) })),
     { key: '_flags', label: '', sort: false, render: (r) => <RecordFlags rec={{ ...r, client_visible: false, reportable: false }} /> },
   ];
 }

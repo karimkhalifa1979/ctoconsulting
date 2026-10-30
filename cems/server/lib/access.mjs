@@ -145,15 +145,21 @@ export class AccessContext {
   }
 
   // Engagement roles summary for the client UI.
+  // Memberships limited to some projects add per-project grants under `projects`.
   summary() {
     const roles = {};
-    for (const id of this.visibleEngagementIds()) {
+    const fnsOf = (g) => {
       const fns = {};
-      for (const [fn, grants] of Object.entries(this.grants(id))) {
+      for (const [fn, grants] of Object.entries(g)) {
         const acts = ACTIONS.filter((a) => a in grants).map((a) => (grants[a] ? `${a}:${grants[a]}` : a));
         if (acts.length) fns[fn] = acts;
       }
-      roles[id] = { roles: this.rolesOn(id), costs: this.canSeeCosts(id), fns };
+      return fns;
+    };
+    for (const id of this.visibleEngagementIds()) {
+      const projects = {};
+      for (const m of this.byEng.get(id) || []) for (const pid of m.project_ids || []) projects[pid] ||= fnsOf(this.grants(id, pid));
+      roles[id] = { roles: this.rolesOn(id), costs: this.canSeeCosts(id), fns: fnsOf(this.grants(id)), projects };
     }
     return roles;
   }

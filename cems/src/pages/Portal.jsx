@@ -9,6 +9,7 @@ import { ApprovalCard } from '../components/Record.jsx';
 import { reportFile } from '../components/Reports.jsx';
 import { Card, Async, Table, Status, D, DT, Empty, Badge, Alert, useAction, useDialog } from '../components/ui.jsx';
 import Icon from '../components/Icon.jsx';
+import { todayIn } from '../../shared/dates.js';
 
 export default function Portal() {
   const { me, signOut } = useSession();
@@ -32,6 +33,8 @@ export default function Portal() {
 }
 
 function Home() {
+  const { me } = useSession();
+  const today = todayIn(me.settings.firm?.timezone || 'Australia/Sydney');
   const q = useApi('/api/portal');
   const approvals = useApi('/api/approvals');
   const [run, busy] = useAction();
@@ -56,7 +59,8 @@ function Home() {
             <Table rows={d.awaitingAcceptance} columns={[
               { key: 'title', label: 'Deliverable', render: (x) => <span><span className="strong">{x.ref} {x.title}</span><div className="tiny muted">{x.engagement}</div></span> },
               { key: 'version', label: 'Version' },
-              { key: 'submitted_date', label: 'Submitted', render: (x) => <D v={x.submitted_date} /> },
+              { key: 'submitted_at', label: 'Submitted', render: (x) => <D v={x.submitted_at} /> },
+              { key: 'review_due', label: 'Review due', render: (x) => <D v={x.review_due} /> },
               { key: 'acceptance_criteria', label: 'Acceptance criteria', render: (x) => <span className="small">{x.acceptance_criteria}</span> },
               { key: 'x', label: '', sort: false, render: (x) => <span className="flex"><button className="btn btn-xs btn-danger" disabled={busy} onClick={() => decide(x, 'reject')}>Reject</button><button className="btn btn-xs btn-primary" disabled={busy} onClick={() => decide(x, 'accept')}>Accept</button></span> },
             ]} />
@@ -76,7 +80,7 @@ function Home() {
           <Table rows={d.actions} empty="No open actions." columns={[
             { key: 'title', label: 'Action', render: (a) => <span>{a.ref} {a.title}<div className="tiny muted">{a.engagement}</div></span> },
             { key: 'owner_name', label: 'Owner' },
-            { key: 'due_date', label: 'Due', render: (a) => <span className={a.overdue ? 'neg' : ''}><D v={a.due_date} /></span> },
+            { key: 'due_date', label: 'Due', render: (a) => <span className={a.due_date && a.due_date < today ? 'neg' : ''}><D v={a.due_date} />{a.due_date && a.due_date < today ? ' (overdue)' : ''}</span> },
             { key: 'status', label: 'Status', render: (a) => <Status v={a.status} /> },
           ]} />
         </Card>

@@ -25,15 +25,16 @@ export default function StatusUpdates() {
   const { id, d, can, reload: reloadProject } = useProject();
   const list = useApi(`/api/projects/${id}/status`);
   const [sel, setSel] = useState(null);
+  const [nonce, setNonce] = useState(0);
   const [run, busy] = useAction();
   const updates = list.data || [];
   const current = sel || updates[0]?.id || null;
   const start = async () => {
     const su = await run(() => post(`/api/projects/${id}/status/open`), 'Update opened with last week’s narrative carried forward');
-    if (su) { await list.reload(); setSel(su.id); }
+    if (su) { await list.reload(); setSel(su.id); setNonce((n) => n + 1); }
   };
   return (
-    <div className="split-r">
+    <div className="split-nav">
       <div className="stack">
         <Card title="Updates" flush actions={can('status', 'C') && <button className="btn btn-sm btn-primary" disabled={busy} onClick={start}><Icon name="plus" /> This week</button>}>
           {list.loading && !list.data ? <Loading /> : !updates.length ? <Empty>No updates yet.</Empty> : (
@@ -58,7 +59,7 @@ export default function StatusUpdates() {
         )}
       </div>
       <div>
-        {current ? <Editor key={current} id={current} onChanged={() => { list.reload(); reloadProject(); }} onSwitch={setSel} /> : <Card><Empty>Start this week’s update, or choose one from the list.</Empty></Card>}
+        {current ? <Editor key={`${current}:${nonce}`} id={current} onChanged={() => { list.reload(); reloadProject(); }} onSwitch={setSel} /> : <Card><Empty>Start this week’s update, or choose one from the list.</Empty></Card>}
       </div>
     </div>
   );
@@ -79,7 +80,7 @@ function Editor({ id, onChanged, onSwitch }) {
   const setRating = (k, patchObj) => { setSu({ ...su, ratings: { ...su.ratings, [k]: { ...su.ratings?.[k], ...patchObj } } }); setDirty(true); };
   const setField = (k, v) => { setSu({ ...su, [k]: v }); setDirty(true); };
   const save = async (quiet) => {
-    const body = { rev: su.rev, ratings: su.ratings, ...Object.fromEntries(NARRATIVE.map(([k]) => [k, su[k] || ''])) };
+    const body = { content_rev: su.content_rev || 0, ratings: su.ratings, ...Object.fromEntries(NARRATIVE.map(([k]) => [k, su[k] || ''])) };
     const out = await run(() => patch(`/api/status/${id}`, body), quiet ? null : 'Draft saved');
     if (out) { setDirty(false); q.reload(); }
     return out;
@@ -113,6 +114,7 @@ function Editor({ id, onChanged, onSwitch }) {
         </>}>
         {su.status === 'Returned' && su.review_comment && <Alert tone="warn"><b>Returned by the reviewer:</b> {su.review_comment}</Alert>}
         {su.late && <Alert tone="warn">Submitted after the cut-off.</Alert>}
+        {su.reported_unapproved && su.status !== 'Reported' && <Alert tone="info">This update was used in an issued report before it was approved (the report recorded the readiness warning). Submit it for review as usual.</Alert>}
         {su.overrides?.length > 0 && !editable && (
           <Alert tone="info"><b>Ratings better than calculated (BR-06):</b> {su.overrides.map((o) => `${o.dimension} ${o.chosen} vs ${o.calculated} — ${o.justification}`).join('; ')}</Alert>
         )}
@@ -215,7 +217,7 @@ function SystemData({ sd, costs }) {
           {!sd.raid_changes?.length ? <p className="small muted">No changes.</p> : (
             <Table compact rows={sd.raid_changes.map((x, i) => ({ ...x, id: i }))} columns={[
               { key: 'change', label: '', render: (x) => <Badge tone={x.change === 'New' ? 'teal' : x.change === 'Closed' ? 'green' : 'grey'}>{x.change}</Badge> },
-              { key: 'ref', label: 'ID' }, { key: 'title', label: 'Title' },
+              { key: 'ref', label: 'ID', render: (x) => <span className="nowrap">{x.ref}</span> }, { key: 'title', label: 'Title' },
             ]} />
           )}
           {(sd.changes_raised?.length > 0 || sd.changes_approved?.length > 0) && (

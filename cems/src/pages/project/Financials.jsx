@@ -9,7 +9,7 @@ import { Register } from '../../components/Record.jsx';
 import Invoices from '../../components/Invoices.jsx';
 import { Async, Card, Tile, Table, Money, Pct, Status, Badge, D, Alert, Empty, Seg, Field, useAction, useDialog, useToast } from '../../components/ui.jsx';
 import { LineChart, SERIES, monthLabel, useFinSeries } from '../../components/charts.jsx';
-import { fmtMoneyShort, fmtMoney, fmtPct, fmtDate, fmtNum } from '../../../shared/format.js';
+import { fmtMoneyShort, fmtMoney, fmtPct, fmtDate, fmtNum, fmtDatePattern } from '../../../shared/format.js';
 import { todayIn, monthOf, monthsBetween } from '../../../shared/dates.js';
 import Icon from '../../components/Icon.jsx';
 
@@ -116,7 +116,7 @@ function Evm({ f }) {
       </Card>
       <Card title="SPI and CPI trend" sub="Weekly, from the forecast refresh (FIN-028).">
         {hist.length < 2 ? <Empty>The trend appears after two weekly refreshes.</Empty> : (
-          <LineChart height={220} categories={hist.map((h) => h.date)} labelX={(d) => fmtDate(d).slice(0, 6)} format={(v) => v.toFixed(2)} series={[
+          <LineChart height={220} categories={hist.map((h) => h.date)} labelX={(d) => fmtDatePattern(d, 'd MMM')} format={(v) => v.toFixed(2)} series={[
             { name: 'SPI', color: SERIES[0], values: hist.map((h) => h.spi) },
             { name: 'CPI', color: SERIES[1], values: hist.map((h) => h.cpi) },
           ]} />
@@ -346,7 +346,7 @@ function LabourGrid({ v, editable, onChange, costs }) {
     <Card title="Labour forecast (FIN-018)" sub={`Hours by person and month from allocations; edited cells override them. ${costs ? `Forecast labour cost ${fmtMoneyShort(cost)}.` : ''}`} flush
       actions={editable && <button className="btn btn-sm" onClick={addRole}><Icon name="plus" /> Add role</button>}>
       <div className="table-wrap">
-        <table className="table compact">
+        <table className="table compact va-middle">
           <thead><tr><th>Person or role</th>{months.map((m) => <th key={m} className="num">{monthLabel(m)}</th>)}<th className="num">Total</th></tr></thead>
           <tbody>
             {keys.map((row) => {

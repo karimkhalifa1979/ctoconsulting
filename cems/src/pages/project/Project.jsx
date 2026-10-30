@@ -42,7 +42,7 @@ function Workspace({ d, me, reload, id }) {
   const p = d.project;
   const engId = p.engagement_id;
   const lookups = useLookups({ engagementId: engId });
-  const can = (fn, act = 'R') => canOn(me, engId, fn, act);
+  const can = (fn, act = 'R') => canOn(me, engId, fn, act, id);
   const value = { id, d, p, engId, can, costs: costsOn(me, engId), roles: rolesOn(me, engId), reload, lookups };
   const base = `/projects/${id}`;
   return (

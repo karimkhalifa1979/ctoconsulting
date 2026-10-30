@@ -1,13 +1,30 @@
 // SVG charts: line (with crosshair), bars, risk heat map, RAG strip, Gantt and sparkline.
 // Categorical slots follow the validated order blue, orange, aqua, violet; status colours are kept
 // for RAG and always carry a letter or label.
-import { useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { fmtMoneyShort, fmtDate } from '../../shared/format.js';
 import { addDays, diffDays, monthOf, addMonths } from '../../shared/dates.js';
 
 export const SERIES = ['#2a78d6', '#eb6834', '#1baf7a', '#6250d6', '#64748b'];
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 export const monthLabel = (m) => `${MONTHS[Number(m.slice(5, 7)) - 1]} ${m.slice(2, 4)}`;
+
+// Width of the chart's container, so the SVG is drawn at its real size and text never scales.
+function useWidth(initial = 640) {
+  const ref = useRef(null);
+  const [w, setW] = useState(initial);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const measure = () => { const cw = Math.round(el.getBoundingClientRect().width); if (cw > 0) setW(cw); };
+    measure();
+    if (typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return [ref, w];
+}
 
 function niceTicks(max, count = 4) {
   if (!(max > 0)) return [0, 1];
@@ -47,14 +64,15 @@ export function Legend({ series, box }) {
 // series: [{ name, color, dashed, values: [number|null] }] over categories (x labels).
 export function LineChart({ categories, series, height = 220, format = fmtMoneyShort, labelX = (x) => x, markX }) {
   const ref = useRef(null);
+  const [wrap, W] = useWidth();
   const [tip, setTip] = useState(null);
-  const W = 640, H = height, pad = { l: 52, r: 14, t: 10, b: 26 };
+  const H = height, pad = { l: 52, r: 22, t: 10, b: 26 };
   const max = Math.max(1, ...series.flatMap((s) => s.values.filter((v) => v != null)));
   const ticks = niceTicks(max);
   const top = ticks.at(-1);
   const x = (i) => pad.l + (categories.length <= 1 ? 0 : (i * (W - pad.l - pad.r)) / (categories.length - 1));
   const y = (v) => pad.t + (H - pad.t - pad.b) * (1 - v / top);
-  const every = Math.ceil(categories.length / 8);
+  const every = Math.ceil(categories.length / Math.max(2, Math.floor((W - pad.l) / 70)));
   const onMove = (e) => {
     const box = ref.current.getBoundingClientRect();
     const px = ((e.clientX - box.left) / box.width) * W;
@@ -62,11 +80,11 @@ export function LineChart({ categories, series, height = 220, format = fmtMoneyS
     setTip({ i, x: (x(i) / W) * box.width, y: e.clientY - box.top, flip: x(i) > W * 0.6, title: labelX(categories[i]), rows: series.filter((s) => s.values[i] != null).map((s) => ({ name: s.name, color: s.color, dashed: s.dashed, value: format(s.values[i]) })) });
   };
   return (
-    <div style={{ position: 'relative' }}>
-      <svg ref={ref} className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={series.map((s) => s.name).join(', ')} onPointerMove={onMove} onPointerLeave={() => setTip(null)}>
+    <div ref={wrap} style={{ position: 'relative' }}>
+      <svg ref={ref} className="chart" width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={series.map((s) => s.name).join(', ')} onPointerMove={onMove} onPointerLeave={() => setTip(null)}>
         <g className="grid">{ticks.map((t) => <line key={t} x1={pad.l} x2={W - pad.r} y1={y(t)} y2={y(t)} />)}</g>
         {ticks.map((t) => <text key={t} x={pad.l - 6} y={y(t) + 4} textAnchor="end">{format(t)}</text>)}
-        {categories.map((c, i) => (i % every === 0 ? <text key={c} x={x(i)} y={H - 8} textAnchor="middle">{labelX(c)}</text> : null))}
+        {categories.map((c, i) => (i % every === 0 ? <text key={c} x={x(i)} y={H - 8} textAnchor={i === 0 && categories.length > 1 ? 'start' : i === categories.length - 1 ? 'end' : 'middle'}>{labelX(c)}</text> : null))}
         {markX != null && categories.indexOf(markX) >= 0 && <line x1={x(categories.indexOf(markX))} x2={x(categories.indexOf(markX))} y1={pad.t} y2={H - pad.b} stroke="#0fa3b1" strokeWidth="1" />}
         {series.map((s) => {
           const pts = s.values.map((v, i) => (v == null ? null : [x(i), y(v)]));
@@ -88,8 +106,9 @@ export function LineChart({ categories, series, height = 220, format = fmtMoneyS
 // Grouped or stacked columns: series: [{ name, color, values }].
 export function BarChart({ categories, series, height = 220, format = fmtMoneyShort, stacked, labelX = (x) => x }) {
   const ref = useRef(null);
+  const [wrap, W] = useWidth();
   const [tip, setTip] = useState(null);
-  const W = 640, H = height, pad = { l: 52, r: 10, t: 10, b: 26 };
+  const H = height, pad = { l: 52, r: 10, t: 10, b: 26 };
   const totals = categories.map((_, i) => (stacked ? series.reduce((a, s) => a + Math.max(0, s.values[i] || 0), 0) : Math.max(0, ...series.map((s) => s.values[i] || 0))));
   const ticks = niceTicks(Math.max(1, ...totals));
   const top = ticks.at(-1);
@@ -97,14 +116,14 @@ export function BarChart({ categories, series, height = 220, format = fmtMoneySh
   const groupW = Math.min(stacked ? 24 : 24 * series.length + 2 * (series.length - 1), band * 0.7);
   const barW = stacked ? groupW : (groupW - 2 * (series.length - 1)) / series.length;
   const y = (v) => pad.t + (H - pad.t - pad.b) * (1 - v / top);
-  const every = Math.ceil(categories.length / 10);
+  const every = Math.ceil(categories.length / Math.max(2, Math.floor((W - pad.l) / 64)));
   const show = (e, i) => {
     const box = ref.current.getBoundingClientRect();
     setTip({ x: e.clientX - box.left, y: e.clientY - box.top, flip: e.clientX - box.left > box.width * 0.6, title: labelX(categories[i]), rows: series.map((s) => ({ name: s.name, color: s.color, value: format(s.values[i] || 0) })) });
   };
   return (
-    <div style={{ position: 'relative' }}>
-      <svg ref={ref} className="chart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={series.map((s) => s.name).join(', ')} onPointerLeave={() => setTip(null)}>
+    <div ref={wrap} style={{ position: 'relative' }}>
+      <svg ref={ref} className="chart" width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={series.map((s) => s.name).join(', ')} onPointerLeave={() => setTip(null)}>
         <g className="grid">{ticks.map((t) => <line key={t} x1={pad.l} x2={W - pad.r} y1={y(t)} y2={y(t)} />)}</g>
         {ticks.map((t) => <text key={t} x={pad.l - 6} y={y(t) + 4} textAnchor="end">{format(t)}</text>)}
         {categories.map((c, i) => {

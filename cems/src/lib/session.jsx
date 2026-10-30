@@ -33,11 +33,17 @@ export function SessionProvider({ children }) {
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 }
 
-// Engagement-level permission check from the access summary returned by /api/me.
-export function canOn(me, engagementId, fn, action = 'R') {
+// Permission check from the access summary returned by /api/me. With a project, grants from a
+// membership limited to that project apply (a project manager's own projects).
+const has = (list, action) => (list || []).some((x) => x === action || x.startsWith(`${action}:`));
+export function canOn(me, engagementId, fn, action = 'R', projectId = null) {
   const a = me?.access?.[engagementId];
   if (!a) return false;
-  return (a.fns[fn] || []).some((x) => x === action || x.startsWith(`${action}:`));
+  return has(a.fns[fn], action) || Boolean(projectId && has(a.projects?.[projectId]?.[fn], action));
+}
+// Whether the user holds the grant on any engagement or project (navigation and entry points).
+export function canAnywhere(me, fn, action = 'R') {
+  return Object.values(me?.access || {}).some((a) => has(a.fns[fn], action) || Object.values(a.projects || {}).some((p) => has(p[fn], action)));
 }
 export const rolesOn = (me, engagementId) => me?.access?.[engagementId]?.roles || [];
 export const costsOn = (me, engagementId) => Boolean(me?.access?.[engagementId]?.costs);

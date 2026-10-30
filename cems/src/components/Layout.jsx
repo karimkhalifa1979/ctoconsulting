@@ -1,7 +1,7 @@
 // Application shell: navigation by role, global search, notifications and the user menu.
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useSession } from '../lib/session.jsx';
+import { useSession, canAnywhere } from '../lib/session.jsx';
 import { get, post, patch, del } from '../lib/api.js';
 import { initials } from '../lib/util.js';
 import { ROLE_LABEL } from '../../shared/permissions.js';
@@ -10,7 +10,7 @@ import Icon from './Icon.jsx';
 
 function navFor(me) {
   const c = me.can;
-  const anyFn = (fn, act) => Object.values(me.access || {}).some((a) => (a.fns[fn] || []).some((x) => x.startsWith(act)));
+  const anyFn = (fn, act) => canAnywhere(me, fn, act);
   const anyRole = (r) => Object.values(me.access || {}).some((a) => a.roles.includes(r));
   const sections = [
     { label: null, items: [

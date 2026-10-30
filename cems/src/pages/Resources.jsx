@@ -7,7 +7,7 @@ import { post } from '../lib/api.js';
 import { useSession } from '../lib/session.jsx';
 import { Register } from '../components/Record.jsx';
 import { PageHead, RouteTabs, Card, Async, Table, Badge, D, Seg, Modal, Meter, Empty, Alert, Money, useAction } from '../components/ui.jsx';
-import { fmtPct, fmtDate, fmtNum } from '../../shared/format.js';
+import { fmtPct, fmtDate, fmtNum, fmtDatePattern } from '../../shared/format.js';
 import { addDays, todayIn, weekStart } from '../../shared/dates.js';
 
 export default function Resources() {
@@ -55,7 +55,7 @@ function Capacity() {
           <Card title="Allocated against available hours" sub="Each cell is confirmed plus tentative hours as a share of available hours (after leave and public holidays)." flush>
             <div className="table-wrap">
               <table className="table compact cap-table">
-                <thead><tr><th>{f.group === 'person' ? 'Person' : f.group === 'grade' ? 'Grade' : 'Practice'}</th>{d.weeks.map((w) => <th key={w} className="num">{fmtDate(w).slice(0, 6)}</th>)}</tr></thead>
+                <thead><tr><th>{f.group === 'person' ? 'Person' : f.group === 'grade' ? 'Grade' : 'Practice'}</th>{d.weeks.map((w) => <th key={w} className="num">{fmtDatePattern(w, 'd MMM')}</th>)}</tr></thead>
                 <tbody>
                   {d.rows.map((r) => (
                     <tr key={r.id || r.name}>
@@ -85,7 +85,7 @@ function Capacity() {
               { key: 'project', label: 'Project', render: (x) => <Link to={`/projects/${x.project_id}/resources`}>{x.project}</Link> },
               { key: 'start_date', label: 'From', render: (x) => <D v={x.start_date} /> },
               { key: 'end_date', label: 'To', render: (x) => <D v={x.end_date} /> },
-              ...d.weeks.map((w, i) => ({ key: w, label: fmtDate(w).slice(0, 6), num: true, sort: false, render: (x) => (x.cells[i] ? fmtNum(x.cells[i]) : '') })),
+              ...d.weeks.map((w, i) => ({ key: w, label: fmtDatePattern(w, 'd MMM'), num: true, sort: false, render: (x) => (x.cells[i] ? fmtNum(x.cells[i]) : '') })),
             ]} />
           </Card>
         </>

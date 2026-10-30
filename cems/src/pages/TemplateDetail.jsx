@@ -24,7 +24,7 @@ export default function TemplateDetail() {
             sub={<>{t.report_type} · {t.scope}{t.client ? ` (${t.client})` : ''}{t.engagement ? ` (${t.engagement})` : ''} · {t.level}-level · {t.audience} audience</>}
             actions={<Actions t={t} reload={q.reload} onUploaded={(v) => { setSel(v.id); q.reload(); }} />} />
           <div className="flex mb-2"><Status v={t.status} />{t.cloned_from && <Badge tone="grey">Cloned</Badge>}{t.description && <span className="small muted">{t.description}</span>}</div>
-          <div className="split-r">
+          <div className="split-nav">
             <div className="stack">
               <Card title="Versions" flush>
                 {!t.versions.length ? <Empty>No file uploaded yet.</Empty> : (
