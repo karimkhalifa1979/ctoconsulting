@@ -4,6 +4,7 @@ import { DIMENSIONS, worstRag, RAG_RANK } from '../../shared/rag.js';
 import { RAID_TYPES, ENTITIES } from '../../shared/schema.js';
 import { forbidden, notFound } from '../http.mjs';
 import { now as clockNow } from '../../shared/clock.js';
+import { stripProjectCosts } from './entities.mjs';
 
 const pickFin = (pos, costs) => {
   if (!pos) return null;
@@ -92,7 +93,7 @@ export function createDashboards(app) {
     const pos = finance.position(projectId);
     const risks = entities.list(ctx, 'risk', { engagement_id: p.engagement_id, project_id: projectId });
     return {
-      ...sum, project: p, history: status.history(projectId), plan: schedule.plan(projectId), lookahead: schedule.lookahead(projectId),
+      ...sum, project: costs ? p : stripProjectCosts(p), history: status.history(projectId), plan: schedule.plan(projectId), lookahead: schedule.lookahead(projectId),
       heatmap: heat(risks.filter((r) => r.status === 'Open')), riskTrend: riskTrend(risks), fin: pickFin(pos, costs), evm: costs ? pos.evm : { spi: pos.evm.spi, cpi: pos.evm.cpi, pctComplete: pos.evm.pctComplete },
       costs,
     };

@@ -137,6 +137,7 @@ export function createEntities(app) {
     const costs = costsVisible(ctx, d, rec, 'read');
     if (!costs) for (const fld of d.fields) if (fld.sensitive) delete out[fld.key];
     if (!costs) for (const k of Object.keys(out)) if (k.startsWith('_cost') || k.startsWith('_margin')) delete out[k];
+    if (!costs && d.name === 'project') out = stripProjectCosts(out);
     return out;
   }
 
@@ -425,5 +426,18 @@ export function createEntities(app) {
   return {
     repos, hooks, register, def, list, get, raw, create, update, patch, remove, bulk, action,
     canRead, canWrite, serialize, scopeOf, lockedReason, engagementOf, projectOf, validate,
+  };
+}
+
+// ACC-003: cost, margin and EAC values held on the project record outside the schema fields.
+const PROJECT_COST_KEYS = ['bac', 'ac', 'eac', 'wip', 'billedInAdvance', 'forecastMargin', 'baselineMargin', 'writeDowns'];
+export function stripProjectCosts(p) {
+  if (!p) return p;
+  const { margin_target, current_eac, ...rest } = p; // eslint-disable-line no-unused-vars
+  return {
+    ...rest,
+    commercial: p.commercial ? { ...p.commercial, cost: undefined, margin: undefined } : p.commercial,
+    final_position: p.final_position ? Object.fromEntries(Object.entries(p.final_position).filter(([k]) => !PROJECT_COST_KEYS.includes(k))) : p.final_position,
+    evm_history: (p.evm_history || []).map((h) => ({ date: h.date, spi: h.spi, cpi: h.cpi })),
   };
 }

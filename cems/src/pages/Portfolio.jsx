@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useApi } from '../lib/hooks.js';
 import { useSession } from '../lib/session.jsx';
 import { useLookups } from '../components/fields.jsx';
-import { PageHead, Card, Tile, Async, Table, Rag, Money, Pct, D, Badge, Empty, Meter, Level } from '../components/ui.jsx';
+import { PageHead, Card, Tile, Async, Table, Rag, Money, Pct, Badge, Empty, Meter, Level } from '../components/ui.jsx';
 import { fmtMoneyShort, fmtPct, fmtDate } from '../../shared/format.js';
 import { LISTS } from '../../shared/defaults.js';
 
@@ -93,4 +93,3 @@ export function Exceptions({ ex }) {
   );
 }
 
-export { D };
