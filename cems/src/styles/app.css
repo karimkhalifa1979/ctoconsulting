@@ -288,7 +288,7 @@ table.table { width: 100%; border-collapse: collapse; font-size: 13px; }
 @keyframes pop { from { transform: translate(-50%, 10px); opacity: 0.6; } }
 
 /* Toasts & alerts */
-.toasts { position: fixed; bottom: 18px; right: 18px; z-index: 120; display: flex; flex-direction: column; gap: 8px; max-width: 420px; }
+.toasts { position: fixed; top: 64px; right: 18px; z-index: 120; display: flex; flex-direction: column; gap: 8px; max-width: 420px; }
 .toast { background: var(--brand-navy); color: #fff; padding: 10px 14px; border-radius: 10px; box-shadow: var(--shadow-lg); font-size: 13px; display: flex; gap: 10px; align-items: flex-start; animation: pop2 0.15s ease-out; }
 .toast.error { background: var(--rag-red); }
 .toast.ok { background: var(--rag-green); }

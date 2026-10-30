@@ -1,9 +1,9 @@
 // Generic, schema-driven registers: list with filters, bulk update and export, and a record drawer
 // with edit form, record actions, approvals, comments and history (NFR-025).
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ENTITIES } from '../../shared/schema.js';
-import { api, get, post, patch, del, download } from '../lib/api.js';
+import { api, get, post, patch, del, download, upload, fileUrl } from '../lib/api.js';
 import { useApi } from '../lib/hooks.js';
 import { useSession, canOn } from '../lib/session.jsx';
 import { FieldInput, FieldValue, isVisible, useLookups, useFieldGroups, clearLookups } from './fields.jsx';
@@ -201,14 +201,15 @@ export function RecordDrawer({ entity, id, defaults = {}, scope = {}, onClose, o
       {rec && (
         <>
           {!creating && !editing && (
-            <Tabs value={tab} onChange={setTab} tabs={[{ id: 'details', label: 'Details' }, { id: 'approvals', label: 'Approvals' }, { id: 'comments', label: 'Comments' }, { id: 'history', label: 'History' }]} />
+            <Tabs value={tab} onChange={setTab} tabs={[{ id: 'details', label: 'Details' }, { id: 'attachments', label: 'Attachments', count: rec.attachments?.length || null }, { id: 'approvals', label: 'Approvals' }, { id: 'comments', label: 'Comments' }, { id: 'history', label: 'History' }]} />
           )}
           {editing && Object.keys(errors).length > 0 && <div className="alert error mb-2"><Icon name="alert" /><div>Please correct the highlighted fields.{errors._duplicate && ' A possible duplicate exists (CLI-007).'}</div></div>}
           {editing ? (
             <RecordForm entity={entity} rec={draft || rec} onChange={setDraft} errors={errors} lookups={lookups} creating={creating} engagementId={engagementId} />
           ) : tab === 'details' ? (
             <RecordView entity={entity} rec={rec} lookups={lookups} />
-          ) : tab === 'history' ? <History entity={entity} id={id} /> : tab === 'comments' ? <Comments entity={entity} id={id} lookups={lookups} /> : <Approvals entity={entity} id={id} onDecided={() => q.reload()} />}
+          ) : tab === 'history' ? <History entity={entity} id={id} /> : tab === 'comments' ? <Comments entity={entity} id={id} lookups={lookups} />
+            : tab === 'attachments' ? <Attachments entity={entity} rec={rec} lookups={lookups} onChanged={() => q.reload()} /> : <Approvals entity={entity} id={id} onDecided={() => q.reload()} />}
         </>
       )}
     </Drawer>
@@ -291,6 +292,52 @@ function Comments({ entity, id, lookups }) {
         <span className="flex-1" />
         <button className="btn btn-primary" onClick={send} disabled={busy || !text.trim()}><Icon name="send" /> Post</button>
       </div>
+    </div>
+  );
+}
+
+// DOC-004: documents and evidence attached to the record; files are scanned and checked by content.
+function Attachments({ entity, rec, lookups, onChanged }) {
+  const input = useRef(null);
+  const [run, busy] = useAction();
+  const dialog = useDialog();
+  const list = rec.attachments || [];
+  const name = (uid) => lookups?.users?.find((u) => u.id === uid)?.label;
+  const add = async (e) => {
+    const f = e.target.files?.[0];
+    e.target.value = '';
+    if (!f) return;
+    const out = await run(() => upload(`/api/e/${entity}/${rec.id}/attachments`, f), `${f.name} attached`);
+    if (out) onChanged();
+  };
+  const remove = async (a) => {
+    if (!(await dialog({ title: `Remove ${a.name}`, message: 'The attachment is removed from this record; the file is kept for the audit trail.', confirm: 'Remove', danger: true }))) return;
+    const out = await run(() => del(`/api/e/${entity}/${rec.id}/attachments/${a.file_id}`), 'Attachment removed');
+    if (out) onChanged();
+  };
+  return (
+    <div className="stack">
+      {rec._can?.update && (
+        <div>
+          <input ref={input} type="file" hidden onChange={add} accept=".pdf,.png,.jpg,.jpeg,.gif,.docx,.xlsx,.pptx,.csv,.txt" />
+          <button className="btn btn-sm" disabled={busy} onClick={() => input.current?.click()}><Icon name="upload" /> Attach a file</button>
+          <span className="tiny muted" style={{ marginLeft: 8 }}>PDF, images, Office documents, CSV or text; scanned for malware on upload.</span>
+        </div>
+      )}
+      {!list.length ? <Empty>No attachments.</Empty> : (
+        <ul className="list">
+          {list.map((a) => (
+            <li key={a.file_id}>
+              <Icon name="file" size={16} />
+              <div className="grow">
+                <a href={fileUrl(a.file_id)}>{a.name}</a>
+                <div className="tiny muted">{Math.max(1, Math.round((a.size || 0) / 1024))} KB · {name(a.by) || 'Unknown'} · <DT v={a.at} /></div>
+              </div>
+              {rec._can?.update && <button className="btn btn-xs btn-ghost" disabled={busy} onClick={() => remove(a)} aria-label={`Remove ${a.name}`}><Icon name="trash" size={13} /></button>}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -421,7 +468,7 @@ export function Register({ entity, scope = {}, defaults = {}, title, sub, column
 function defaultColumns(d, lookups) {
   const listFields = d.fields.filter((f) => f.list && f.key !== 'project_id').slice(0, 8);
   return [
-    ...listFields.map((f) => ({ key: f.key, label: f.label, num: ['money', 'number', 'int', 'percent'].includes(f.type), render: (r) => (f.key === 'status' && f.type === 'text' ? <Status v={r.status} /> : <FieldValue field={f} value={r[f.key]} rec={r} lookups={lookups} />) })),
+    ...listFields.map((f) => ({ key: f.key, label: f.label, num: ['money', 'number', 'int', 'percent'].includes(f.type), render: (r) => (f.key === 'status' && f.type === 'text' ? <Status v={r.status} /> : f.key === 'ref' ? <span className="nowrap">{r.ref}</span> : <FieldValue field={f} value={r[f.key]} rec={r} lookups={lookups} />) })),
     { key: '_flags', label: '', sort: false, render: (r) => <RecordFlags rec={{ ...r, client_visible: false, reportable: false }} /> },
   ];
 }

@@ -4,6 +4,10 @@ A web application for discovering, registering, assessing and reporting an organ
 
 It ships pre-loaded with the complete *NDIA ICT Policy Requirements Register v0.48* against the organisation **National Insurance Disability Agency**, and can assess any number of additional organisations.
 
+> This repository also contains **CEMS**, CTO Consulting's Consulting Engagement Management System,
+> in [`cems/`](cems/README.md): engagements, projects, weekly status, RAID, change, time, resources,
+> financials and Word/PDF reporting, built from the CEMS Requirements Specification.
+
 ## Features
 
 | # | Capability | Where |

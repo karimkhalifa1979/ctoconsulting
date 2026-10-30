@@ -6,7 +6,7 @@ import { useApi } from '../../lib/hooks.js';
 import { PageHead, Card, Async, Table, Badge, Tile } from '../../components/ui.jsx';
 
 const PRIORITY = { M: 'Must', S: 'Should', C: 'Could', W: 'Won’t' };
-const TONE = { Implemented: 'green', Partial: 'amber', Configurable: 'teal', 'Not started': 'grey', 'Out of scope': 'grey' };
+const TONE = { Implemented: 'green', Partial: 'amber', Configurable: 'teal', Deployment: 'navy', Process: 'gold', 'Not started': 'grey', 'Out of scope': 'grey' };
 
 export default function Requirements() {
   const q = useApi('/api/requirements');
@@ -15,7 +15,7 @@ export default function Requirements() {
   return (
     <>
       <PageHead title="Requirements traceability" crumbs={<><Link to="/admin">Administration</Link><span>›</span></>}
-        sub="Requirements from the CEMS specification with their implementation status and where to find them." />
+        sub="Requirements from the CEMS specification with their status and where to find them. Deployment items are met by hosting and operations; Process items are rollout activities." />
       <Async q={q}>{(rows) => {
         const shown = rows.filter((r) => (!f.module || r.module === f.module) && (!f.priority || r.priority === f.priority) && (!f.status || r.status === f.status)
           && (!f.q || `${r.id} ${r.text} ${r.where || ''}`.toLowerCase().includes(f.q.toLowerCase())));

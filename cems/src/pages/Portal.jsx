@@ -3,7 +3,7 @@
 // Client users see only client-visible content for engagements they are members of.
 import { Link, Route, Routes, useParams } from 'react-router-dom';
 import { useApi } from '../lib/hooks.js';
-import { post } from '../lib/api.js';
+import { post, patch } from '../lib/api.js';
 import { useSession } from '../lib/session.jsx';
 import { ApprovalCard } from '../components/Record.jsx';
 import { reportFile } from '../components/Reports.jsx';
@@ -39,6 +39,10 @@ function Home() {
   const approvals = useApi('/api/approvals');
   const [run, busy] = useAction();
   const dialog = useDialog();
+  const setActionStatus = async (a, status) => {
+    const out = await run(() => patch(`/api/e/action/${a.id}`, { status }), `${a.ref} marked ${status.toLowerCase()}`);
+    if (out) q.reload();
+  };
   const decide = async (d, act) => {
     const comments = await dialog({ title: act === 'accept' ? `Accept ${d.title}` : `Reject ${d.title}`, message: act === 'accept' ? 'Record your acceptance of this deliverable against its acceptance criteria.' : 'Explain what needs to change; the team will rework and resubmit.', input: true, required: act !== 'accept', label: 'Comments', confirm: act === 'accept' ? 'Accept' : 'Reject', danger: act !== 'accept' });
     if (comments === null) return;
@@ -81,7 +85,11 @@ function Home() {
             { key: 'title', label: 'Action', render: (a) => <span>{a.ref} {a.title}<div className="tiny muted">{a.engagement}</div></span> },
             { key: 'owner_name', label: 'Owner' },
             { key: 'due_date', label: 'Due', render: (a) => <span className={a.due_date && a.due_date < today ? 'neg' : ''}><D v={a.due_date} />{a.due_date && a.due_date < today ? ' (overdue)' : ''}</span> },
-            { key: 'status', label: 'Status', render: (a) => <Status v={a.status} /> },
+            { key: 'status', label: 'Status (CPT-004)', sort: false, render: (a) => (
+              <select value={a.status} disabled={busy} aria-label={`Status of ${a.ref} ${a.title}`} onChange={(e) => setActionStatus(a, e.target.value)} style={{ width: 'auto' }}>
+                {['Open', 'In progress', 'Done'].map((x) => <option key={x}>{x}</option>)}
+              </select>
+            ) },
           ]} />
         </Card>
         <Card title="Your engagements">

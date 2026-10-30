@@ -481,7 +481,7 @@ export function createReports(app) {
     if (!(r.status === 'Approved' || (r.status === 'Draft' && !needsApproval(r)))) throw badRequest(needsApproval(r) ? 'This report needs approval before it is issued (RPT-040).' : 'Only drafts or approved reports can be issued.');
     const snap = snapshots.get(r.snapshot_id);
     snapshots.patch(snap.id, { locked: true }, ctx.user.id);
-    // The issued report carries its final file name (RPT-042); draft numbers belong to drafts.
+    // The issued report carries its final file name (RPT-035); draft numbers belong to drafts.
     const finalName = String(r.name).replace(/_draft\d+$/, '');
     for (const [kind, fid] of Object.entries(r.files || {})) if (fid) files.rename(fid, `${finalName}.${kind}`);
     reports.patch(id, { name: finalName, status: 'Issued', issued_at: nowIso(), issued_by: ctx.user.id, locked: true, history: [...(r.history || []), { at: nowIso(), by: ctx.user.id, event: 'Issued' }] }, ctx.user.id);

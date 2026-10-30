@@ -64,7 +64,11 @@ function PositionTiles({ f, costs }) {
 function MonthlyChart({ f, costs }) {
   const [mode, setMode] = useState('cumulative');
   const [what, setWhat] = useState('fees');
-  const s = useFinSeries(f.months, { cumulative: mode === 'cumulative', costs: costs && what === 'cost', revenue: !costs || what === 'fees' });
+  const base = useFinSeries(f.months, { cumulative: mode === 'cumulative', costs: costs && what === 'cost', revenue: !costs || what === 'fees' });
+  // FIN-048: cumulative fees burn up against the contract value.
+  const s = mode === 'cumulative' && (what === 'fees' || !costs) && f.contractValue
+    ? { ...base, series: [...base.series, { name: 'Contract value', color: SERIES[4], dashed: true, values: base.categories.map(() => f.contractValue) }] }
+    : base;
   const thisMonth = monthOf(todayIn('Australia/Sydney'));
   return (
     <Card title={what === 'fees' ? 'Fees: budget, earned and forecast' : 'Cost: budget, actual and forecast'} sub="Solid lines are budget and actuals; dashed lines are the current forecast. The teal line marks this month."

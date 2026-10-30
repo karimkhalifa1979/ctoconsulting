@@ -114,12 +114,21 @@ function Evm({ f }) {
           { key: 'v', label: 'EAC', num: true, sort: false, render: (r) => <Money v={r.v} /> },
         ]} />
       </Card>
-      <Card title="SPI and CPI trend" sub="Weekly, from the forecast refresh (FIN-028).">
-        {hist.length < 2 ? <Empty>The trend appears after two weekly refreshes.</Empty> : (
-          <LineChart height={220} categories={hist.map((h) => h.date)} labelX={(d) => fmtDatePattern(d, 'd MMM')} format={(v) => v.toFixed(2)} series={[
-            { name: 'SPI', color: SERIES[0], values: hist.map((h) => h.spi) },
-            { name: 'CPI', color: SERIES[1], values: hist.map((h) => h.cpi) },
-          ]} />
+      <Card title="Earned value over time (FIN-031)" sub="Weekly, from the forecast refresh (FIN-028).">
+        {hist.length < 2 ? <Empty>The curves appear after two weekly refreshes.</Empty> : (
+          <>
+            <h4 className="mb-1">Planned value, earned value and actual cost</h4>
+            <LineChart height={200} categories={hist.map((h) => h.date)} labelX={(d) => fmtDatePattern(d, 'd MMM')} series={[
+              { name: 'Planned value', color: SERIES[0], values: hist.map((h) => h.pv ?? null) },
+              { name: 'Earned value', color: SERIES[2], values: hist.map((h) => h.ev ?? null) },
+              { name: 'Actual cost', color: SERIES[1], values: hist.map((h) => h.ac ?? null) },
+            ]} />
+            <h4 className="mt-3 mb-1">SPI and CPI</h4>
+            <LineChart height={170} categories={hist.map((h) => h.date)} labelX={(d) => fmtDatePattern(d, 'd MMM')} format={(v) => v.toFixed(2)} series={[
+              { name: 'SPI', color: SERIES[0], values: hist.map((h) => h.spi) },
+              { name: 'CPI', color: SERIES[1], values: hist.map((h) => h.cpi) },
+            ]} />
+          </>
         )}
       </Card>
     </div>
@@ -292,12 +301,20 @@ function Forecast() {
       <div className="grid g-2">
         <Card title="Compared with prior forecasts and the baseline (FIN-023)" flush>
           <Async q={cmp}>{(c) => (
+            <>
+            {costs && c.trend?.length > 1 && (
+              <div className="card-body">
+                <h4 className="mb-1">Forecast margin by cycle (FIN-048)</h4>
+                <LineChart height={160} categories={c.trend.map((t) => t.period)} labelX={monthLabel} format={(v) => fmtPct(v, 1)} series={[{ name: 'Forecast margin', color: SERIES[0], values: c.trend.map((t) => t.forecastMargin ?? null) }]} />
+              </div>
+            )}
             <Table compact rows={c.rows.map((r, i) => ({ ...r, id: i }))} columns={[
               { key: 'label', label: 'Version', sort: false },
               costs && { key: 'eac', label: 'Cost at completion', num: true, sort: false, render: (r) => <Money v={r.eac} /> },
               { key: 'eacRevenue', label: 'Fees at completion', num: true, sort: false, render: (r) => <Money v={r.eacRevenue} /> },
               costs && { key: 'forecastMargin', label: 'Margin', num: true, sort: false, render: (r) => <Pct v={r.forecastMargin} d={1} /> },
             ].filter(Boolean)} />
+            </>
           )}</Async>
         </Card>
         <Card title="Scenarios (FIN-024)" sub="What-if views that do not change the forecast." flush>

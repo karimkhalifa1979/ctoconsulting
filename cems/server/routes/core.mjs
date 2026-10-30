@@ -239,12 +239,10 @@ export function registerCoreRoutes(r, app) {
 
   // ---------- Files (receipts, logos, evidence) ----------
   const IMAGE = ['png', 'jpg', 'gif'];
-  r.post('/api/files', async (ctx) => {
+  // Checks an upload by content (NFR-008), scans it and stores it.
+  async function storeUpload(ctx, { purpose, engagementId }) {
     const buffer = ctx.body;
     const name = ctx.fileName || 'upload';
-    const purpose = ctx.req.headers['x-purpose'] || 'document';
-    const engagementId = ctx.req.headers['x-engagement-id'] || null;
-    if (engagementId && !ctx.access.canSeeEngagement(engagementId)) throw forbidden();
     const ext = name.split('.').pop().toLowerCase();
     const kind = sniff(buffer);
     if (['docm', 'xlsm', 'pptm', 'dotm', 'exe', 'js', 'bat', 'cmd', 'ps1', 'html', 'htm', 'svg'].includes(ext)) throw unprocessable('This file type is not accepted (NFR-008).');
@@ -259,8 +257,43 @@ export function registerCoreRoutes(r, app) {
     if (scan.status === 'infected') throw unprocessable('The file failed the malware scan.');
     const meta = files.save(buffer, { name, mime: MIME[kind] || MIME[ext], engagementId, purpose, userId: ctx.user.id, scan: scan.status });
     audit.record({ userId: ctx.user.id, ip: ctx.ip, action: 'upload', entity: 'file', entityId: meta.id, engagementId, summary: `Uploaded ${name} (${purpose}, scan: ${scan.status})` });
-    return { id: meta.id, name: meta.name, size: meta.size, mime: meta.mime, scan: scan.status };
+    return { ...meta, scan: scan.status };
+  }
+
+  r.post('/api/files', async (ctx) => {
+    const purpose = ctx.req.headers['x-purpose'] || 'document';
+    const engagementId = ctx.req.headers['x-engagement-id'] || null;
+    if (engagementId && !ctx.access.canSeeEngagement(engagementId)) throw forbidden();
+    const meta = await storeUpload(ctx, { purpose, engagementId });
+    return { id: meta.id, name: meta.name, size: meta.size, mime: meta.mime, scan: meta.scan };
   }, { raw: true });
+
+  // DOC-004: documents and evidence attached to any record. Adding needs edit rights on the
+  // record; approved or locked items still accept evidence from people who could edit them.
+  const attachmentTarget = (ctx) => {
+    const d = entities.def(ctx.params.entity);
+    const rec = d && entities.raw(ctx.params.entity, ctx.params.id);
+    if (!rec || ctx.access.isExternal || !entities.canRead(ctx, d, rec)) throw notFound();
+    if (!entities.canWrite(ctx, d, rec, 'U')) throw forbidden('You cannot change attachments on this record.');
+    return { d, rec };
+  };
+  r.post('/api/e/:entity/:id/attachments', async (ctx) => {
+    const { d, rec } = attachmentTarget(ctx);
+    const meta = await storeUpload(ctx, { purpose: 'attachment', engagementId: rec.engagement_id || null });
+    const list = [...(rec.attachments || []), { file_id: meta.id, name: meta.name, size: meta.size, mime: meta.mime, by: ctx.user.id, at: nowIso() }];
+    entities.repos[d.name].patch(rec.id, { attachments: list }, ctx.user.id);
+    audit.record({ userId: ctx.user.id, ip: ctx.ip, action: 'update', entity: d.name, entityId: rec.id, engagementId: rec.engagement_id, summary: `Attachment ${meta.name} added to ${d.label.toLowerCase()} ${rec.ref || ''}`.trim() });
+    return list;
+  }, { raw: true, internal: true });
+  r.delete('/api/e/:entity/:id/attachments/:fileId', (ctx) => {
+    const { d, rec } = attachmentTarget(ctx);
+    const gone = (rec.attachments || []).find((a) => a.file_id === ctx.params.fileId);
+    if (!gone) throw notFound('Attachment not found');
+    const list = (rec.attachments || []).filter((a) => a.file_id !== ctx.params.fileId);
+    entities.repos[d.name].patch(rec.id, { attachments: list }, ctx.user.id);
+    audit.record({ userId: ctx.user.id, ip: ctx.ip, action: 'update', entity: d.name, entityId: rec.id, engagementId: rec.engagement_id, summary: `Attachment ${gone.name} removed from ${d.label.toLowerCase()} ${rec.ref || ''} (file kept for the audit trail)`.trim() });
+    return list;
+  }, { internal: true });
 
   r.get('/api/files/:id', (ctx) => {
     const f = files.read(ctx.params.id);

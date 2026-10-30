@@ -2,7 +2,7 @@
   "name": "cems",
   "private": true,
   "version": "1.0.0",
-  "description": "CTO Consulting — Consulting Engagement Management System (CEMS)",
+  "description": "CTO Consulting \u2014 Consulting Engagement Management System (CEMS)",
   "type": "module",
   "engines": {
     "node": ">=22.13"
@@ -15,8 +15,9 @@
     "seed": "node --disable-warning=ExperimentalWarning server/seed/run.mjs",
     "templates": "node scripts/build-starter-templates.mjs",
     "requirements": "node scripts/extract-requirements.mjs",
-    "test": "node --disable-warning=ExperimentalWarning --test test/",
-    "smoke": "node scripts/smoke.mjs"
+    "test": "node --disable-warning=ExperimentalWarning --test --test-concurrency=1 \"test/**/*.test.mjs\"",
+    "smoke": "node scripts/smoke.mjs",
+    "traceability": "node scripts/build-traceability.mjs"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
