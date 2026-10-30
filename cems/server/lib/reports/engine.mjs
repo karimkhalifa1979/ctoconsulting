@@ -1,7 +1,7 @@
 // Binds the template engine to report data: scope resolution, collection filters and sorting
 // (RPT-013), formatting helpers (RPT-012), audience blocking (RPT-021) and validation (RPT-024, RPT-025).
 import { loadDocx, analyse, structure, DocxRenderer, applyMappings, applyMetadata, describeLocation, parseToken } from './docx.mjs';
-import { GLOBAL_TOKENS, FIN_TOKENS, PROJECT_TOKENS, COLLECTIONS, HELPERS, CHARTS, allowedFor, lookupToken } from '../../../shared/tokens.js';
+import { GLOBAL_TOKENS, FIN_TOKENS, PROJECT_TOKENS, CHANGE_TOKENS, COLLECTIONS, HELPERS, CHARTS, allowedFor, lookupToken } from '../../../shared/tokens.js';
 import { fmtDatePattern, fmtMoney, fmtPct, fmtNum, fmtDateTime, textCase } from '../../../shared/format.js';
 import { parseRich } from '../../../shared/markdown.js';
 import { TREND_LABEL } from '../../../shared/rag.js';
@@ -20,7 +20,7 @@ const RANK = { Green: 0, Amber: 1, Red: 2, Low: 1, Medium: 2, High: 3, Extreme: 
 
 const COLLECTION_KEYS = new Set(Object.keys(COLLECTIONS));
 const itemFields = (name) => new Map((COLLECTIONS[name]?.fields || []).map((f) => [f.key, f]));
-const GLOBAL_INDEX = new Map([...GLOBAL_TOKENS, ...FIN_TOKENS].map((t) => [t.path, t]));
+const GLOBAL_INDEX = new Map([...GLOBAL_TOKENS, ...FIN_TOKENS, ...CHANGE_TOKENS].map((t) => [t.path, t]));
 const PROJECT_INDEX = new Map(PROJECT_TOKENS.map((t) => [t.path, t]));
 
 // Collection name from a block path, e.g. 'engagement.projects', 'risks', 'changes_since_last.new_risks'.
@@ -166,10 +166,8 @@ export function makeFormatter({ ctx, charts, images }) {
       case 'chart': {
         const name = ast.literal || (path?.startsWith('chart.') ? path.slice(6) : path);
         const widthCm = parseFloat(ast.hash.width) || 16;
-        const heightCm = parseFloat(ast.hash.height) || widthCm * 0.45;
-        const chartScope = resolve(scope, 'project') ? scope : scope;
-        const img = await charts(name, chartScope, { widthCm, heightCm });
-        return img ? { kind: 'image', buffer: img.png, widthCm, heightCm, alt: img.alt } : { kind: 'text', text: `[chart ${name} unavailable]` };
+        const img = await charts(name, scope, { widthCm, heightCm: parseFloat(ast.hash.height) || null });
+        return img ? { kind: 'image', buffer: img.png, widthCm, heightCm: img.heightCm, alt: img.alt } : { kind: 'text', text: '' };
       }
       case 'image': {
         const widthCm = parseFloat(ast.hash.width) || 4;

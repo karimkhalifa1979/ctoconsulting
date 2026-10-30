@@ -91,7 +91,10 @@ CREATE INDEX IF NOT EXISTS comments_record ON comments(entity, entity_id);
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT);
 `;
 
-function docTableDDL(table, columns) {
+const BASE_NAMES = new Set(['id', 'type', 'client_id', 'engagement_id', 'project_id', 'ref', 'data', 'rev', 'created_at', 'created_by', 'updated_at', 'updated_by', 'deleted_at']);
+
+function docTableDDL(table, allColumns) {
+  const columns = allColumns.filter((c) => !BASE_NAMES.has(c));
   const gen = columns.map((c) => `,\n  ${c} TEXT GENERATED ALWAYS AS (json_extract(data, '$.${c}')) VIRTUAL`).join('');
   const idx = ['engagement_id', 'project_id', 'client_id', 'type', 'ref', ...columns]
     .map((c) => `CREATE INDEX IF NOT EXISTS ${table}_${c} ON ${table}(${c});`).join('\n');

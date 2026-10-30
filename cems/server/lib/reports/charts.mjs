@@ -112,7 +112,7 @@ export function milestoneTimeline(data) {
   if (!ms.length) return null;
   const dates = ms.flatMap((m) => [m.baseline_date, m.forecast_date, m.actual_date]).filter(Boolean).concat(data.today ? [data.today] : []).sort();
   const t0 = new Date(dates[0]).getTime(), t1 = new Date(dates.at(-1)).getTime() || t0 + 1;
-  const w = 760, rowH = 26, pad = { l: 230, r: 30, t: 44, b: 34 };
+  const w = 760, rowH = 26, pad = { l: 230, r: 30, t: 44, b: 52 };
   const h = pad.t + ms.length * rowH + pad.b;
   const x = (d) => pad.l + ((new Date(d).getTime() - t0) / Math.max(1, t1 - t0)) * (w - pad.l - pad.r);
   const color = (m) => (m.actual_date ? RAG.Green : m.status === 'Missed' ? RAG.Red : m.status === 'Forecast late' || m.status === 'At risk' ? RAG.Amber : C.blue);
@@ -131,8 +131,8 @@ export function milestoneTimeline(data) {
     }
   });
   const [a, b] = [dates[0], dates.at(-1)];
-  body += `<text x="${pad.l}" y="${h - 12}" font-size="10.5" fill="${C.ink2}">${esc(fmtDate(a))}</text><text x="${w - pad.r}" y="${h - 12}" font-size="10.5" text-anchor="end" fill="${C.ink2}">${esc(fmtDate(b))}</text>`;
-  body += `<text x="${(pad.l + w - pad.r) / 2}" y="${h - 12}" font-size="10.5" text-anchor="middle" fill="${C.ink2}">◇ baseline   ◆ forecast or actual (green achieved, amber late or at risk, red missed)</text>`;
+  body += `<text x="${pad.l}" y="${h - 32}" font-size="10.5" fill="${C.ink2}">${esc(fmtDate(a))}</text><text x="${w - pad.r}" y="${h - 32}" font-size="10.5" text-anchor="end" fill="${C.ink2}">${esc(fmtDate(b))}</text>`;
+  body += `<text x="16" y="${h - 10}" font-size="10.5" fill="${C.ink2}">◇ baseline   ◆ forecast or actual: green achieved, blue on track, amber late or at risk, red missed</text>`;
   const late = ms.filter((m) => ['Forecast late', 'Missed', 'At risk'].includes(m.status));
   return { svg: frame(w, h, body, 'Milestone timeline'), alt: `Milestone timeline of ${ms.length} milestones; ${ms.filter((m) => m.actual_date).length} achieved, ${late.length} late, missed or at risk${late.length ? `: ${late.map((m) => m.name).join(', ')}` : ''}.` };
 }
@@ -193,7 +193,10 @@ const BUILDERS = { budget_burn: budgetBurn, milestone_timeline: milestoneTimelin
 export function chartSvg(name, data, opts = {}) {
   const b = BUILDERS[name];
   if (!b || !data) return null;
-  return b(data, opts);
+  const out = b(data, opts);
+  if (!out) return null;
+  const m = out.svg.match(/width="(\d+)" height="(\d+)"/);
+  return { ...out, ratio: m ? Number(m[2]) / Number(m[1]) : 0.45 };
 }
 
 export function svgToPng(svg, widthCm = 16) {

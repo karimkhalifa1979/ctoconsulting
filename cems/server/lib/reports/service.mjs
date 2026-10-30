@@ -7,6 +7,7 @@ import { docxToPdf, docxToHtml, sofficeAvailable } from './pdf.mjs';
 import { sniff, MIME } from '../files.mjs';
 import { todayIn, weekEnding, addDays } from '../../../shared/dates.js';
 import { allTokens, COLLECTIONS, HELPERS } from '../../../shared/tokens.js';
+import { RAG_DEFINITIONS } from '../../../shared/rag.js';
 import { badRequest, forbidden, notFound, unprocessable, HttpError } from '../../http.mjs';
 import { nowIso } from '../../db.mjs';
 import crypto from 'node:crypto';
@@ -236,7 +237,7 @@ export function createReports(app) {
       const svg = chartSvg(name, data, { audience });
       if (!svg) return null;
       const png = svgToPng(svg.svg, widthCm);
-      return png ? { png, alt: svg.alt, heightCm } : null;
+      return png ? { png, alt: svg.alt, heightCm: heightCm || widthCm * svg.ratio } : null;
     };
   }
 
@@ -649,7 +650,7 @@ function sampleNarrative() {
 }
 
 // Synthetic data for previewing a template without live data (RPT-005).
-function sampleSnapshot(t) {
+export function sampleSnapshot(t) {
   const proj = (n, rag) => ({
     _project_id: `p${n}`,
     project: { name: `Sample project ${n}`, code: `SMP-P0${n}`, manager: 'Priya Raman', stage: 'Build', state: 'In delivery', approach: 'hybrid', percent_complete: 0.45 + n / 10, start_date: '2026-07-01', end_baseline: '2027-03-19', end_forecast: '2027-03-26', next_milestone: 'Release 2', next_milestone_date: '2026-11-14' },
@@ -689,7 +690,7 @@ function sampleSnapshot(t) {
     fin_lines: [], risks: first.risks, issues: first.issues, dependencies: first.dependencies, actions: first.actions, decisions: first.decisions, assumptions: [], changes: first.changes,
     milestones: first.milestones, deliverables: first.deliverables, people: first.people,
     meetings: [{ date: '2026-11-12', title: 'Steering committee', kind: 'Steering committee' }],
-    rag_definitions: [], exception: { raised: true, summary: '- **Sample project 1**: cost tolerance forecast to be exceeded' },
+    rag_definitions: RAG_DEFINITIONS, exception: { raised: true, summary: '- **Sample project 1**: cost tolerance forecast to be exceeded' },
     changes_since_last: { rag_movements: [{ project: 'Sample project 1', dimension: 'Overall', from: 'Green', to: 'Amber', direction: 'Down' }], new_risks: [], closed_risks: [], milestone_movements: [{ project: 'Sample project 1', name: 'Release 2', from: '2026-11-07', to: '2026-11-14', days: 7 }], forecast_movement: 12000, previous_report: 'Sample v1' },
     chartdata: { ...first.chartdata, po_burn: { po: { number: 'PO-4500123', value: 800000, consumedPct: 0.78, exhaustionDate: '2027-02-12', consumedBefore: 0 }, months: first.chartdata.budget_burn.months.map((m) => ({ month: m.month, billing: m.actualRevenue || m.forecastRevenue })), asAtMonth: '2026-10' } },
     custom: {}, _meta: { level: t.level, client_shows_evm: false },

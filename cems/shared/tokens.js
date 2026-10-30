@@ -117,6 +117,22 @@ export const PROJECT_TOKENS = [
   t('exception.summary', 'rich', 'client', 'Summary of this project’s forecast tolerance breaches', '…'),
 ];
 
+// Change request and variation documents (CHG-005).
+export const CHANGE_TOKENS = [
+  t('change.id', 'text', 'client', 'Change request ID', 'CR-002'),
+  t('change.title', 'text', 'client', 'Change title', 'Archived records migration'),
+  t('change.description', 'rich', 'client', 'Description of the change', '…'),
+  t('change.reason', 'rich', 'client', 'Reason for the change', '…'),
+  t('change.type', 'text', 'client', 'Change type', 'Scope'),
+  t('change.requester', 'text', 'client', 'Requested by', 'Rachel Kim'),
+  t('change.raised_date', 'date', 'client', 'Date raised', '20/10/2026'),
+  t('change.status', 'text', 'client', 'Status', 'Awaiting approval'),
+  t('change.price_impact', 'currency', 'client', 'Price impact (ex GST)', '$86,000'),
+  t('change.schedule_impact_days', 'number', 'client', 'Schedule impact in business days', '12'),
+  t('change.scope_impact', 'rich', 'client', 'Scope impact', '…'),
+  t('change.variation_ref', 'text', 'client', 'Contract variation number', 'SOW-001-V2'),
+];
+
 // Repeating collections (RPT-013) and the fields of each item.
 const item = (key, type, desc, audience = 'client') => ({ key, type, desc, audience });
 export const COLLECTIONS = {
@@ -184,6 +200,11 @@ export const COLLECTIONS = {
     fields: [item('date', 'date', 'Date'), item('title', 'text', 'Meeting or key date'), item('kind', 'text', 'Type')],
     filters: ['upcoming', 'all'], sorts: ['date'],
   },
+  'change.estimate': {
+    desc: 'Effort estimate lines of a change request', audience: 'client',
+    fields: [item('role', 'text', 'Role'), item('days', 'number', 'Days'), item('rate', 'currency', 'Day rate'), item('amount', 'currency', 'Amount')],
+    filters: ['all'], sorts: ['role'],
+  },
   rag_definitions: {
     desc: 'RAG definitions for the appendix (BR-03)', audience: 'client',
     fields: [item('dimension', 'text', 'Dimension'), item('green', 'text', 'Green'), item('amber', 'text', 'Amber'), item('red', 'text', 'Red')],
@@ -228,7 +249,7 @@ export const BLOCKS = ['each', 'if', 'unless'];
 export const CHARTS = ['budget_burn', 'milestone_timeline', 'rag_trend', 'risk_heatmap', 'po_burn'];
 
 const index = new Map();
-for (const tk of [...GLOBAL_TOKENS, ...FIN_TOKENS]) index.set(tk.path, { ...tk, context: 'global' });
+for (const tk of [...GLOBAL_TOKENS, ...FIN_TOKENS, ...CHANGE_TOKENS]) index.set(tk.path, { ...tk, context: 'global' });
 for (const tk of PROJECT_TOKENS) if (!index.has(tk.path)) index.set(tk.path, { ...tk, context: 'project' });
 
 export function lookupToken(path) {
@@ -237,7 +258,7 @@ export function lookupToken(path) {
 
 export function allTokens(customFields = []) {
   const custom = customFields.map((c) => t(`custom.${c.key}`, c.type || 'text', c.audience === 'internal' ? 'internal' : 'client', `Custom field: ${c.label} (${c.entity})`, ''));
-  return [...GLOBAL_TOKENS, ...FIN_TOKENS, ...PROJECT_TOKENS, ...custom];
+  return [...GLOBAL_TOKENS, ...FIN_TOKENS, ...PROJECT_TOKENS, ...CHANGE_TOKENS, ...custom];
 }
 
 // Whether a token is allowed for an audience; configurable tokens depend on the engagement setting.

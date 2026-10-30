@@ -515,6 +515,7 @@ export class DocxRenderer {
       await this.renderRich(run, out.blocks);
     } else if (out.kind === 'image') {
       if (!out.buffer) { parent.replaceChild(newRun(doc, rPr, newText(doc, out.fallback || '')), run); return; }
+      autoLineSpacing(closest(run, 'p'));
       parent.replaceChild(await this.imageRun(doc, out), run);
     } else {
       parent.removeChild(run);
@@ -668,6 +669,22 @@ export class DocxRenderer {
     const xml = `<w:r xmlns:w="${W}"><w:drawing><wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="${id}" name="Image ${id}" descr="${esc(alt)}"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="${id}" name="${name}" descr="${esc(alt)}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip xmlns:r="${R_NS}" r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>`;
     return doc.importNode(parseXml(xml).documentElement, true);
   }
+}
+
+// Exact line spacing would clip inline images, so image paragraphs use automatic spacing.
+function autoLineSpacing(p) {
+  if (!p) return;
+  const doc = p.ownerDocument;
+  let pPr = children(p).find((c) => isW(c, 'pPr'));
+  if (!pPr) { pPr = doc.createElementNS(W, 'w:pPr'); p.insertBefore(pPr, p.firstChild); }
+  let sp = children(pPr).find((c) => isW(c, 'spacing'));
+  if (!sp) {
+    sp = doc.createElementNS(W, 'w:spacing');
+    const after = children(pPr).find((c) => !['pStyle', 'keepNext', 'keepLines', 'pageBreakBefore', 'framePr', 'widowControl', 'numPr', 'suppressLineNumbers', 'pBdr', 'shd', 'tabs', 'suppressAutoHyphens', 'kinsoku', 'wordWrap', 'overflowPunct', 'topLinePunct', 'autoSpaceDE', 'autoSpaceDN', 'bidi', 'adjustRightInd', 'snapToGrid'].includes(c.localName));
+    pPr.insertBefore(sp, after || null);
+  }
+  sp.setAttributeNS(W, 'w:line', '240');
+  sp.setAttributeNS(W, 'w:lineRule', 'auto');
 }
 
 // ---------- Client-supplied templates (RPT-026) ----------
