@@ -1,0 +1,2610 @@
+[
+ {
+  "id": "ACC-001",
+  "module": "ACC",
+  "section": "5.2 Access control requirements",
+  "text": "Grant access per engagement through membership, with a role assigned on each engagement. A person may hold different roles on different engagements.",
+  "priority": "M"
+ },
+ {
+  "id": "ACC-002",
+  "module": "ACC",
+  "section": "5.2 Access control requirements",
+  "text": "Show users only the clients, engagements and projects they are members of, except roles granted portfolio-wide read access (engagement executive, PMO, finance, auditor).",
+  "priority": "M"
+ },
+ {
+  "id": "ACC-003",
+  "module": "ACC",
+  "section": "5.2 Access control requirements",
+  "text": "Restrict cost rates, salary-derived costs, margins and internal commercial notes to finance, engagement executives and engagement managers unless explicitly granted.",
+  "priority": "M"
+ },
+ {
+  "id": "ACC-004",
+  "module": "ACC",
+  "section": "5.2 Access control requirements",
+  "text": "Support restricted engagements whose existence and data are hidden from everyone except named members, including portfolio-wide roles.",
+  "priority": "M"
+ },
+ {
+  "id": "ACC-005",
+  "module": "ACC",
+  "section": "5.2 Access control requirements",
+  "text": "Limit external client users to their own engagements and to records explicitly flagged as client-visible.",
+  "priority": "M"
+ },
+ {
+  "id": "ACC-006",
+  "module": "ACC",
+  "section": "5.2 Access control requirements",
+  "text": "Support time-bound access (start and end dates) for contractors and auditors, removed automatically at expiry.",
+  "priority": "S"
+ },
+ {
+  "id": "ACC-007",
+  "module": "ACC",
+  "section": "5.2 Access control requirements",
+  "text": "Record every grant, change and removal of access in the audit log.",
+  "priority": "M"
+ },
+ {
+  "id": "ACC-008",
+  "module": "ACC",
+  "section": "5.2 Access control requirements",
+  "text": "Provide an access review report per engagement for periodic review by the engagement manager.",
+  "priority": "S"
+ },
+ {
+  "id": "ACC-009",
+  "module": "ACC",
+  "section": "5.2 Access control requirements",
+  "text": "Separate administration rights from data access, so system administrators have no default access to engagement content.",
+  "priority": "S"
+ },
+ {
+  "id": "CLI-001",
+  "module": "CLI",
+  "section": "6.1 Client management (CLI)",
+  "text": "Maintain client records: legal and trading name, ABN, client code, sector, government or private, addresses, billing entity, default payment terms, currency and status.",
+  "priority": "M"
+ },
+ {
+  "id": "CLI-002",
+  "module": "CLI",
+  "section": "6.1 Client management (CLI)",
+  "text": "Maintain client contacts with title, role, contact details and relationship owner, reusable across stakeholder registers, approvals and distribution lists.",
+  "priority": "M"
+ },
+ {
+  "id": "CLI-003",
+  "module": "CLI",
+  "section": "6.1 Client management (CLI)",
+  "text": "Support parent–child client hierarchies (for example a department and its agencies, or a group and its subsidiaries) for roll-up reporting.",
+  "priority": "S"
+ },
+ {
+  "id": "CLI-004",
+  "module": "CLI",
+  "section": "6.1 Client management (CLI)",
+  "text": "Record master agreements and panel arrangements (head agreements, standing offers, deeds) with term, expiry, rate schedules and key terms, and alert before expiry (default 90 days).",
+  "priority": "M"
+ },
+ {
+  "id": "CLI-005",
+  "module": "CLI",
+  "section": "6.1 Client management (CLI)",
+  "text": "Record client obligations that affect delivery: clearance and onboarding requirements, data classification, reporting frequency, template and recipients, and invoicing rules (such as PO number on invoice or an invoice portal).",
+  "priority": "M"
+ },
+ {
+  "id": "CLI-006",
+  "module": "CLI",
+  "section": "6.1 Client management (CLI)",
+  "text": "Provide a client overview: current and past engagements, agreements, revenue to date, WIP, debtors, key contacts, open high risks and issues, and satisfaction scores.",
+  "priority": "M"
+ },
+ {
+  "id": "CLI-007",
+  "module": "CLI",
+  "section": "6.1 Client management (CLI)",
+  "text": "Prevent duplicate client records by matching on ABN and name, and synchronise client and contact data with the CRM (INT-006).",
+  "priority": "S"
+ },
+ {
+  "id": "CLI-008",
+  "module": "CLI",
+  "section": "6.1 Client management (CLI)",
+  "text": "Record client satisfaction survey results per engagement and show trends.",
+  "priority": "C"
+ },
+ {
+  "id": "ENG-001",
+  "module": "ENG",
+  "section": "6.2 Engagement management (ENG)",
+  "text": "Create an engagement for a client with name, code, description, objectives, type (advisory, delivery, managed service, capacity), dates, engagement executive, engagement manager, client sponsor, status, data classification and security requirements.",
+  "priority": "M"
+ },
+ {
+  "id": "ENG-002",
+  "module": "ENG",
+  "section": "6.2 Engagement management (ENG)",
+  "text": "Create an engagement from a won CRM opportunity, carrying over client, value, scope summary, proposed team and commercial model.",
+  "priority": "S"
+ },
+ {
+  "id": "ENG-003",
+  "module": "ENG",
+  "section": "6.2 Engagement management (ENG)",
+  "text": "Allow an engagement to contain one or more projects: add projects at any time, move a project between engagements of the same client (audited), and close projects independently.",
+  "priority": "M"
+ },
+ {
+  "id": "ENG-004",
+  "module": "ENG",
+  "section": "6.2 Engagement management (ENG)",
+  "text": "Record contractual instruments: master agreement reference, SOWs, work orders and variations, with value, term, commercial model, deliverables, payment terms, key personnel, liability caps and special conditions.",
+  "priority": "M"
+ },
+ {
+  "id": "ENG-005",
+  "module": "ENG",
+  "section": "6.2 Engagement management (ENG)",
+  "text": "Record client POs with number, value, GST basis (inclusive or exclusive), validity dates and any financial-year limits, and track consumption (invoiced plus approved unbilled) against each PO.",
+  "priority": "M"
+ },
+ {
+  "id": "ENG-006",
+  "module": "ENG",
+  "section": "6.2 Engagement management (ENG)",
+  "text": "Allocate funding from SOWs and POs to projects many-to-many, and prevent allocations exceeding an instrument's value.",
+  "priority": "M"
+ },
+ {
+  "id": "ENG-007",
+  "module": "ENG",
+  "section": "6.2 Engagement management (ENG)",
+  "text": "Define engagement governance: steering committee membership, meeting cadence, decision rights, delegations and escalation path, reusable for project boards.",
+  "priority": "M"
+ },
+ {
+  "id": "ENG-008",
+  "module": "ENG",
+  "section": "6.2 Engagement management (ENG)",
+  "text": "Record cross-project dependencies within the engagement, and with other engagements for the same client, and show their impact on dependent milestones.",
+  "priority": "M"
+ },
+ {
+  "id": "ENG-009",
+  "module": "ENG",
+  "section": "6.2 Engagement management (ENG)",
+  "text": "Maintain engagement-level RAID registers; escalate a project item to the engagement level; link related items across projects.",
+  "priority": "M"
+ },
+ {
+  "id": "ENG-010",
+  "module": "ENG",
+  "section": "6.2 Engagement management (ENG)",
+  "text": "Provide an engagement dashboard that rolls up all projects: health by dimension, milestones due in the next four weeks, top risks and issues, open changes, financials (budget, actuals, forecast, EAC, margin, PO burn) and resourcing.",
+  "priority": "M"
+ },
+ {
+  "id": "ENG-011",
+  "module": "ENG",
+  "section": "6.2 Engagement management (ENG)",
+  "text": "Calculate engagement health from project health using a configurable rule (BR-16), with manual override requiring justification.",
+  "priority": "M"
+ },
+ {
+  "id": "ENG-012",
+  "module": "ENG",
+  "section": "6.2 Engagement management (ENG)",
+  "text": "Record engagement objectives and map each project to the objectives it supports.",
+  "priority": "S"
+ },
+ {
+  "id": "ENG-013",
+  "module": "ENG",
+  "section": "6.2 Engagement management (ENG)",
+  "text": "Track key contract dates (expiry, extension options, renewal decisions) and alert the engagement manager at 90, 60 and 30 days.",
+  "priority": "M"
+ },
+ {
+  "id": "ENG-014",
+  "module": "ENG",
+  "section": "6.2 Engagement management (ENG)",
+  "text": "Record engagement reporting obligations (cadence, default report template, distribution list, required governance meetings) and show compliance with them.",
+  "priority": "M"
+ },
+ {
+  "id": "ENG-015",
+  "module": "ENG",
+  "section": "6.2 Engagement management (ENG)",
+  "text": "Show an engagement roadmap with all projects, stages and key milestones on one timeline.",
+  "priority": "S"
+ },
+ {
+  "id": "ENG-016",
+  "module": "ENG",
+  "section": "6.2 Engagement management (ENG)",
+  "text": "Support extension and renewal: create a new SOW or variation and carry forward open projects, RAID items and team.",
+  "priority": "S"
+ },
+ {
+  "id": "ENG-017",
+  "module": "ENG",
+  "section": "6.2 Engagement management (ENG)",
+  "text": "Record growth opportunities identified during delivery and pass them to the CRM.",
+  "priority": "C"
+ },
+ {
+  "id": "GOV-001",
+  "module": "GOV",
+  "section": "6.3 Project initiation and governance (GOV)",
+  "text": "Create a project in an engagement from a project template that pre-populates its delivery profile, stages, standard tasks, standard risks, mandatory artefacts and gate criteria.",
+  "priority": "M"
+ },
+ {
+  "id": "GOV-002",
+  "module": "GOV",
+  "section": "6.3 Project initiation and governance (GOV)",
+  "text": "Capture a project brief or charter: background, objectives, scope in and out, deliverables, success criteria, constraints, assumptions, dependencies, approach, stakeholders, governance, indicative budget and timeline.",
+  "priority": "M"
+ },
+ {
+  "id": "GOV-003",
+  "module": "GOV",
+  "section": "6.3 Project initiation and governance (GOV)",
+  "text": "Record the Firm's commercial approval (price, cost, margin, risk, contract terms), routed by value and margin thresholds; for example, margin below target needs engagement executive approval.",
+  "priority": "M"
+ },
+ {
+  "id": "GOV-004",
+  "module": "GOV",
+  "section": "6.3 Project initiation and governance (GOV)",
+  "text": "Record or link the client's business case (options, benefits, costs, timescales, risks) and require continued business justification to be confirmed at each stage gate.",
+  "priority": "S"
+ },
+ {
+  "id": "GOV-005",
+  "module": "GOV",
+  "section": "6.3 Project initiation and governance (GOV)",
+  "text": "Record governance roles with named people from the Firm and the client, using configurable role sets (for example PRINCE2 executive, senior user, senior supplier, project assurance and change authority; or sponsor and steering committee).",
+  "priority": "M"
+ },
+ {
+  "id": "GOV-006",
+  "module": "GOV",
+  "section": "6.3 Project initiation and governance (GOV)",
+  "text": "Record a RACI matrix for key deliverables and activities.",
+  "priority": "S"
+ },
+ {
+  "id": "GOV-007",
+  "module": "GOV",
+  "section": "6.3 Project initiation and governance (GOV)",
+  "text": "Set project and stage tolerances for time, cost, scope, quality, benefits, risk and sustainability; tolerances drive automated monitoring and exception alerts (STS-008).",
+  "priority": "M"
+ },
+ {
+  "id": "GOV-008",
+  "module": "GOV",
+  "section": "6.3 Project initiation and governance (GOV)",
+  "text": "Define stage gates with criteria, required artefacts and approvers; record decisions (proceed, proceed with conditions, re-plan, stop) and track conditions to closure.",
+  "priority": "M"
+ },
+ {
+  "id": "GOV-009",
+  "module": "GOV",
+  "section": "6.3 Project initiation and governance (GOV)",
+  "text": "Block, or flag per configuration, progression to the next stage until mandatory gate artefacts are complete and approved.",
+  "priority": "S"
+ },
+ {
+  "id": "GOV-010",
+  "module": "GOV",
+  "section": "6.3 Project initiation and governance (GOV)",
+  "text": "Classify each project by size, complexity and risk (for example small, medium, large). The classification sets governance intensity: reporting frequency, gate requirements and whether earned value is mandatory.",
+  "priority": "M"
+ },
+ {
+  "id": "GOV-011",
+  "module": "GOV",
+  "section": "6.3 Project initiation and governance (GOV)",
+  "text": "Record how the delivery profile has been tailored for the project, and why.",
+  "priority": "S"
+ },
+ {
+  "id": "GOV-012",
+  "module": "GOV",
+  "section": "6.3 Project initiation and governance (GOV)",
+  "text": "Record the project's management approaches (risk, quality, change, communication, sustainability, data) as structured fields or linked documents.",
+  "priority": "S"
+ },
+ {
+  "id": "GOV-013",
+  "module": "GOV",
+  "section": "6.3 Project initiation and governance (GOV)",
+  "text": "Generate a project initiation document (PID) from captured data using the report engine (section 8).",
+  "priority": "S"
+ },
+ {
+  "id": "GOV-014",
+  "module": "GOV",
+  "section": "6.3 Project initiation and governance (GOV)",
+  "text": "Support PMO assurance health checks with a configurable checklist, findings and actions.",
+  "priority": "C"
+ },
+ {
+  "id": "PLN-001",
+  "module": "PLN",
+  "section": "6.4 Planning and scheduling (PLN)",
+  "text": "Maintain a work breakdown structure of stages, work packages and tasks, at least eight levels deep.",
+  "priority": "M"
+ },
+ {
+  "id": "PLN-002",
+  "module": "PLN",
+  "section": "6.4 Planning and scheduling (PLN)",
+  "text": "Support product-based planning: product breakdown structure and product descriptions (purpose, composition, quality criteria, quality method, owner, approver).",
+  "priority": "S"
+ },
+ {
+  "id": "PLN-003",
+  "module": "PLN",
+  "section": "6.4 Planning and scheduling (PLN)",
+  "text": "Schedule tasks with start and finish dates, duration, effort, percent complete, assigned resources, and dependencies (finish-to-start, start-to-start, finish-to-finish, start-to-finish) with leads and lags.",
+  "priority": "M"
+ },
+ {
+  "id": "PLN-004",
+  "module": "PLN",
+  "section": "6.4 Planning and scheduling (PLN)",
+  "text": "Calculate the critical path and total float, and highlight critical tasks.",
+  "priority": "S"
+ },
+ {
+  "id": "PLN-005",
+  "module": "PLN",
+  "section": "6.4 Planning and scheduling (PLN)",
+  "text": "Maintain milestones, including client-dependency and payment milestones, with planned, baseline, forecast and actual dates.",
+  "priority": "M"
+ },
+ {
+  "id": "PLN-006",
+  "module": "PLN",
+  "section": "6.4 Planning and scheduling (PLN)",
+  "text": "Store multiple baselines (original, plus approved re-baselines with reason and approval reference) and show variance against the current approved baseline.",
+  "priority": "M"
+ },
+ {
+  "id": "PLN-007",
+  "module": "PLN",
+  "section": "6.4 Planning and scheduling (PLN)",
+  "text": "Present Gantt and list views of the schedule.",
+  "priority": "M"
+ },
+ {
+  "id": "PLN-008",
+  "module": "PLN",
+  "section": "6.4 Planning and scheduling (PLN)",
+  "text": "Present Kanban board, calendar and timeline views.",
+  "priority": "S"
+ },
+ {
+  "id": "PLN-009",
+  "module": "PLN",
+  "section": "6.4 Planning and scheduling (PLN)",
+  "text": "Import and export schedules from and to Microsoft Project and Excel.",
+  "priority": "S"
+ },
+ {
+  "id": "PLN-010",
+  "module": "PLN",
+  "section": "6.4 Planning and scheduling (PLN)",
+  "text": "Support agile planning: product backlog (epics, features, user stories) with priority, estimates and acceptance criteria; sprints with goals, capacity and commitment; and release plans.",
+  "priority": "S"
+ },
+ {
+  "id": "PLN-011",
+  "module": "PLN",
+  "section": "6.4 Planning and scheduling (PLN)",
+  "text": "Calculate agile measures: velocity, sprint burn-down, release burn-up, cumulative flow and scope change.",
+  "priority": "S"
+ },
+ {
+  "id": "PLN-012",
+  "module": "PLN",
+  "section": "6.4 Planning and scheduling (PLN)",
+  "text": "Support hybrid plans where agile iterations sit inside predictive stages and roll progress up to stage milestones.",
+  "priority": "S"
+ },
+ {
+  "id": "PLN-013",
+  "module": "PLN",
+  "section": "6.4 Planning and scheduling (PLN)",
+  "text": "Let assignees update task status, percent complete or remaining effort, and comments, on web and mobile.",
+  "priority": "M"
+ },
+ {
+  "id": "PLN-014",
+  "module": "PLN",
+  "section": "6.4 Planning and scheduling (PLN)",
+  "text": "Flag schedule slippage: milestones forecast later than baseline, overdue tasks, and milestones put at risk by late predecessors or dependencies.",
+  "priority": "M"
+ },
+ {
+  "id": "PLN-015",
+  "module": "PLN",
+  "section": "6.4 Planning and scheduling (PLN)",
+  "text": "Provide reusable plan templates for common engagement types (for example discovery, business case, implementation, assurance review).",
+  "priority": "M"
+ },
+ {
+  "id": "PLN-016",
+  "module": "PLN",
+  "section": "6.4 Planning and scheduling (PLN)",
+  "text": "Provide a four-week look-ahead of tasks, milestones and deliverables for status reporting.",
+  "priority": "M"
+ },
+ {
+  "id": "PLN-017",
+  "module": "PLN",
+  "section": "6.4 Planning and scheduling (PLN)",
+  "text": "Model what-if re-plans without changing the live plan until approved.",
+  "priority": "C"
+ },
+ {
+  "id": "SCP-001",
+  "module": "SCP",
+  "section": "6.5 Scope and deliverables (SCP)",
+  "text": "Maintain a scope statement for each project and engagement, with in-scope and out-of-scope items linked to the SOW.",
+  "priority": "M"
+ },
+ {
+  "id": "SCP-002",
+  "module": "SCP",
+  "section": "6.5 Scope and deliverables (SCP)",
+  "text": "Maintain a deliverables register: ID, title, description, SOW reference, owner, planned, baseline, forecast and actual dates, status, version, acceptance criteria and client approver.",
+  "priority": "M"
+ },
+ {
+  "id": "SCP-003",
+  "module": "SCP",
+  "section": "6.5 Scope and deliverables (SCP)",
+  "text": "Support deliverable acceptance: submission to the client approver (in CEMS or the portal), review period per contract (default 10 business days), acceptance or rejection with comments, deemed acceptance where the contract allows, and stored evidence.",
+  "priority": "M"
+ },
+ {
+  "id": "SCP-004",
+  "module": "SCP",
+  "section": "6.5 Scope and deliverables (SCP)",
+  "text": "Link deliverables to billing milestones, so that acceptance marks the milestone ready to invoice.",
+  "priority": "M"
+ },
+ {
+  "id": "SCP-005",
+  "module": "SCP",
+  "section": "6.5 Scope and deliverables (SCP)",
+  "text": "Allow scope changes only through change control, and flag deliverables added or removed outside it.",
+  "priority": "M"
+ },
+ {
+  "id": "SCP-006",
+  "module": "SCP",
+  "section": "6.5 Scope and deliverables (SCP)",
+  "text": "Maintain an optional requirements register with traceability from business need to requirement, deliverable and acceptance test.",
+  "priority": "C"
+ },
+ {
+  "id": "RES-001",
+  "module": "RES",
+  "section": "6.6 Resource management (RES)",
+  "text": "Maintain a resource pool of employees, contractors and subcontractors: role and grade, practice, location, employment type, standard hours, cost rate (restricted under ACC-003), skills and proficiency, certifications, security clearances with level and expiry, and availability.",
+  "priority": "M"
+ },
+ {
+  "id": "RES-002",
+  "module": "RES",
+  "section": "6.6 Resource management (RES)",
+  "text": "Alert resource and engagement managers before clearances or certifications required by an engagement expire (default 60 days).",
+  "priority": "S"
+ },
+ {
+  "id": "RES-003",
+  "module": "RES",
+  "section": "6.6 Resource management (RES)",
+  "text": "Let project managers raise resource requests (role, skills, clearance, hours or FTE, dates, location) and resource managers fulfil them with named people.",
+  "priority": "M"
+ },
+ {
+  "id": "RES-004",
+  "module": "RES",
+  "section": "6.6 Resource management (RES)",
+  "text": "Record allocations as tentative or confirmed, by hours or percentage of full time per week, at project level and optionally at task level.",
+  "priority": "M"
+ },
+ {
+  "id": "RES-005",
+  "module": "RES",
+  "section": "6.6 Resource management (RES)",
+  "text": "Show capacity against demand by person, role, practice and period, net of leave and public holidays by state and territory, highlighting over- and under-allocation.",
+  "priority": "M"
+ },
+ {
+  "id": "RES-006",
+  "module": "RES",
+  "section": "6.6 Resource management (RES)",
+  "text": "Calculate planned and actual utilisation (billable and non-billable) by person, team and practice.",
+  "priority": "M"
+ },
+ {
+  "id": "RES-007",
+  "module": "RES",
+  "section": "6.6 Resource management (RES)",
+  "text": "Search and match people to requests by skills, clearance, availability and cost.",
+  "priority": "S"
+ },
+ {
+  "id": "RES-008",
+  "module": "RES",
+  "section": "6.6 Resource management (RES)",
+  "text": "Allow placeholder (unnamed) roles in plans and forecasts until named people are confirmed.",
+  "priority": "M"
+ },
+ {
+  "id": "RES-009",
+  "module": "RES",
+  "section": "6.6 Resource management (RES)",
+  "text": "Record engagement onboarding requirements (inductions, building access, client system accounts, clearance sponsorship) and track completion for each team member.",
+  "priority": "S"
+ },
+ {
+  "id": "RES-010",
+  "module": "RES",
+  "section": "6.6 Resource management (RES)",
+  "text": "Record key personnel named in the contract, and alert the engagement manager when a key person is removed, reallocated or goes on extended leave.",
+  "priority": "S"
+ },
+ {
+  "id": "RES-011",
+  "module": "RES",
+  "section": "6.6 Resource management (RES)",
+  "text": "Show an engagement team view: who is on which project, in what role, at what allocation, with onboarding status.",
+  "priority": "M"
+ },
+ {
+  "id": "RES-012",
+  "module": "RES",
+  "section": "6.6 Resource management (RES)",
+  "text": "Feed allocations into the labour forecast (FIN-019).",
+  "priority": "M"
+ },
+ {
+  "id": "TEX-001",
+  "module": "TEX",
+  "section": "6.7 Time and expenses (TEX)",
+  "text": "Let users record time daily or weekly against project tasks or project-level codes, with billable flag, work type and notes.",
+  "priority": "M"
+ },
+ {
+  "id": "TEX-002",
+  "module": "TEX",
+  "section": "6.7 Time and expenses (TEX)",
+  "text": "Provide non-project time codes: leave, training, business development, practice development and internal projects.",
+  "priority": "M"
+ },
+ {
+  "id": "TEX-003",
+  "module": "TEX",
+  "section": "6.7 Time and expenses (TEX)",
+  "text": "Enforce timesheet deadlines (default: Monday 10:00 am local time for the previous week) with reminders and escalation for late submission.",
+  "priority": "M"
+ },
+ {
+  "id": "TEX-004",
+  "module": "TEX",
+  "section": "6.7 Time and expenses (TEX)",
+  "text": "Route timesheets to the project manager for approval (engagement manager as alternate), support line-level approval and rejection, and lock approved time.",
+  "priority": "M"
+ },
+ {
+  "id": "TEX-005",
+  "module": "TEX",
+  "section": "6.7 Time and expenses (TEX)",
+  "text": "Validate entries: block time on closed projects and tasks; warn or block (configurable) time on unassigned tasks, above a daily maximum (default 12 hours), or beyond budget or PO limits.",
+  "priority": "M"
+ },
+ {
+  "id": "TEX-006",
+  "module": "TEX",
+  "section": "6.7 Time and expenses (TEX)",
+  "text": "Convert hours to billable days using the contract's day length (for example 7.5 or 8 hours) and rounding rule (BR-12).",
+  "priority": "M"
+ },
+ {
+  "id": "TEX-007",
+  "module": "TEX",
+  "section": "6.7 Time and expenses (TEX)",
+  "text": "Produce client timesheet extracts in the client's format, and capture client sign-off where the contract requires it.",
+  "priority": "S"
+ },
+ {
+  "id": "TEX-008",
+  "module": "TEX",
+  "section": "6.7 Time and expenses (TEX)",
+  "text": "Record expenses (travel, accommodation, meals, materials) with receipt image, GST amount, billable flag, contract mark-up rules and an approval workflow.",
+  "priority": "M"
+ },
+ {
+  "id": "TEX-009",
+  "module": "TEX",
+  "section": "6.7 Time and expenses (TEX)",
+  "text": "Import third-party and subcontractor costs and supplier invoices from the accounting system against projects and cost types.",
+  "priority": "M"
+ },
+ {
+  "id": "TEX-010",
+  "module": "TEX",
+  "section": "6.7 Time and expenses (TEX)",
+  "text": "Correct approved time only through a controlled adjustment with reason and audit trail; corrections to closed periods post to the current open period.",
+  "priority": "M"
+ },
+ {
+  "id": "TEX-011",
+  "module": "TEX",
+  "section": "6.7 Time and expenses (TEX)",
+  "text": "Suggest time entries from the user's Outlook calendar.",
+  "priority": "C"
+ },
+ {
+  "id": "RSK-001",
+  "module": "RSK",
+  "section": "6.8 Risk management (RSK)",
+  "text": "Maintain risk registers at project and engagement level: ID, title, cause–event–effect description, category, owner, actionee, date raised, proximity, likelihood, consequence, inherent and residual ratings, response strategy and actions, trend, status, linked items, client-visible flag and include-in-report flag.",
+  "priority": "M"
+ },
+ {
+  "id": "RSK-002",
+  "module": "RSK",
+  "section": "6.8 Risk management (RSK)",
+  "text": "Use a configurable likelihood × consequence matrix (default 5 × 5) with descriptors aligned to the Firm's risk framework, and allow a client-specific matrix per engagement.",
+  "priority": "M"
+ },
+ {
+  "id": "RSK-003",
+  "module": "RSK",
+  "section": "6.8 Risk management (RSK)",
+  "text": "Manage threats and opportunities with matching response types (threats: avoid, reduce, transfer, share, accept, prepare contingent plans; opportunities: exploit, enhance, share, reject).",
+  "priority": "M"
+ },
+ {
+  "id": "RSK-004",
+  "module": "RSK",
+  "section": "6.8 Risk management (RSK)",
+  "text": "Quantify risks where needed: cost and schedule impact ranges (minimum, most likely, maximum) and expected value.",
+  "priority": "S"
+ },
+ {
+  "id": "RSK-005",
+  "module": "RSK",
+  "section": "6.8 Risk management (RSK)",
+  "text": "Hold contingency and management reserve per project, and record drawdowns against risks or approved changes, with approval (FIN-011).",
+  "priority": "S"
+ },
+ {
+  "id": "RSK-006",
+  "module": "RSK",
+  "section": "6.8 Risk management (RSK)",
+  "text": "Prompt owners to review risks on a cycle set by rating (default weekly for high and extreme, fortnightly for others) and flag overdue reviews.",
+  "priority": "M"
+ },
+ {
+  "id": "RSK-007",
+  "module": "RSK",
+  "section": "6.8 Risk management (RSK)",
+  "text": "Escalate risks above a rating threshold, or forecast to breach tolerance, to the engagement level and notify the engagement manager (BR-15).",
+  "priority": "M"
+ },
+ {
+  "id": "RSK-008",
+  "module": "RSK",
+  "section": "6.8 Risk management (RSK)",
+  "text": "Provide inherent and residual heat maps, risk trends over time, and top-risk lists for dashboards and reports.",
+  "priority": "M"
+ },
+ {
+  "id": "RSK-009",
+  "module": "RSK",
+  "section": "6.8 Risk management (RSK)",
+  "text": "Keep a full history of rating, owner and status changes, to support trends and \"changes since last report\".",
+  "priority": "M"
+ },
+ {
+  "id": "RSK-010",
+  "module": "RSK",
+  "section": "6.8 Risk management (RSK)",
+  "text": "Provide a library of common consulting risks (for example subject-matter expert availability, scope creep, key person dependency, delayed system access) to seed registers.",
+  "priority": "S"
+ },
+ {
+  "id": "RSK-011",
+  "module": "RSK",
+  "section": "6.8 Risk management (RSK)",
+  "text": "Record the project's risk management approach: appetite, scales, roles and review frequency.",
+  "priority": "C"
+ },
+ {
+  "id": "RSK-012",
+  "module": "RSK",
+  "section": "6.8 Risk management (RSK)",
+  "text": "Run Monte Carlo cost and schedule risk analysis.",
+  "priority": "W"
+ },
+ {
+  "id": "RAI-001",
+  "module": "RAI",
+  "section": "6.9 Issues and RAID logs (RAI)",
+  "text": "Maintain issue registers at project and engagement level: ID, title, description, type (problem or concern, request for change, off-specification, client escalation), priority, severity, owner, raised date, target resolution date, status, resolution, impacts and links.",
+  "priority": "M"
+ },
+ {
+  "id": "RAI-002",
+  "module": "RAI",
+  "section": "6.9 Issues and RAID logs (RAI)",
+  "text": "Convert a request for change or off-specification into a change request, carrying over its data and keeping the link.",
+  "priority": "M"
+ },
+ {
+  "id": "RAI-003",
+  "module": "RAI",
+  "section": "6.9 Issues and RAID logs (RAI)",
+  "text": "Escalate issues beyond tolerance or authority (configurable by severity) to the engagement manager or board, with an exception notification.",
+  "priority": "M"
+ },
+ {
+  "id": "RAI-004",
+  "module": "RAI",
+  "section": "6.9 Issues and RAID logs (RAI)",
+  "text": "Maintain an assumptions log: assumption, source (such as the SOW), owner, validate-by date, status (open, validated, invalid) and impact if invalid. Invalidating an assumption prompts a linked risk, issue or change.",
+  "priority": "M"
+ },
+ {
+  "id": "RAI-005",
+  "module": "RAI",
+  "section": "6.9 Issues and RAID logs (RAI)",
+  "text": "Maintain a dependencies register: direction (inbound or outbound), type (internal, client, third party, cross-project), provider, receiver, need-by date, status, linked milestones and impact. Overdue client dependencies are flagged prominently.",
+  "priority": "M"
+ },
+ {
+  "id": "RAI-006",
+  "module": "RAI",
+  "section": "6.9 Issues and RAID logs (RAI)",
+  "text": "Maintain a decisions log: decision, context and options, decision-maker, date, forum, rationale, impacts and links.",
+  "priority": "M"
+ },
+ {
+  "id": "RAI-007",
+  "module": "RAI",
+  "section": "6.9 Issues and RAID logs (RAI)",
+  "text": "Maintain an actions log: action, owner (Firm or client), due date, source (meeting, RAID item, gate condition) and status, with reminders when overdue.",
+  "priority": "M"
+ },
+ {
+  "id": "RAI-008",
+  "module": "RAI",
+  "section": "6.9 Issues and RAID logs (RAI)",
+  "text": "Provide a combined RAID view with filtering, sorting, bulk update and export to Excel.",
+  "priority": "M"
+ },
+ {
+  "id": "RAI-009",
+  "module": "RAI",
+  "section": "6.9 Issues and RAID logs (RAI)",
+  "text": "Flag RAID items as client-visible and include-in-report, with report inclusion defaulted by rule (open high and extreme risks, high-severity issues, overdue client dependencies, decisions required).",
+  "priority": "M"
+ },
+ {
+  "id": "RAI-010",
+  "module": "RAI",
+  "section": "6.9 Issues and RAID logs (RAI)",
+  "text": "Show the age of RAID items and highlight items not reviewed within their cycle.",
+  "priority": "M"
+ },
+ {
+  "id": "RAI-011",
+  "module": "RAI",
+  "section": "6.9 Issues and RAID logs (RAI)",
+  "text": "Raise RAID items from meeting minutes, a project email address, or Microsoft Teams.",
+  "priority": "C"
+ },
+ {
+  "id": "CHG-001",
+  "module": "CHG",
+  "section": "6.10 Change control (CHG)",
+  "text": "Record change requests: ID, title, description, reason, requester (client or Firm), type (scope, schedule, cost, resource, contract), date raised, priority and status.",
+  "priority": "M"
+ },
+ {
+  "id": "CHG-002",
+  "module": "CHG",
+  "section": "6.10 Change control (CHG)",
+  "text": "Capture impact on scope, schedule, cost and price, resources, quality, risk, benefits and contract terms; for priced changes, calculate cost, price and margin from estimates and rate cards.",
+  "priority": "M"
+ },
+ {
+  "id": "CHG-003",
+  "module": "CHG",
+  "section": "6.10 Change control (CHG)",
+  "text": "Route change requests for approval by change authority thresholds (for example project manager up to a set value or number of days, engagement manager up to a higher value, steering committee or client above that), including client approval where required.",
+  "priority": "M"
+ },
+ {
+  "id": "CHG-004",
+  "module": "CHG",
+  "section": "6.10 Change control (CHG)",
+  "text": "On approval, update the affected baselines (scope, schedule, budget, price) with a link to the change, keeping prior baselines.",
+  "priority": "M"
+ },
+ {
+  "id": "CHG-005",
+  "module": "CHG",
+  "section": "6.10 Change control (CHG)",
+  "text": "Generate a change request or contract variation document from a template for signature, and record the executed variation (number, value, date).",
+  "priority": "S"
+ },
+ {
+  "id": "CHG-006",
+  "module": "CHG",
+  "section": "6.10 Change control (CHG)",
+  "text": "Show the financial effect of pending changes separately in forecasts and scenarios (FIN-024).",
+  "priority": "M"
+ },
+ {
+  "id": "CHG-007",
+  "module": "CHG",
+  "section": "6.10 Change control (CHG)",
+  "text": "Maintain a change log per project and engagement showing cumulative approved variations against the original contract value.",
+  "priority": "M"
+ },
+ {
+  "id": "CHG-008",
+  "module": "CHG",
+  "section": "6.10 Change control (CHG)",
+  "text": "Flag time booked to work linked to unapproved changes as a commercial risk.",
+  "priority": "S"
+ },
+ {
+  "id": "CHG-009",
+  "module": "CHG",
+  "section": "6.10 Change control (CHG)",
+  "text": "Track implementation of approved changes and close them when complete.",
+  "priority": "M"
+ },
+ {
+  "id": "QLT-001",
+  "module": "QLT",
+  "section": "6.11 Quality management (QLT)",
+  "text": "Record each project's quality management approach: standards, review methods, roles and acceptance responsibilities.",
+  "priority": "S"
+ },
+ {
+  "id": "QLT-002",
+  "module": "QLT",
+  "section": "6.11 Quality management (QLT)",
+  "text": "Record quality criteria and quality methods for each deliverable (its product description).",
+  "priority": "S"
+ },
+ {
+  "id": "QLT-003",
+  "module": "QLT",
+  "section": "6.11 Quality management (QLT)",
+  "text": "Maintain a quality register of planned and actual quality activities (peer review, QA review, testing, client walkthrough) with reviewers, dates, results and follow-up actions.",
+  "priority": "M"
+ },
+ {
+  "id": "QLT-004",
+  "module": "QLT",
+  "section": "6.11 Quality management (QLT)",
+  "text": "Require an internal quality review before a deliverable can be marked Submitted, configurable by deliverable class (for example engagement executive review of final reports).",
+  "priority": "M"
+ },
+ {
+  "id": "QLT-005",
+  "module": "QLT",
+  "section": "6.11 Quality management (QLT)",
+  "text": "Record review findings and defects against deliverables with severity and resolution.",
+  "priority": "S"
+ },
+ {
+  "id": "QLT-006",
+  "module": "QLT",
+  "section": "6.11 Quality management (QLT)",
+  "text": "Report quality measures: first-time acceptance rate, rework cycles, findings by severity and overdue reviews.",
+  "priority": "S"
+ },
+ {
+  "id": "QLT-007",
+  "module": "QLT",
+  "section": "6.11 Quality management (QLT)",
+  "text": "Record client feedback on individual deliverables.",
+  "priority": "C"
+ },
+ {
+  "id": "STK-001",
+  "module": "STK",
+  "section": "6.12 Stakeholders and communications (STK)",
+  "text": "Maintain an engagement stakeholder register shared by its projects: organisation, role, influence, interest, attitude, current and desired engagement level (unaware, resistant, neutral, supportive, leading), communication preferences and relationship owner.",
+  "priority": "M"
+ },
+ {
+  "id": "STK-002",
+  "module": "STK",
+  "section": "6.12 Stakeholders and communications (STK)",
+  "text": "Show stakeholders on a power–interest grid and an engagement assessment matrix (current against desired level).",
+  "priority": "S"
+ },
+ {
+  "id": "STK-003",
+  "module": "STK",
+  "section": "6.12 Stakeholders and communications (STK)",
+  "text": "Maintain a communication plan (audience, information needed, purpose, channel, frequency, owner, template) and track delivery against it.",
+  "priority": "M"
+ },
+ {
+  "id": "STK-004",
+  "module": "STK",
+  "section": "6.12 Stakeholders and communications (STK)",
+  "text": "Manage distribution lists per engagement and report type, for internal and client recipients.",
+  "priority": "M"
+ },
+ {
+  "id": "STK-005",
+  "module": "STK",
+  "section": "6.12 Stakeholders and communications (STK)",
+  "text": "Record governance meetings and workshops (agenda, attendees, minutes, decisions, actions), with decisions and actions flowing to their logs.",
+  "priority": "S"
+ },
+ {
+  "id": "STK-006",
+  "module": "STK",
+  "section": "6.12 Stakeholders and communications (STK)",
+  "text": "Generate steering committee packs and meeting agendas from templates using the report engine (section 8).",
+  "priority": "S"
+ },
+ {
+  "id": "STK-007",
+  "module": "STK",
+  "section": "6.12 Stakeholders and communications (STK)",
+  "text": "Record stakeholder interactions and relationship notes.",
+  "priority": "C"
+ },
+ {
+  "id": "STK-008",
+  "module": "STK",
+  "section": "6.12 Stakeholders and communications (STK)",
+  "text": "Schedule governance meetings through the Outlook calendar.",
+  "priority": "C"
+ },
+ {
+  "id": "STS-001",
+  "module": "STS",
+  "section": "6.13 Status and performance tracking (STS)",
+  "text": "Require a status update for each active project per reporting period (default weekly; period and cut-off per BR-01), with reminders before the cut-off.",
+  "priority": "M"
+ },
+ {
+  "id": "STS-002",
+  "module": "STS",
+  "section": "6.13 Status and performance tracking (STS)",
+  "text": "Capture in each status update: overall RAG and RAG for schedule, budget, scope, resources, risks and issues, and quality (dimensions configurable), each with commentary; executive summary; achievements this period; planned activities next period; decisions required; escalations; and client actions outstanding.",
+  "priority": "M"
+ },
+ {
+  "id": "STS-003",
+  "module": "STS",
+  "section": "6.13 Status and performance tracking (STS)",
+  "text": "Pre-populate each update with system data: milestones achieved and missed, four-week look-ahead, RAID changes since the last update, change requests raised and approved, financial position, schedule and cost indices, and hours recorded.",
+  "priority": "M"
+ },
+ {
+  "id": "STS-004",
+  "module": "STS",
+  "section": "6.13 Status and performance tracking (STS)",
+  "text": "Calculate a suggested RAG for each dimension from data and tolerances (BR-03), show it beside the manager's rating, and require justification when the chosen rating is better than the calculated one. This guards against \"watermelon\" reporting: green outside, red inside.",
+  "priority": "M"
+ },
+ {
+  "id": "STS-005",
+  "module": "STS",
+  "section": "6.13 Status and performance tracking (STS)",
+  "text": "Roll the previous period's narrative forward as a starting point, marking fields carried over unchanged.",
+  "priority": "M"
+ },
+ {
+  "id": "STS-006",
+  "module": "STS",
+  "section": "6.13 Status and performance tracking (STS)",
+  "text": "Route status updates to the engagement manager for review, who approves them or returns them with comments.",
+  "priority": "M"
+ },
+ {
+  "id": "STS-007",
+  "module": "STS",
+  "section": "6.13 Status and performance tracking (STS)",
+  "text": "Keep the history of all status updates and show RAG trends (default last 12 periods).",
+  "priority": "M"
+ },
+ {
+  "id": "STS-008",
+  "module": "STS",
+  "section": "6.13 Status and performance tracking (STS)",
+  "text": "Monitor tolerances continuously and raise exception alerts when a forecast breaches tolerance for time, cost, scope, quality, benefits, risk or sustainability.",
+  "priority": "M"
+ },
+ {
+  "id": "STS-009",
+  "module": "STS",
+  "section": "6.13 Status and performance tracking (STS)",
+  "text": "Generate exception reports from a template, capturing cause, consequences, options, recommendation and lessons.",
+  "priority": "S"
+ },
+ {
+  "id": "STS-010",
+  "module": "STS",
+  "section": "6.13 Status and performance tracking (STS)",
+  "text": "Show engagement managers and the PMO a submission tracker: which projects have submitted, are late, or await approval.",
+  "priority": "M"
+ },
+ {
+  "id": "STS-011",
+  "module": "STS",
+  "section": "6.13 Status and performance tracking (STS)",
+  "text": "Lock status updates once used in an issued report; later edits create a new version with audit (BR-07).",
+  "priority": "M"
+ },
+ {
+  "id": "STS-012",
+  "module": "STS",
+  "section": "6.13 Status and performance tracking (STS)",
+  "text": "Accept checkpoint reports from work package or team leads that feed the project status update.",
+  "priority": "C"
+ },
+ {
+  "id": "STS-013",
+  "module": "STS",
+  "section": "6.13 Status and performance tracking (STS)",
+  "text": "Support status update entry on mobile devices.",
+  "priority": "S"
+ },
+ {
+  "id": "BEN-001",
+  "module": "BEN",
+  "section": "6.14 Benefits management (BEN)",
+  "text": "Maintain a benefits register per engagement and project: benefit, description, type (financial or non-financial, cashable or non-cashable), client owner, measure, baseline, target, timing, enabling deliverables and status.",
+  "priority": "S"
+ },
+ {
+  "id": "BEN-002",
+  "module": "BEN",
+  "section": "6.14 Benefits management (BEN)",
+  "text": "Record benefit measurements over time, including after project closure, against targets.",
+  "priority": "S"
+ },
+ {
+  "id": "BEN-003",
+  "module": "BEN",
+  "section": "6.14 Benefits management (BEN)",
+  "text": "Record dis-benefits alongside benefits.",
+  "priority": "C"
+ },
+ {
+  "id": "BEN-004",
+  "module": "BEN",
+  "section": "6.14 Benefits management (BEN)",
+  "text": "Produce a benefits review plan at closure, with review dates and owners.",
+  "priority": "C"
+ },
+ {
+  "id": "BEN-005",
+  "module": "BEN",
+  "section": "6.14 Benefits management (BEN)",
+  "text": "Flag benefits and outcomes the client has approved for use as case studies or credentials.",
+  "priority": "C"
+ },
+ {
+  "id": "LSN-001",
+  "module": "LSN",
+  "section": "6.15 Lessons learned (LSN)",
+  "text": "Maintain a lessons log per project and engagement: what happened, impact, root cause, recommendation, category, tags, raised by and date.",
+  "priority": "M"
+ },
+ {
+  "id": "LSN-002",
+  "module": "LSN",
+  "section": "6.15 Lessons learned (LSN)",
+  "text": "Prompt lesson capture at stage gates and closure, and support agile retrospectives.",
+  "priority": "S"
+ },
+ {
+  "id": "LSN-003",
+  "module": "LSN",
+  "section": "6.15 Lessons learned (LSN)",
+  "text": "Publish selected lessons to a cross-engagement knowledge base, with client-confidential details removed or restricted.",
+  "priority": "S"
+ },
+ {
+  "id": "LSN-004",
+  "module": "LSN",
+  "section": "6.15 Lessons learned (LSN)",
+  "text": "Suggest relevant lessons when a project is created, matched by engagement type, client, sector and tags.",
+  "priority": "S"
+ },
+ {
+  "id": "LSN-005",
+  "module": "LSN",
+  "section": "6.15 Lessons learned (LSN)",
+  "text": "Track actions arising from lessons (such as updating a template or method) to closure.",
+  "priority": "C"
+ },
+ {
+  "id": "CLS-001",
+  "module": "CLS",
+  "section": "6.16 Closure (CLS)",
+  "text": "Provide a configurable closure checklist: deliverables accepted, RAID items closed or transferred, final invoice issued, time and costs finalised, people released, client feedback obtained, lessons recorded, documents archived, access revoked.",
+  "priority": "M"
+ },
+ {
+  "id": "CLS-002",
+  "module": "CLS",
+  "section": "6.16 Closure (CLS)",
+  "text": "Prevent closure until mandatory checklist items are complete or an exception is approved.",
+  "priority": "M"
+ },
+ {
+  "id": "CLS-003",
+  "module": "CLS",
+  "section": "6.16 Closure (CLS)",
+  "text": "Generate an end project report (performance against baseline for scope, schedule, cost, quality and benefits; lessons; follow-on actions) from a template.",
+  "priority": "S"
+ },
+ {
+  "id": "CLS-004",
+  "module": "CLS",
+  "section": "6.16 Closure (CLS)",
+  "text": "Transfer open risks, issues and actions to the engagement, another project or an operational owner on closure.",
+  "priority": "M"
+ },
+ {
+  "id": "CLS-005",
+  "module": "CLS",
+  "section": "6.16 Closure (CLS)",
+  "text": "Close time codes automatically on project closure, after a grace period for final timesheets (default 10 business days).",
+  "priority": "M"
+ },
+ {
+  "id": "CLS-006",
+  "module": "CLS",
+  "section": "6.16 Closure (CLS)",
+  "text": "Support premature closure (cancellation) with a reason, and calculate the final financial position.",
+  "priority": "M"
+ },
+ {
+  "id": "CLS-007",
+  "module": "CLS",
+  "section": "6.16 Closure (CLS)",
+  "text": "Close an engagement only when all its projects are closed and contractual obligations (final invoice, handover, return or destruction of client data) are complete.",
+  "priority": "M"
+ },
+ {
+  "id": "CLS-008",
+  "module": "CLS",
+  "section": "6.16 Closure (CLS)",
+  "text": "Set closed projects and engagements to read-only and retain them under the retention rules (DAT-001).",
+  "priority": "M"
+ },
+ {
+  "id": "DOC-001",
+  "module": "DOC",
+  "section": "6.17 Documents (DOC)",
+  "text": "Maintain a document register per project and engagement: title, type, version, status, owner, classification and location.",
+  "priority": "M"
+ },
+ {
+  "id": "DOC-002",
+  "module": "DOC",
+  "section": "6.17 Documents (DOC)",
+  "text": "Store documents in the Firm's repository (for example SharePoint) and link them to CEMS records without duplicating storage, respecting repository permissions.",
+  "priority": "M"
+ },
+ {
+  "id": "DOC-003",
+  "module": "DOC",
+  "section": "6.17 Documents (DOC)",
+  "text": "Create a standard folder structure in the repository when an engagement or project is created.",
+  "priority": "S"
+ },
+ {
+  "id": "DOC-004",
+  "module": "DOC",
+  "section": "6.17 Documents (DOC)",
+  "text": "Attach documents and evidence to any record (RAID item, change, deliverable, gate decision).",
+  "priority": "M"
+ },
+ {
+  "id": "DOC-005",
+  "module": "DOC",
+  "section": "6.17 Documents (DOC)",
+  "text": "Retain version history for documents held or linked by CEMS.",
+  "priority": "M"
+ },
+ {
+  "id": "DOC-006",
+  "module": "DOC",
+  "section": "6.17 Documents (DOC)",
+  "text": "Apply sensitivity labels (the Firm's labels, or Australian Government protective markings where required) and enforce their handling rules.",
+  "priority": "S"
+ },
+ {
+  "id": "DOC-007",
+  "module": "DOC",
+  "section": "6.17 Documents (DOC)",
+  "text": "Search across records and attached documents within the user's permissions.",
+  "priority": "S"
+ },
+ {
+  "id": "WFL-001",
+  "module": "WFL",
+  "section": "6.18 Workflow and notifications (WFL)",
+  "text": "Provide a configurable workflow engine for approvals (status updates, timesheets, expenses, change requests, gate decisions, forecasts, report templates, reports) with sequential and parallel steps, delegation, and escalation on timeout.",
+  "priority": "M"
+ },
+ {
+  "id": "WFL-002",
+  "module": "WFL",
+  "section": "6.18 Workflow and notifications (WFL)",
+  "text": "Notify users of assignments, approvals, due and overdue items, and threshold breaches, in the app and by email.",
+  "priority": "M"
+ },
+ {
+  "id": "WFL-003",
+  "module": "WFL",
+  "section": "6.18 Workflow and notifications (WFL)",
+  "text": "Send notifications and approval actions to Microsoft Teams.",
+  "priority": "S"
+ },
+ {
+  "id": "WFL-004",
+  "module": "WFL",
+  "section": "6.18 Workflow and notifications (WFL)",
+  "text": "Let users choose immediate or daily-digest delivery for non-mandatory notifications.",
+  "priority": "S"
+ },
+ {
+  "id": "WFL-005",
+  "module": "WFL",
+  "section": "6.18 Workflow and notifications (WFL)",
+  "text": "Give each user a \"My work\" view: tasks, actions, approvals, owned RAID items, and timesheets and status updates due.",
+  "priority": "M"
+ },
+ {
+  "id": "WFL-006",
+  "module": "WFL",
+  "section": "6.18 Workflow and notifications (WFL)",
+  "text": "Support approval delegation during leave, with audit.",
+  "priority": "M"
+ },
+ {
+  "id": "WFL-007",
+  "module": "WFL",
+  "section": "6.18 Workflow and notifications (WFL)",
+  "text": "Support comments and @mentions on records.",
+  "priority": "S"
+ },
+ {
+  "id": "DSH-001",
+  "module": "DSH",
+  "section": "6.19 Dashboards and analytics (DSH)",
+  "text": "Provide a portfolio dashboard across clients and engagements, filterable by client, engagement manager, practice, sector and status, showing health, financials, milestones, risks and utilisation.",
+  "priority": "M"
+ },
+ {
+  "id": "DSH-002",
+  "module": "DSH",
+  "section": "6.19 Dashboards and analytics (DSH)",
+  "text": "Provide engagement and project dashboards (ENG-010).",
+  "priority": "M"
+ },
+ {
+  "id": "DSH-003",
+  "module": "DSH",
+  "section": "6.19 Dashboards and analytics (DSH)",
+  "text": "Drill down from portfolio to client, engagement, project and individual records.",
+  "priority": "M"
+ },
+ {
+  "id": "DSH-004",
+  "module": "DSH",
+  "section": "6.19 Dashboards and analytics (DSH)",
+  "text": "Provide exception lists: projects at risk, late status updates, PO burn alerts, contract and clearance expiries, overdue RAID reviews.",
+  "priority": "M"
+ },
+ {
+  "id": "DSH-005",
+  "module": "DSH",
+  "section": "6.19 Dashboards and analytics (DSH)",
+  "text": "Provide a self-service report builder (fields, filters, grouping) with saved views and export to Excel, CSV and PDF.",
+  "priority": "S"
+ },
+ {
+  "id": "DSH-006",
+  "module": "DSH",
+  "section": "6.19 Dashboards and analytics (DSH)",
+  "text": "Expose a governed analytics model (for example for Power BI) with row-level security matching CEMS permissions.",
+  "priority": "S"
+ },
+ {
+  "id": "DSH-007",
+  "module": "DSH",
+  "section": "6.19 Dashboards and analytics (DSH)",
+  "text": "Show trends: RAG history, forecast movements, margin trend and RAID ageing.",
+  "priority": "S"
+ },
+ {
+  "id": "CPT-001",
+  "module": "CPT",
+  "section": "6.20 Client portal (CPT)",
+  "text": "Provide a secure portal for client stakeholders, using external identities with multi-factor authentication, scoped to their engagements.",
+  "priority": "S"
+ },
+ {
+  "id": "CPT-002",
+  "module": "CPT",
+  "section": "6.20 Client portal (CPT)",
+  "text": "Let client users view and download issued reports and deliverables, and view client-visible RAID items and actions.",
+  "priority": "S"
+ },
+ {
+  "id": "CPT-003",
+  "module": "CPT",
+  "section": "6.20 Client portal (CPT)",
+  "text": "Let client approvers accept or reject deliverables and approve change requests with comments, recorded as auditable approvals.",
+  "priority": "S"
+ },
+ {
+  "id": "CPT-004",
+  "module": "CPT",
+  "section": "6.20 Client portal (CPT)",
+  "text": "Let client users update the status of client-owned actions and dependencies.",
+  "priority": "C"
+ },
+ {
+  "id": "CPT-005",
+  "module": "CPT",
+  "section": "6.20 Client portal (CPT)",
+  "text": "Never expose internal-only data to client users (cost rates, costs, margins, internal notes, internal RAID items), enforced at the data layer and covered by automated tests.",
+  "priority": "M",
+  "conditional": "M (when the portal is built)"
+ },
+ {
+  "id": "ADM-001",
+  "module": "ADM",
+  "section": "6.21 Administration (ADM)",
+  "text": "Manage users, roles and engagement memberships, provisioned from Microsoft Entra ID groups (INT-001).",
+  "priority": "M"
+ },
+ {
+  "id": "ADM-002",
+  "module": "ADM",
+  "section": "6.21 Administration (ADM)",
+  "text": "Configure delivery profiles (for example PRINCE2-aligned, PMBOK-aligned, agile, hybrid): lifecycle stages, gate criteria, mandatory artefacts and terminology (such as \"stage\" or \"phase\", \"project board\" or \"steering committee\").",
+  "priority": "M"
+ },
+ {
+  "id": "ADM-003",
+  "module": "ADM",
+  "section": "6.21 Administration (ADM)",
+  "text": "Configure reference data: risk matrices and categories, RAG rules and thresholds, tolerance defaults, work and expense types, public holidays by state and territory, financial calendar and reporting periods.",
+  "priority": "M"
+ },
+ {
+  "id": "ADM-004",
+  "module": "ADM",
+  "section": "6.21 Administration (ADM)",
+  "text": "Configure workflows and delegations of authority, including approval thresholds by value and margin.",
+  "priority": "M"
+ },
+ {
+  "id": "ADM-005",
+  "module": "ADM",
+  "section": "6.21 Administration (ADM)",
+  "text": "Add custom fields to key records (client, engagement, project, RAID item, deliverable); custom fields become available as report tokens.",
+  "priority": "S"
+ },
+ {
+  "id": "ADM-006",
+  "module": "ADM",
+  "section": "6.21 Administration (ADM)",
+  "text": "Configure numbering schemes, for example client code, engagement code and project number.",
+  "priority": "S"
+ },
+ {
+  "id": "ADM-007",
+  "module": "ADM",
+  "section": "6.21 Administration (ADM)",
+  "text": "Maintain project, plan, RAID and closure templates.",
+  "priority": "M"
+ },
+ {
+  "id": "ADM-008",
+  "module": "ADM",
+  "section": "6.21 Administration (ADM)",
+  "text": "Show system health, integration logs and scheduled jobs (such as scheduled report drafts).",
+  "priority": "S"
+ },
+ {
+  "id": "FIN-001",
+  "module": "FIN",
+  "section": "7.1 Commercial models and pricing",
+  "text": "Support these commercial models per project or SOW: time and materials (T&M); capped T&M (not to exceed); fixed price; milestone-based fixed price; retainer or managed service (recurring fee); and outcome-based fees. A project may have more than one billing arrangement, for example a fixed-price phase plus T&M support.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-002",
+  "module": "FIN",
+  "section": "7.1 Commercial models and pricing",
+  "text": "Build a price from effort estimates by role and rate, plus expenses, contingency and risk premium, showing the resulting price, cost, margin and effective day rate.",
+  "priority": "S"
+ },
+ {
+  "id": "FIN-003",
+  "module": "FIN",
+  "section": "7.1 Commercial models and pricing",
+  "text": "Maintain total contract value as original value plus approved variations, by SOW and by project.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-004",
+  "module": "FIN",
+  "section": "7.2 Rate cards and cost rates",
+  "text": "Maintain charge-out rate cards at Firm, client, agreement or panel, and engagement level, by role or grade (optionally by named person), with effective dates, unit (hour or day) and currency. Resolve the applicable rate by precedence: named person, engagement, agreement or panel, client, Firm standard.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-005",
+  "module": "FIN",
+  "section": "7.2 Rate cards and cost rates",
+  "text": "Maintain cost rates per person (fully loaded salary cost or contractor rate) with effective dates, visible only to authorised roles (ACC-003).",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-006",
+  "module": "FIN",
+  "section": "7.2 Rate cards and cost rates",
+  "text": "Apply rate changes, such as contracted annual indexation, from an effective date and show their effect on forecasts.",
+  "priority": "S"
+ },
+ {
+  "id": "FIN-007",
+  "module": "FIN",
+  "section": "7.2 Rate cards and cost rates",
+  "text": "Apply discounts, rebates and volume tiers defined in agreements, at invoice or engagement level.",
+  "priority": "C"
+ },
+ {
+  "id": "FIN-008",
+  "module": "FIN",
+  "section": "7.3 Budgets and baselines",
+  "text": "Create project budgets by stage or work package, cost type (labour, contractors, expenses, third-party products and services, contingency) and month, either top-down or bottom-up from the resource plan.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-009",
+  "module": "FIN",
+  "section": "7.3 Budgets and baselines",
+  "text": "Hold the cost budget and revenue budget separately and calculate budgeted margin.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-010",
+  "module": "FIN",
+  "section": "7.3 Budgets and baselines",
+  "text": "Baseline the budget on approval and keep every baseline; change it only through approved change requests or an approved re-baseline with a reason (BR-10).",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-011",
+  "module": "FIN",
+  "section": "7.3 Budgets and baselines",
+  "text": "Hold contingency (for identified risks) and management reserve outside the performance measurement baseline, and record drawdowns with approval and justification.",
+  "priority": "S"
+ },
+ {
+  "id": "FIN-012",
+  "module": "FIN",
+  "section": "7.3 Budgets and baselines",
+  "text": "Roll budgets up to engagement, client and portfolio level.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-013",
+  "module": "FIN",
+  "section": "7.4 Actuals and commitments",
+  "text": "Calculate labour actuals from approved timesheets: hours × cost rate for cost, and hours × applicable charge-out rate for revenue value (T&M) or standard value (fixed price).",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-014",
+  "module": "FIN",
+  "section": "7.4 Actuals and commitments",
+  "text": "Import non-labour actuals (expenses, supplier invoices) from the accounting system, mapped to projects and cost types.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-015",
+  "module": "FIN",
+  "section": "7.4 Actuals and commitments",
+  "text": "Record commitments (subcontractor orders, confirmed allocations not yet worked) and show them alongside actuals.",
+  "priority": "S"
+ },
+ {
+  "id": "FIN-016",
+  "module": "FIN",
+  "section": "7.4 Actuals and commitments",
+  "text": "Refresh actuals at least daily and on demand.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-017",
+  "module": "FIN",
+  "section": "7.4 Actuals and commitments",
+  "text": "Reconcile project actuals to the general ledger at month-end and flag differences.",
+  "priority": "S"
+ },
+ {
+  "id": "FIN-018",
+  "module": "FIN",
+  "section": "7.5 Forecasting",
+  "text": "Produce a monthly, time-phased forecast of cost, revenue, billing and margin to completion for each project, combining actuals to date with the forecast for remaining periods.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-019",
+  "module": "FIN",
+  "section": "7.5 Forecasting",
+  "text": "Generate the labour forecast automatically from resource allocations (hours × cost rate and × charge-out rate), letting the project manager adjust hours, add placeholder roles and add non-labour forecasts.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-020",
+  "module": "FIN",
+  "section": "7.5 Forecasting",
+  "text": "Support alternative estimate-at-completion methods, recording the chosen method and justification: bottom-up from the resource plan; EAC = BAC ÷ CPI; EAC = AC + (BAC − EV); EAC = AC + (BAC − EV) ÷ (CPI × SPI); and manual override.",
+  "priority": "S"
+ },
+ {
+  "id": "FIN-021",
+  "module": "FIN",
+  "section": "7.5 Forecasting",
+  "text": "Calculate EAC, VAC, percentage of budget consumed, forecast margin and variance against baseline per project, and roll them up to the engagement.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-022",
+  "module": "FIN",
+  "section": "7.5 Forecasting",
+  "text": "Run a monthly forecast cycle with versioning, deadlines and approval (steps below).",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-023",
+  "module": "FIN",
+  "section": "7.5 Forecasting",
+  "text": "Compare forecast versions (current, prior month, baseline) and require commentary on movements above a threshold (BR-14).",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-024",
+  "module": "FIN",
+  "section": "7.5 Forecasting",
+  "text": "Model scenarios (for example base, best and worst case; with or without pending changes; with expected extensions) without changing the approved forecast.",
+  "priority": "S"
+ },
+ {
+  "id": "FIN-025",
+  "module": "FIN",
+  "section": "7.5 Forecasting",
+  "text": "Forecast portfolio revenue by month for the financial year, showing contracted work, signed but unstarted SOWs and probability-weighted CRM pipeline separately.",
+  "priority": "S"
+ },
+ {
+  "id": "FIN-026",
+  "module": "FIN",
+  "section": "7.5 Forecasting",
+  "text": "Track forecast accuracy: forecast against actual by month, by project and by engagement manager.",
+  "priority": "S"
+ },
+ {
+  "id": "FIN-027",
+  "module": "FIN",
+  "section": "7.5 Forecasting",
+  "text": "Forecast the date each PO or contract will be exhausted from forecast burn, and alert when it falls before the planned end date (BR-05).",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-028",
+  "module": "FIN",
+  "section": "7.5 Forecasting",
+  "text": "Refresh the labour forecast weekly from approved time and current allocations, so weekly reports show a current EAC between monthly cycles.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-029",
+  "module": "FIN",
+  "section": "7.6 Earned value management",
+  "text": "Calculate earned value measures for projects whose classification requires them (GOV-010): planned value, earned value, actual cost, schedule and cost variance, SPI, CPI, TCPI and EAC, at project, stage and work package level.",
+  "priority": "S"
+ },
+ {
+  "id": "FIN-030",
+  "module": "FIN",
+  "section": "7.6 Earned value management",
+  "text": "Support earning methods per work package: 0/100, 50/50, weighted milestones, physical percent complete and apportioned effort.",
+  "priority": "S"
+ },
+ {
+  "id": "FIN-031",
+  "module": "FIN",
+  "section": "7.6 Earned value management",
+  "text": "Plot S-curves of planned value, earned value, actual cost and forecast, and trend CPI and SPI over time.",
+  "priority": "S"
+ },
+ {
+  "id": "FIN-032",
+  "module": "FIN",
+  "section": "7.6 Earned value management",
+  "text": "Calculate release-level earned value for agile projects from completed against planned story points.",
+  "priority": "C"
+ },
+ {
+  "id": "FIN-033",
+  "module": "FIN",
+  "section": "7.7 Revenue, billing and WIP",
+  "text": "Recognise revenue per period by commercial model, using rules agreed with Finance in line with AASB 15: T&M as time and expenses are delivered; fixed price over time using a configured measure of progress (cost-to-cost input method, or milestones as an output method); retainers evenly over the service period.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-034",
+  "module": "FIN",
+  "section": "7.7 Revenue, billing and WIP",
+  "text": "Generate a billing schedule per SOW or PO (T&M billing by period, for example monthly in arrears; milestone billing on acceptance; fixed-fee instalments; recurring fees), giving an invoice forecast by date.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-035",
+  "module": "FIN",
+  "section": "7.7 Revenue, billing and WIP",
+  "text": "Prepare draft invoices with supporting detail (timesheet extract by person and day, PO number, SOW reference, GST) for review by the engagement manager and finance, then send approved invoices to the accounting system for issue.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-036",
+  "module": "FIN",
+  "section": "7.7 Revenue, billing and WIP",
+  "text": "Synchronise invoice status (issued, paid, overdue, disputed) from the accounting system and calculate debtor days.",
+  "priority": "S"
+ },
+ {
+  "id": "FIN-037",
+  "module": "FIN",
+  "section": "7.7 Revenue, billing and WIP",
+  "text": "Calculate WIP and billed-in-advance balances per project, age WIP (0–30, 31–60, 61–90, over 90 days) and alert on aged WIP above a threshold.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-038",
+  "module": "FIN",
+  "section": "7.7 Revenue, billing and WIP",
+  "text": "Record WIP write-ups and write-downs with approval and reason codes, and report realisation.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-039",
+  "module": "FIN",
+  "section": "7.7 Revenue, billing and WIP",
+  "text": "Apply client billing rules: hourly or daily billing, day length and rounding (BR-12), billing caps, non-billable categories, expense mark-ups and travel rules.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-040",
+  "module": "FIN",
+  "section": "7.8 Cash flow",
+  "text": "Forecast monthly cash receipts from the invoice forecast and payment terms, and cash payments for subcontractor and third-party costs, giving a net cash flow forecast per engagement and for the portfolio.",
+  "priority": "S"
+ },
+ {
+  "id": "FIN-041",
+  "module": "FIN",
+  "section": "7.9 Financial controls",
+  "text": "Support a financial calendar (default Australian financial year, 1 July to 30 June) with monthly periods and period locking after month-end close; later transactions post to the open period.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-042",
+  "module": "FIN",
+  "section": "7.9 Financial controls",
+  "text": "Store amounts exclusive of GST, apply GST by tax code (default 10%), and compare PO consumption on the same GST basis as the PO (BR-13).",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-043",
+  "module": "FIN",
+  "section": "7.9 Financial controls",
+  "text": "Support engagements in other currencies with exchange rates, reporting in AUD.",
+  "priority": "C"
+ },
+ {
+  "id": "FIN-044",
+  "module": "FIN",
+  "section": "7.9 Financial controls",
+  "text": "Enforce delegations of financial authority for budget changes, write-downs, discounts and forecast approval.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-045",
+  "module": "FIN",
+  "section": "7.9 Financial controls",
+  "text": "Keep a full audit trail of financial changes: who, what, when, and before and after values.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-046",
+  "module": "FIN",
+  "section": "7.9 Financial controls",
+  "text": "Support multiple legal entities and inter-entity resource charging.",
+  "priority": "W"
+ },
+ {
+  "id": "FIN-047",
+  "module": "FIN",
+  "section": "7.10 Financial reporting and KPIs",
+  "text": "Provide standard financial reports: project financial summary; engagement profit and loss; budget, actual and forecast by month; EAC trend; margin by project, engagement, client and practice; PO and contract burn with remaining funds; WIP and debtor ageing; revenue forecast by month for the financial year; utilisation and realisation; forecast movements; and the financial impact of changes.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-048",
+  "module": "FIN",
+  "section": "7.10 Financial reporting and KPIs",
+  "text": "Visualise budget and PO burn-down, revenue burn-up against contract value, S-curves, margin trend and monthly revenue.",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-049",
+  "module": "FIN",
+  "section": "7.10 Financial reporting and KPIs",
+  "text": "Expose financial figures as report tokens (Appendix A), with audience controls so client-audience reports never show cost or margin (RPT-021).",
+  "priority": "M"
+ },
+ {
+  "id": "FIN-050",
+  "module": "FIN",
+  "section": "7.10 Financial reporting and KPIs",
+  "text": "Export financial data to Excel and to the analytics model (DSH-006).",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-001",
+  "module": "RPT",
+  "section": "8.3 Template library and upload",
+  "text": "Maintain a report template library with metadata: name, description, report type (weekly status, steering committee, monthly financial, exception, end stage, end project, PID, change request), scope (Firm-wide, client or engagement), level (project, engagement or portfolio), audience (internal or client), output formats, owner, version and status (draft, published, retired).",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-002",
+  "module": "RPT",
+  "section": "8.3 Template library and upload",
+  "text": "Let authorised users (the PMO for the library; engagement managers for their own engagements) upload templates as Microsoft Word (.docx) files.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-003",
+  "module": "RPT",
+  "section": "8.3 Template library and upload",
+  "text": "Accept PowerPoint (.pptx) and Excel (.xlsx) templates.",
+  "priority": "S"
+ },
+ {
+  "id": "RPT-004",
+  "module": "RPT",
+  "section": "8.3 Template library and upload",
+  "text": "Reject macro-enabled files (.docm, .pptm, .xlsm) and files over the size limit (default 20 MB); validate file type by content, not extension; and scan uploads for malware.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-005",
+  "module": "RPT",
+  "section": "8.3 Template library and upload",
+  "text": "Preview a template filled with sample data, or with a selected live project the user can access, before publishing.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-006",
+  "module": "RPT",
+  "section": "8.3 Template library and upload",
+  "text": "Version templates: a new upload creates a new version, earlier versions are kept, issued reports stay linked to the version used, and retired templates remain in history.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-007",
+  "module": "RPT",
+  "section": "8.3 Template library and upload",
+  "text": "Require PMO approval before a template is published (configurable).",
+  "priority": "S"
+ },
+ {
+  "id": "RPT-008",
+  "module": "RPT",
+  "section": "8.3 Template library and upload",
+  "text": "Assign default templates per engagement and report type, and allow another permitted template to be chosen at generation.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-009",
+  "module": "RPT",
+  "section": "8.3 Template library and upload",
+  "text": "Provide starter templates in Word and PowerPoint for weekly project and weekly engagement reports, plus a downloadable token reference with descriptions, data types, formats and examples (Appendix A).",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-010",
+  "module": "RPT",
+  "section": "8.3 Template library and upload",
+  "text": "Preserve the template's branding and styles (logos, colours, fonts, headers and footers), and insert dynamic images such as the client logo from the client record.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-011",
+  "module": "RPT",
+  "section": "8.3 Template library and upload",
+  "text": "Clone a template to adapt it for another client or engagement.",
+  "priority": "S"
+ },
+ {
+  "id": "RPT-012",
+  "module": "RPT",
+  "section": "8.4 Template markup",
+  "text": "Replace single-value tokens, with formatting helpers for dates, numbers, AUD currency, percentages and text case.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-013",
+  "module": "RPT",
+  "section": "8.4 Template markup",
+  "text": "Repeat table rows and sections over collections (projects, milestones, deliverables, risks, issues, actions, decisions, dependencies, changes, people, financial lines), with filtering, sorting and row limits such as \"top five risks\".",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-014",
+  "module": "RPT",
+  "section": "8.4 Template markup",
+  "text": "Show or hide content conditionally on data, for example an exception section only when a tolerance is breached.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-015",
+  "module": "RPT",
+  "section": "8.4 Template markup",
+  "text": "Render RAG indicators as coloured cells, shapes or icons that always carry a text label, so colour is never the only signal (WCAG 2.2).",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-016",
+  "module": "RPT",
+  "section": "8.4 Template markup",
+  "text": "Render standard charts into templates as images: budget burn-down, milestone timeline, RAG trend and risk heat map.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-017",
+  "module": "RPT",
+  "section": "8.4 Template markup",
+  "text": "Bind data to native PowerPoint and Excel charts.",
+  "priority": "C"
+ },
+ {
+  "id": "RPT-018",
+  "module": "RPT",
+  "section": "8.4 Template markup",
+  "text": "Render rich-text narrative (bold, italics, bullets, numbered lists, links) using the template's own styles.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-019",
+  "module": "RPT",
+  "section": "8.4 Template markup",
+  "text": "Support engagement-level templates that loop over each in-scope project and add engagement sections: summary, consolidated financials, engagement RAID and cross-project dependencies.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-020",
+  "module": "RPT",
+  "section": "8.4 Template markup",
+  "text": "Make custom fields (ADM-005) available as tokens automatically.",
+  "priority": "S"
+ },
+ {
+  "id": "RPT-021",
+  "module": "RPT",
+  "section": "8.4 Template markup",
+  "text": "Classify every token as client-safe or internal-only, and block internal-only tokens (cost, margin, cost rates, internal notes, internal RAID) from client-audience templates at validation and at generation.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-022",
+  "module": "RPT",
+  "section": "8.4 Template markup",
+  "text": "Keep the template language logic-limited: no arbitrary code execution, and no access to data outside the token catalogue and the user's permissions (NFR-008).",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-023",
+  "module": "RPT",
+  "section": "8.4 Template markup",
+  "text": "Provide \"changes since last report\" tokens: RAG movements (up, down, steady), new and closed RAID items, milestone date movements, and forecast movement since the previous issued report.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-024",
+  "module": "RPT",
+  "section": "8.5 Template validation and field mapping",
+  "text": "Parse each uploaded template and list every token found, with its location (page, slide or cell).",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-025",
+  "module": "RPT",
+  "section": "8.5 Template validation and field mapping",
+  "text": "Validate tokens against the catalogue and report errors with locations: unknown tokens, malformed syntax, unclosed loops or conditions, and internal-only tokens in client templates. Templates with errors cannot be published.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-026",
+  "module": "RPT",
+  "section": "8.5 Template validation and field mapping",
+  "text": "Support client-supplied templates without CEMS tokens: detect Word content controls (by tag or title), bookmarks and marked placeholder text, and let the user map each one to a token or narrative field on a mapping screen. The mapping is saved with the template version.",
+  "priority": "S"
+ },
+ {
+  "id": "RPT-027",
+  "module": "RPT",
+  "section": "8.5 Template validation and field mapping",
+  "text": "Flag template fields with no matching data, and offer to create a custom field (ADM-005) or a narrative field for them.",
+  "priority": "S"
+ },
+ {
+  "id": "RPT-028",
+  "module": "RPT",
+  "section": "8.6 Report generation",
+  "text": "Let the engagement manager generate a report by selecting: engagement; scope (one project, selected projects, or all projects in the engagement); report type; template (from those permitted); reporting period (default the current week); audience; and output formats.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-029",
+  "module": "RPT",
+  "section": "8.6 Report generation",
+  "text": "Run a readiness check before generation and show the results: status updates submitted and approved for each in-scope project, timesheets outstanding, overdue RAID reviews, milestones without current forecasts, and empty narrative fields the template requires. The user can return to fix gaps, or proceed with the warnings recorded against the report.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-030",
+  "module": "RPT",
+  "section": "8.6 Report generation",
+  "text": "Freeze an immutable snapshot of all data used in the report at generation, with an as-at timestamp, so the report can be reproduced exactly and later data changes never alter it.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-031",
+  "module": "RPT",
+  "section": "8.6 Report generation",
+  "text": "Provide an in-app editing step for report-level narrative (for example engagement summary and key messages) before final rendering. Project data changes only if the user chooses to save an edit back to the status update.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-032",
+  "module": "RPT",
+  "section": "8.6 Report generation",
+  "text": "Render reports as Word (.docx) and PDF, preserving template formatting, with PDFs tagged for accessibility.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-033",
+  "module": "RPT",
+  "section": "8.6 Report generation",
+  "text": "Render reports as PowerPoint (.pptx) and Excel (.xlsx).",
+  "priority": "S"
+ },
+ {
+  "id": "RPT-034",
+  "module": "RPT",
+  "section": "8.6 Report generation",
+  "text": "Produce a draft for an engagement of up to 10 projects within 60 seconds (95th percentile); run larger reports in the background and notify the user when ready.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-035",
+  "module": "RPT",
+  "section": "8.6 Report generation",
+  "text": "Name files by a configurable convention, for example {ClientCode}_{EngagementCode}_WeeklyReport_{WeekEnding}_v{n}.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-036",
+  "module": "RPT",
+  "section": "8.6 Report generation",
+  "text": "Allow drafts to be regenerated any number of times before issue, keeping every version with its author and time.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-037",
+  "module": "RPT",
+  "section": "8.6 Report generation",
+  "text": "Schedule automatic draft generation (for example Friday 9:00 am) for engagements with a default template, and notify the engagement manager when the draft is ready.",
+  "priority": "S"
+ },
+ {
+  "id": "RPT-038",
+  "module": "RPT",
+  "section": "8.6 Report generation",
+  "text": "Generate the client and internal versions of a report from the same snapshot in one action.",
+  "priority": "S"
+ },
+ {
+  "id": "RPT-039",
+  "module": "RPT",
+  "section": "8.6 Report generation",
+  "text": "Batch-generate one report type across several engagements, for example the PMO's internal portfolio pack.",
+  "priority": "C"
+ },
+ {
+  "id": "RPT-040",
+  "module": "RPT",
+  "section": "8.7 Review, approval and issue",
+  "text": "Manage report status (Draft, In review, Approved, Issued, plus Superseded and Withdrawn) with configurable approvers, for example the engagement executive for client reports.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-041",
+  "module": "RPT",
+  "section": "8.7 Review, approval and issue",
+  "text": "On issue, lock the report and its snapshot and mark the underlying status updates as reported. A correction is issued as a new version that supersedes the earlier one, with a recorded reason.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-042",
+  "module": "RPT",
+  "section": "8.7 Review, approval and issue",
+  "text": "Apply sensitivity labels and protective markings to generated files (header, footer and document metadata) based on the engagement's classification.",
+  "priority": "S"
+ },
+ {
+  "id": "RPT-043",
+  "module": "RPT",
+  "section": "8.8 Distribution and archive",
+  "text": "Email issued reports through Microsoft 365 to the engagement's distribution list, as an attachment, a secure link or both, using a configurable message template.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-044",
+  "module": "RPT",
+  "section": "8.8 Distribution and archive",
+  "text": "Publish issued reports to the client portal (CPT-002).",
+  "priority": "S"
+ },
+ {
+  "id": "RPT-045",
+  "module": "RPT",
+  "section": "8.8 Distribution and archive",
+  "text": "Record each distribution (recipients, date and time, channel) in the engagement's communications log.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-046",
+  "module": "RPT",
+  "section": "8.8 Distribution and archive",
+  "text": "Allow external distribution only to recipients on the engagement's distribution list, unless an authorised user approves an exception.",
+  "priority": "S"
+ },
+ {
+  "id": "RPT-047",
+  "module": "RPT",
+  "section": "8.8 Distribution and archive",
+  "text": "Keep a searchable archive of all reports per engagement and project, filterable by period, type and status.",
+  "priority": "M"
+ },
+ {
+  "id": "RPT-048",
+  "module": "RPT",
+  "section": "8.8 Distribution and archive",
+  "text": "Compare two report periods side by side.",
+  "priority": "S"
+ },
+ {
+  "id": "AIA-001",
+  "module": "AIA",
+  "section": "8.10 AI assistance (AIA)",
+  "text": "Offer AI-drafted text for narrative sections (executive summary, achievements, engagement summary across projects) using only data in the report snapshot.",
+  "priority": "C"
+ },
+ {
+  "id": "AIA-002",
+  "module": "AIA",
+  "section": "8.10 AI assistance (AIA)",
+  "text": "Label AI drafts clearly, require a person to review and accept or edit them before inclusion, and record that AI assistance was used.",
+  "priority": "M",
+  "conditional": "M (when enabled)"
+ },
+ {
+  "id": "AIA-003",
+  "module": "AIA",
+  "section": "8.10 AI assistance (AIA)",
+  "text": "Use only an AI service approved by the Firm, with data processed in Australia where required, no use of Firm or client data for model training, and the same access controls as the requesting user.",
+  "priority": "M",
+  "conditional": "M (when enabled)"
+ },
+ {
+  "id": "AIA-004",
+  "module": "AIA",
+  "section": "8.10 AI assistance (AIA)",
+  "text": "Allow AI assistance to be switched on or off per engagement, defaulting to off for restricted engagements and wherever the client has not agreed to its use.",
+  "priority": "M",
+  "conditional": "M (when enabled)"
+ },
+ {
+  "id": "AIA-005",
+  "module": "AIA",
+  "section": "8.10 AI assistance (AIA)",
+  "text": "Suggest RAID items from meeting notes or status narrative, for a person to confirm.",
+  "priority": "C"
+ },
+ {
+  "id": "DAT-001",
+  "module": "DAT",
+  "section": "11.2 Retention and disposal",
+  "text": "Retain engagement, project and financial records for at least seven years after engagement closure, consistent with the seven-year retention of financial records under the Corporations Act 2001 (Cth), with configurable retention by record type and legal hold.",
+  "priority": "M"
+ },
+ {
+  "id": "DAT-002",
+  "module": "DAT",
+  "section": "11.2 Retention and disposal",
+  "text": "De-identify or delete personal information that is no longer needed, subject to retention obligations (APP 11.2).",
+  "priority": "M"
+ },
+ {
+  "id": "DAT-003",
+  "module": "DAT",
+  "section": "11.2 Retention and disposal",
+  "text": "Keep archived data searchable and read-only.",
+  "priority": "M"
+ },
+ {
+  "id": "DAT-004",
+  "module": "DAT",
+  "section": "11.2 Retention and disposal",
+  "text": "Record client contractual data obligations (for example return or destruction of client data at contract end) and track them to completion.",
+  "priority": "S"
+ },
+ {
+  "id": "DAT-005",
+  "module": "DAT",
+  "section": "11.3 Data migration",
+  "text": "Import active clients, engagements, projects, RAID logs, people, rate cards and open financial positions from spreadsheets and existing tools, using import templates with validation and error reports.",
+  "priority": "M"
+ },
+ {
+  "id": "DAT-006",
+  "module": "DAT",
+  "section": "11.3 Data migration",
+  "text": "Import historical actuals (at least the current and prior financial year) for trend reporting.",
+  "priority": "S"
+ },
+ {
+  "id": "DAT-007",
+  "module": "DAT",
+  "section": "11.3 Data migration",
+  "text": "Produce reconciliation reports comparing migrated data with source totals.",
+  "priority": "M"
+ },
+ {
+  "id": "DAT-008",
+  "module": "DAT",
+  "section": "11.4 Data quality",
+  "text": "Apply mandatory fields and validation rules per entity and lifecycle state.",
+  "priority": "M"
+ },
+ {
+  "id": "DAT-009",
+  "module": "DAT",
+  "section": "11.4 Data quality",
+  "text": "Provide a data quality dashboard for the PMO: records missing owners, overdue reviews, stale forecasts and projects without baselines.",
+  "priority": "S"
+ },
+ {
+  "id": "INT-001",
+  "module": "INT",
+  "section": "12. Integration requirements",
+  "text": "Microsoft Entra ID — Single sign-on (SAML or OpenID Connect), MFA, group-based provisioning (SCIM) (Inbound)",
+  "priority": "M"
+ },
+ {
+  "id": "INT-002",
+  "module": "INT",
+  "section": "12. Integration requirements",
+  "text": "Microsoft 365 email (Exchange Online) — Notifications and report distribution from a service mailbox (Outbound)",
+  "priority": "M"
+ },
+ {
+  "id": "INT-003",
+  "module": "INT",
+  "section": "12. Integration requirements",
+  "text": "SharePoint and OneDrive — Document storage, folder provisioning, archive copy of issued reports (Both)",
+  "priority": "S"
+ },
+ {
+  "id": "INT-004",
+  "module": "INT",
+  "section": "12. Integration requirements",
+  "text": "Microsoft Teams — Notifications, approvals and report links in engagement channels (Outbound)",
+  "priority": "S"
+ },
+ {
+  "id": "INT-005",
+  "module": "INT",
+  "section": "12. Integration requirements",
+  "text": "Accounting system (to be confirmed, for example Xero, MYOB or Dynamics 365 Business Central) — Clients and debtors, invoices, payments, supplier costs, general ledger actuals (Both)",
+  "priority": "M"
+ },
+ {
+  "id": "INT-006",
+  "module": "INT",
+  "section": "12. Integration requirements",
+  "text": "CRM (to be confirmed) — Won opportunities, clients, contacts and weighted pipeline in; engagement status and growth opportunities out (Both)",
+  "priority": "S"
+ },
+ {
+  "id": "INT-007",
+  "module": "INT",
+  "section": "12. Integration requirements",
+  "text": "HR and payroll system — People, employment details, cost rate inputs, leave (Inbound)",
+  "priority": "S"
+ },
+ {
+  "id": "INT-008",
+  "module": "INT",
+  "section": "12. Integration requirements",
+  "text": "Delivery tools (for example Jira, Azure DevOps) — Epics, stories, sprints and progress for agile projects (Inbound, optional outbound)",
+  "priority": "S"
+ },
+ {
+  "id": "INT-009",
+  "module": "INT",
+  "section": "12. Integration requirements",
+  "text": "Microsoft Project and Excel — Schedule import and export (Both)",
+  "priority": "S"
+ },
+ {
+  "id": "INT-010",
+  "module": "INT",
+  "section": "12. Integration requirements",
+  "text": "Power BI or data warehouse — Governed analytics model (Outbound)",
+  "priority": "S"
+ },
+ {
+  "id": "INT-011",
+  "module": "INT",
+  "section": "12. Integration requirements",
+  "text": "E-signature service — Signature of change requests and variations (Both)",
+  "priority": "C"
+ },
+ {
+  "id": "INT-012",
+  "module": "INT",
+  "section": "12. Integration requirements",
+  "text": "Approved AI service — Narrative drafting and suggestions (section 8.10) (Outbound)",
+  "priority": "C"
+ },
+ {
+  "id": "INT-013",
+  "module": "INT",
+  "section": "12. Integration requirements",
+  "text": "Provide a documented REST API (OpenAPI) for core entities, secured with OAuth 2.0, and webhooks for key events (status update submitted, report issued, change approved, threshold breached).",
+  "priority": "S"
+ },
+ {
+  "id": "INT-014",
+  "module": "INT",
+  "section": "12. Integration requirements",
+  "text": "Monitor integrations, retry failed messages, queue errors for resolution and alert administrators; processing is idempotent.",
+  "priority": "M"
+ },
+ {
+  "id": "INT-015",
+  "module": "INT",
+  "section": "12. Integration requirements",
+  "text": "Define the system of record for each data object: CRM for prospects and pipeline; accounting for invoices, payments and the ledger; HR for employees; CEMS for engagements, projects, RAID, forecasts and reports.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-001",
+  "module": "NFR",
+  "section": "13.1 Security",
+  "text": "Authenticate internal users through single sign-on with enforced MFA (phishing-resistant methods preferred), and external users through federated or guest identities with MFA.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-002",
+  "module": "NFR",
+  "section": "13.1 Security",
+  "text": "Enforce role-based, engagement-scoped access with field-level restrictions (section 5.2) at the service and data layers, not only in the user interface.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-003",
+  "module": "NFR",
+  "section": "13.1 Security",
+  "text": "Encrypt data in transit (TLS 1.2 or higher) and at rest (AES-256), with keys in a managed key service.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-004",
+  "module": "NFR",
+  "section": "13.1 Security",
+  "text": "Align controls with ISO/IEC 27001 and the Firm's ISMS. For engagements handling Australian Government information, meet the client's required controls, such as the ISM, Essential Eight maturity targets and IRAP-assessed hosting for OFFICIAL: Sensitive information.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-005",
+  "module": "NFR",
+  "section": "13.1 Security",
+  "text": "Complete independent penetration testing before go-live, annually and after major releases, and resolve critical and high findings before go-live.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-006",
+  "module": "NFR",
+  "section": "13.1 Security",
+  "text": "Follow a secure development lifecycle that addresses the OWASP Top 10, with static code analysis and dependency scanning in the build pipeline.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-007",
+  "module": "NFR",
+  "section": "13.1 Security",
+  "text": "Send security events (sign-ins, failed sign-ins, permission changes, exports, report distribution) to the Firm's security monitoring platform.",
+  "priority": "S"
+ },
+ {
+  "id": "NFR-008",
+  "module": "NFR",
+  "section": "13.1 Security",
+  "text": "Treat uploaded templates and attachments as untrusted: scan for malware, strip active content, and render templates in an isolated service with a logic-limited template language that cannot execute code.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-009",
+  "module": "NFR",
+  "section": "13.1 Security",
+  "text": "End inactive sessions after 30 minutes (configurable).",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-010",
+  "module": "NFR",
+  "section": "13.1 Security",
+  "text": "Log all data exports and restrict bulk export to authorised roles.",
+  "priority": "S"
+ },
+ {
+  "id": "NFR-011",
+  "module": "NFR",
+  "section": "13.2 Privacy",
+  "text": "Handle personal information in line with the Privacy Act 1988 (Cth) and the APPs, and complete a privacy impact assessment before go-live.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-012",
+  "module": "NFR",
+  "section": "13.2 Privacy",
+  "text": "Collect only the personal information needed, and support access and correction requests.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-013",
+  "module": "NFR",
+  "section": "13.2 Privacy",
+  "text": "Provide the logs and records needed to assess a suspected eligible data breach under the Notifiable Data Breaches scheme.",
+  "priority": "S"
+ },
+ {
+  "id": "NFR-014",
+  "module": "NFR",
+  "section": "13.3 Hosting and data sovereignty",
+  "text": "Host production, backups and disaster recovery in Australian data centres, with no offshore access to data without the Firm's approval.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-015",
+  "module": "NFR",
+  "section": "13.4 Availability and resilience",
+  "text": "Achieve at least 99.5% availability per month during business hours (7:00 am to 7:00 pm Australian Eastern Time, Monday to Friday), excluding scheduled maintenance outside those hours.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-016",
+  "module": "NFR",
+  "section": "13.4 Availability and resilience",
+  "text": "Meet a recovery point objective of 1 hour or less and a recovery time objective of 4 hours or less.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-017",
+  "module": "NFR",
+  "section": "13.4 Availability and resilience",
+  "text": "Take daily backups (retained 35 days) and monthly backups (retained 12 months), and test restores at least quarterly.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-018",
+  "module": "NFR",
+  "section": "13.5 Performance and scalability",
+  "text": "Respond to 95% of screen interactions within 2 seconds under normal load.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-019",
+  "module": "NFR",
+  "section": "13.5 Performance and scalability",
+  "text": "Support at least 300 named users, 100 concurrent users, 50 active engagements, 300 active projects and 10 years of data without degradation. This sizing is indicative and will be confirmed in discovery.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-020",
+  "module": "NFR",
+  "section": "13.5 Performance and scalability",
+  "text": "Refresh dashboards within 5 seconds, and meet the report generation time in RPT-034.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-021",
+  "module": "NFR",
+  "section": "13.6 Usability and accessibility",
+  "text": "Conform to WCAG 2.2 Level AA, for the application and for generated PDF reports.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-022",
+  "module": "NFR",
+  "section": "13.6 Usability and accessibility",
+  "text": "Work on desktop, tablet and mobile; on mobile, support time entry, approvals, status updates and RAID entry.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-023",
+  "module": "NFR",
+  "section": "13.6 Usability and accessibility",
+  "text": "Let a project manager complete a weekly status update without training, using in-app guidance, verified through usability testing.",
+  "priority": "S"
+ },
+ {
+  "id": "NFR-024",
+  "module": "NFR",
+  "section": "13.6 Usability and accessibility",
+  "text": "Provide contextual help and role-based onboarding guides.",
+  "priority": "S"
+ },
+ {
+  "id": "NFR-025",
+  "module": "NFR",
+  "section": "13.7 Auditability",
+  "text": "Keep an immutable audit trail of every create, update and delete on business records (user, timestamp, before and after values), retained per DAT-001.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-026",
+  "module": "NFR",
+  "section": "13.7 Auditability",
+  "text": "Provide audit reports filterable by user, record and date range.",
+  "priority": "S"
+ },
+ {
+  "id": "NFR-027",
+  "module": "NFR",
+  "section": "13.8 Localisation",
+  "text": "Use Australian English, AUD formatting, dd/mm/yyyy dates and the Australian financial year; store times in UTC and display them in the user's local time zone, including daylight saving.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-028",
+  "module": "NFR",
+  "section": "13.9 Operability and maintainability",
+  "text": "Provide separate development, test, UAT and production environments, and mask production data before any use in lower environments.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-029",
+  "module": "NFR",
+  "section": "13.9 Operability and maintainability",
+  "text": "Deploy through automated pipelines with automated tests; minor releases deploy without downtime.",
+  "priority": "S"
+ },
+ {
+  "id": "NFR-030",
+  "module": "NFR",
+  "section": "13.9 Operability and maintainability",
+  "text": "Make workflows, templates, thresholds and delivery profiles configurable without a code release.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-031",
+  "module": "NFR",
+  "section": "13.9 Operability and maintainability",
+  "text": "Provide monitoring, alerting and logging, with a defined support model and service levels.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-032",
+  "module": "NFR",
+  "section": "13.9 Operability and maintainability",
+  "text": "Provide user guides, an administrator guide, API documentation, the data dictionary and a template author guide.",
+  "priority": "M"
+ },
+ {
+  "id": "NFR-033",
+  "module": "NFR",
+  "section": "13.9 Operability and maintainability",
+  "text": "Maintain a software bill of materials, and use third-party components under licences compatible with the Firm's ownership of the solution.",
+  "priority": "S"
+ },
+ {
+  "id": "TRN-001",
+  "module": "TRN",
+  "section": "14. Delivery roadmap and transition",
+  "text": "Pilot with two engagements of different shapes (for example a multi-project T&M engagement and a fixed-price engagement) before wider rollout.",
+  "priority": "M"
+ },
+ {
+  "id": "TRN-002",
+  "module": "TRN",
+  "section": "14. Delivery roadmap and transition",
+  "text": "Run weekly reporting in parallel (current method and CEMS) for at least two cycles per pilot engagement, reconciling the outputs.",
+  "priority": "M"
+ },
+ {
+  "id": "TRN-003",
+  "module": "TRN",
+  "section": "14. Delivery roadmap and transition",
+  "text": "Migrate data under DAT-005 to DAT-007, with reconciliation signed off by finance and the engagement managers.",
+  "priority": "M"
+ },
+ {
+  "id": "TRN-004",
+  "module": "TRN",
+  "section": "14. Delivery roadmap and transition",
+  "text": "Deliver role-based training for engagement managers, project managers, team members, finance, the PMO and administrators, plus a template author guide.",
+  "priority": "M"
+ },
+ {
+  "id": "TRN-005",
+  "module": "TRN",
+  "section": "14. Delivery roadmap and transition",
+  "text": "Provide hypercare support for four weeks after each go-live.",
+  "priority": "M"
+ },
+ {
+  "id": "TRN-006",
+  "module": "TRN",
+  "section": "14. Delivery roadmap and transition",
+  "text": "Track adoption (status update timeliness, reports generated, forecast submission rates) for three months after go-live.",
+  "priority": "S"
+ }
+]
