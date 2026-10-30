@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useApi } from '../lib/hooks.js';
-import { post, patch } from '../lib/api.js';
+import { post, patch, offlineInfo } from '../lib/api.js';
 import { ApprovalCard } from '../components/Record.jsx';
-import { reportFile } from '../components/Reports.jsx';
+import { reportFile, printReport } from '../components/Reports.jsx';
 import { PageHead, Card, Async, Status, Badge, DT, Alert, Empty, Field, Modal, Table, KV, Tabs, Loading, Rag, useAction, useDialog } from '../components/ui.jsx';
 import { fmtDate, fmtMoneyShort, fmtPct } from '../../shared/format.js';
 import Icon from '../components/Icon.jsx';
@@ -84,6 +84,7 @@ function Actions({ r, reload }) {
     <>
       {r.files?.pdf && <a className="btn btn-sm" href={reportFile(r.id, 'pdf')}><Icon name="download" /> PDF</a>}
       {r.files?.docx && <a className="btn btn-sm" href={reportFile(r.id, 'docx')}><Icon name="download" /> Word</a>}
+      {!r.files?.pdf && r.files?.docx && <button className="btn btn-sm" disabled={busy} onClick={() => run(() => printReport(r.id, r.name))}><Icon name="report" /> Print or save as PDF</button>}
       {r.can?.edit && <button className="btn btn-sm" disabled={busy} onClick={regenerate}><Icon name="refresh" /> Regenerate</button>}
       {r.can?.edit && r.status === 'Draft' && <button className="btn btn-sm btn-danger" disabled={busy} onClick={withdraw}>Withdraw</button>}
       {r.can?.submit && <button className="btn btn-sm btn-primary" disabled={busy} onClick={submit}><Icon name="send" /> Submit for approval</button>}
@@ -145,7 +146,7 @@ function Preview({ r }) {
       <div className="stack">
         {r.files?.pdf ? (
           <Card title="PDF" flush><iframe title="Report PDF" src={`${reportFile(r.id, 'pdf')}?inline=1`} style={{ width: '100%', height: 620, border: 0 }} /></Card>
-        ) : <Alert tone="info">{r.pdf_error ? `No PDF: ${r.pdf_error}.` : 'Word output only.'}</Alert>}
+        ) : <Alert tone="info">Rendered in Word. Use <b>Print or save as PDF</b> above for a PDF copy{r.pdf_error && !offlineInfo() ? ` (server PDF output: ${r.pdf_error})` : ''}.</Alert>}
         <Card title="About this report">
           <KV items={[
             ['Generated', <><DT v={r.generated_at} /> in {Math.round((r.generation_ms || 0) / 100) / 10} s</>],

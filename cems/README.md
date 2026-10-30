@@ -38,6 +38,26 @@ docker run -p 8090:8090 -v cems-data:/data cems
 
 To reset the demo data: `npm run seed -- --reset` (add `--no-pdf` to skip PDF rendering).
 
+### Offline edition (no install)
+
+[`offline/CEMS_Offline.html`](offline/CEMS_Offline.html) is the whole of CEMS in one file: the web
+client and the server, which runs inside the browser page. Download it and open it in a current
+version of Chrome, Edge, Firefox or Safari. No server, install or internet connection is needed.
+
+- The first time it opens, it builds the demo firm in the browser (about 20 seconds), with dates
+  up to today. After that it opens in a second or two, where you left off.
+- Everything is kept in that browser on that computer. **Your account › Data in this browser**
+  backs up to a file, restores a back-up (on another computer too) or resets to fresh demo data.
+  If the browser does not allow storage for pages opened from disk, a banner says so and changes
+  last until the page is closed.
+- Use one window at a time: two windows on the same data would overwrite each other's changes,
+  so both show a warning.
+- Differences from the server: demo sign-in only; reports are produced in Word, and **Print or
+  save as PDF** on a report gives a PDF; email goes to the outbox (Administration › System);
+  Microsoft 365, Teams, webhooks and malware scanning are not available.
+
+Rebuild it after changes with `npm run build:offline`.
+
 ## Demo personas
 
 | Persona | Role | Try |
@@ -90,6 +110,10 @@ Every requirement's status and location is listed under **Administration › Req
 - **Jobs** (`server/lib/jobs.mjs`): reminders, cut-offs, escalations, exception alerts, scheduled
   report drafts, the weekly forecast refresh, digests, retention and integration retries.
 - **Data** lives in `CEMS_DATA_DIR` (default `./data`): `cems.db` and `files/`. Back up both.
+- **Offline edition** (`src/offline/`, `scripts/build-offline.mjs`): the same server code bundled
+  for the browser, with SQLite compiled to WebAssembly (sql.js), an in-memory file system and small
+  stand-ins for the Node modules it uses, all saved to IndexedDB. The client's requests go straight
+  to the server's request handler, so rules, permissions and workflows are the same as on a server.
 
 ## Security and access
 

@@ -306,6 +306,12 @@ export function ToastProvider({ children }) {
     setItems((xs) => [...xs, { id, message: message?.message || String(message), tone: message instanceof Error ? 'error' : tone }]);
     setTimeout(() => setItems((xs) => xs.filter((x) => x.id !== id)), tone === 'error' || message instanceof Error ? 8000 : 4000);
   }, []);
+  // Errors raised outside a component, such as a failed download.
+  useEffect(() => {
+    const onError = (e) => push(new Error(e.detail || 'Something went wrong.'));
+    window.addEventListener('cems:error', onError);
+    return () => window.removeEventListener('cems:error', onError);
+  }, [push]);
   return (
     <ToastContext.Provider value={push}>
       {children}

@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useApi } from '../lib/hooks.js';
+import { useSession } from '../lib/session.jsx';
 import { post, patch, upload, download } from '../lib/api.js';
 import { useLookups } from '../components/fields.jsx';
 import { Approvals } from '../components/Record.jsx';
@@ -220,6 +221,7 @@ function Mapping({ v, editable, onSaved }) {
 
 // RPT-027: preview with sample data, or with live data from a chosen project.
 function Preview({ id, t }) {
+  const { me } = useSession();
   const lookups = useLookups();
   const projects = useApi('/api/e/project', {});
   const [project, setProject] = useState('');
@@ -232,7 +234,7 @@ function Preview({ id, t }) {
           {(projects.data || []).filter((p) => !t.engagement_id || p.engagement_id === t.engagement_id).map((p) => <option key={p.id} value={p.id}>Live: {lookups?.engagements?.find((e) => e.id === p.engagement_id)?.label?.split(' ')[0]} · {p.name}</option>)}
         </select>
         <button className="btn btn-sm" onClick={() => download(`/api/template-versions/${id}/preview`, { project_id: project || undefined, format: 'docx' })}><Icon name="download" /> Word</button>
-        <button className="btn btn-sm" onClick={() => download(`/api/template-versions/${id}/preview`, { project_id: project || undefined, format: 'pdf' })}><Icon name="download" /> PDF</button>
+        {me.features?.pdf && <button className="btn btn-sm" onClick={() => download(`/api/template-versions/${id}/preview`, { project_id: project || undefined, format: 'pdf' })}><Icon name="download" /> PDF</button>}
       </div>
       <Async q={q}>{(d) => (
         <>

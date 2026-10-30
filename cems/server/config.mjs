@@ -8,7 +8,8 @@ export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 const bool = (v, d = false) => (v === undefined ? d : ['1', 'true', 'yes', 'on'].includes(String(v).toLowerCase()));
 
 export function loadConfig(overrides = {}) {
-  const env = { ...process.env, ...overrides.env };
+  const { env: envOverrides, ...settings } = overrides;
+  const env = { ...process.env, ...envOverrides };
   const dataDir = overrides.dataDir || env.CEMS_DATA_DIR || path.join(ROOT, 'data');
   const cfg = {
     env: env.CEMS_ENV || (env.NODE_ENV === 'production' ? 'production' : 'development'), // NFR-028
@@ -45,7 +46,7 @@ export function loadConfig(overrides = {}) {
     jobs: bool(env.CEMS_JOBS, true),
     seedOnEmpty: bool(env.CEMS_SEED, true),
     logLevel: env.CEMS_LOG || 'info',
-    ...overrides,
+    ...settings,
   };
   cfg.oidc.enabled = Boolean(cfg.oidc.issuer && cfg.oidc.clientId);
   cfg.m365.enabled = Boolean(cfg.m365.tenantId && cfg.m365.clientId && cfg.m365.clientSecret && cfg.m365.sender);

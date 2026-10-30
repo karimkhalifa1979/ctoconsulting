@@ -18,7 +18,7 @@ function mulberry32(seed) {
 
 const q4 = (h) => Math.max(0.25, Math.round(h * 4) / 4);
 
-export function createKit(app, { T, users, people, log }) {
+export function createKit(app, { T, users, people, log, onProgress = null }) {
   const { repos, entities, settings, auth } = app;
   const tz = settings.tz();
   const H = settings.holidays();
@@ -37,6 +37,8 @@ export function createKit(app, { T, users, people, log }) {
     for (let i = 0; i < events.length; i++) {
       if (dirty) { const rest = events.splice(i).sort(cmp); events.push(...rest); dirty = false; }
       const ev = events[i];
+      // Lets a browser host repaint and show progress while the history replays.
+      if (onProgress && i % 4 === 0) await onProgress(i / events.length, ev.label);
       let when = zonedToUtc(ev.date, ev.time, tz).getTime();
       const limit = Date.now() - (events.length - i) * 20; // never run an event in the future
       if (when > limit) when = limit;

@@ -2,10 +2,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useSession, canAnywhere } from '../lib/session.jsx';
-import { get, post, patch, del } from '../lib/api.js';
+import { get, post, patch, del, offlineInfo, saveBlob } from '../lib/api.js';
 import { initials } from '../lib/util.js';
 import { ROLE_LABEL } from '../../shared/permissions.js';
-import { Drawer, DT, Empty, useAction, Field } from './ui.jsx';
+import { Drawer, DT, Empty, useAction, useDialog, Field } from './ui.jsx';
 import Icon from './Icon.jsx';
 
 function navFor(me) {
@@ -58,6 +58,14 @@ export default function Layout() {
     return () => clearInterval(t);
   }, []);
   const sections = useMemo(() => navFor(me), [me]);
+  const offline = offlineInfo();
+  // Offline edition: re-render when another window opens on the same browser data.
+  const [, setOfflineChange] = useState(0);
+  useEffect(() => {
+    const changed = () => setOfflineChange((n) => n + 1);
+    window.addEventListener('cems:offline', changed);
+    return () => window.removeEventListener('cems:offline', changed);
+  }, []);
   return (
     <div className="shell">
       <aside className={`sidebar${menuOpen ? ' open' : ''}`}>
@@ -77,14 +85,29 @@ export default function Layout() {
             </div>
           ))}
         </nav>
-        <div className="sidebar-foot">
-          {me.env !== 'production' && <div>Environment: <b>{me.env}</b>{me.authMode === 'demo' ? ' · demo sign-in' : ''}</div>}
-          <div>Email: {me.features?.email}</div>
-          <div>PDF output: {me.features?.pdf ? 'available' : 'not installed'}</div>
-        </div>
+        {offline ? (
+          <div className="sidebar-foot">
+            <div><b>Offline edition</b> · demo sign-in</div>
+            <div>Data is kept in this browser</div>
+            <div>Email is kept in the outbox</div>
+            <div>PDF: print from a report</div>
+          </div>
+        ) : (
+          <div className="sidebar-foot">
+            {me.env !== 'production' && <div>Environment: <b>{me.env}</b>{me.authMode === 'demo' ? ' · demo sign-in' : ''}</div>}
+            <div>Email: {me.features?.email}</div>
+            <div>PDF output: {me.features?.pdf ? 'available' : 'not installed'}</div>
+          </div>
+        )}
       </aside>
       <div className="main">
-        {me.env !== 'production' && <div className="env-banner">{me.env === 'development' ? 'Development environment with demo data — not for client information' : `${me.env} environment`}</div>}
+        {offline ? (
+          <div className={`env-banner${!offline.persistent || offline.others ? ' warn' : ''}`}>
+            {!offline.persistent ? 'Offline edition — this browser does not allow storage for pages opened from disk, so changes last until you close the page'
+              : offline.others ? 'CEMS is open in another window of this browser — use one window so changes are not overwritten'
+                : 'Offline edition with demo data — everything is kept in this browser on this computer'}
+          </div>
+        ) : me.env !== 'production' && <div className="env-banner">{me.env === 'development' ? 'Development environment with demo data — not for client information' : `${me.env} environment`}</div>}
         <header className="topbar">
           <button className="icon-btn menu-btn" onClick={() => setMenuOpen((o) => !o)} aria-label="Menu"><Icon name="menu" /></button>
           <GlobalSearch />
@@ -203,6 +226,7 @@ function UserPanel({ onClose }) {
             <option value="digest">Daily digest</option>
           </select>
         </Field>
+        {offlineInfo() && <OfflineData />}
         <div>
           <h4 className="mb-1">Delegate approvals while away (WFL-006)</h4>
           {me.delegation?.map((d) => (
@@ -220,5 +244,40 @@ function UserPanel({ onClose }) {
         </div>
       </div>
     </Drawer>
+  );
+}
+
+// Offline edition: the data lives in this browser, so it can be backed up, restored or reset.
+function OfflineData() {
+  const offline = offlineInfo();
+  const dialog = useDialog();
+  const [run, busy] = useAction();
+  const input = useRef(null);
+  const backup = async () => {
+    const blob = await run(() => offline.backup(), 'Back-up saved');
+    if (blob) saveBlob(blob, `CEMS_offline_backup_${new Date().toISOString().slice(0, 10)}.json`);
+  };
+  const restore = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!(await dialog({ title: 'Restore from a back-up', message: `Replace everything in this browser with ${file.name}? CEMS restarts with the restored data.`, confirm: 'Restore', danger: true }))) return;
+    await run(() => offline.restore(file));
+  };
+  const reset = async () => {
+    if (!(await dialog({ title: 'Reset the demo data', message: 'Delete everything CEMS keeps in this browser and build a fresh demo firm up to today? Back up first if you want to keep your changes.', confirm: 'Reset', danger: true }))) return;
+    await run(() => offline.reset());
+  };
+  return (
+    <div>
+      <h4 className="mb-1">Data in this browser</h4>
+      <p className="small muted">The offline edition keeps its database and files in this browser on this computer{offline.persistent ? '' : ' for this session only'}. Back up to move your data or keep a copy.</p>
+      <div className="btn-row">
+        <button className="btn btn-sm" disabled={busy} onClick={backup}><Icon name="download" /> Back up</button>
+        <input ref={input} type="file" accept=".json,application/json" hidden onChange={restore} />
+        <button className="btn btn-sm" disabled={busy} onClick={() => input.current?.click()}><Icon name="upload" /> Restore</button>
+        <button className="btn btn-sm btn-danger" disabled={busy} onClick={reset}>Reset demo data</button>
+      </div>
+    </div>
   );
 }

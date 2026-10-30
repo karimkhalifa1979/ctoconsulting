@@ -6,8 +6,8 @@ import { useApi } from '../lib/hooks.js';
 import { post, patch } from '../lib/api.js';
 import { useSession } from '../lib/session.jsx';
 import { ApprovalCard } from '../components/Record.jsx';
-import { reportFile } from '../components/Reports.jsx';
-import { Card, Async, Table, Status, D, DT, Empty, Badge, Alert, useAction, useDialog } from '../components/ui.jsx';
+import { reportFile, printReport } from '../components/Reports.jsx';
+import { Card, Async, Table, Status, D, DT, Empty, Badge, useAction, useDialog } from '../components/ui.jsx';
 import Icon from '../components/Icon.jsx';
 import { todayIn } from '../../shared/dates.js';
 
@@ -114,9 +114,16 @@ function ReportView() {
           <span className="flex-1" />
           {r.files?.pdf && <a className="btn btn-sm btn-primary" href={reportFile(r.id, 'pdf')}><Icon name="download" /> PDF</a>}
           {r.files?.docx && <a className="btn btn-sm" href={reportFile(r.id, 'docx')}><Icon name="download" /> Word</a>}
+          {!r.files?.pdf && r.files?.docx && <button className="btn btn-sm btn-primary" onClick={() => printReport(r.id, r.name)}><Icon name="report" /> Print or save as PDF</button>}
         </div>
-        {r.files?.pdf ? <iframe title={r.name} src={`${reportFile(r.id, 'pdf')}?inline=1`} style={{ width: '100%', height: '78vh', border: '1px solid var(--line)', borderRadius: 8, background: '#fff' }} /> : <Alert>The PDF is not available; download the Word version.</Alert>}
+        {r.files?.pdf ? <iframe title={r.name} src={`${reportFile(r.id, 'pdf')}?inline=1`} style={{ width: '100%', height: '78vh', border: '1px solid var(--line)', borderRadius: 8, background: '#fff' }} /> : <ReportHtml id={r.id} />}
       </div>
     )}</Async>
   );
+}
+
+// The report as rendered from its Word file, where there is no PDF.
+function ReportHtml({ id }) {
+  const q = useApi(`/api/reports/${id}/html`);
+  return <Card><Async q={q}>{(d) => <div className="doc-preview" style={{ maxHeight: 'none' }} dangerouslySetInnerHTML={{ __html: d.html }} />}</Async></Card>;
 }

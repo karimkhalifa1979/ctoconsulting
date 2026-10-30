@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { get } from './api.js';
+import { get, apiBlob, offlineInfo } from './api.js';
 
 // Loads JSON from the API; reload() refetches, setData() updates locally.
 export function useApi(path, query, deps = []) {
@@ -34,4 +34,23 @@ export function useDebounced(value, ms = 250) {
   const [v, setV] = useState(value);
   useEffect(() => { const t = setTimeout(() => setV(value), ms); return () => clearTimeout(t); }, [value, ms]);
   return v;
+}
+
+// URL for an image served by the API. Offline the image is produced in the page, so it is shown
+// through an object URL instead.
+export function useApiImage(path) {
+  const offline = Boolean(offlineInfo());
+  const [url, setUrl] = useState(offline ? null : path);
+  useEffect(() => {
+    if (!offline || !path) { setUrl(path); return undefined; }
+    let live = true;
+    let created = null;
+    apiBlob(path).then(({ blob }) => {
+      if (!live) return;
+      created = URL.createObjectURL(blob);
+      setUrl(created);
+    }).catch(() => live && setUrl(null));
+    return () => { live = false; if (created) URL.revokeObjectURL(created); };
+  }, [path, offline]);
+  return url;
 }

@@ -1,10 +1,12 @@
 // Standard report charts rendered as images (RPT-016): budget burn-down, milestone timeline,
 // RAG trend, risk heat map and PO burn-down. Charts are drawn as SVG from snapshot data and
 // rasterised to PNG; every chart carries alt text summarising its data (WCAG 2.2).
+import { createRequire } from 'node:module';
 import { fmtMoneyShort, fmtDate, fmtMoney } from '../../../shared/format.js';
 
+// resvg is optional: a native module loaded synchronously when present.
 let Resvg = null;
-try { ({ Resvg } = await import('@resvg/resvg-js')); } catch { Resvg = null; }
+try { ({ Resvg } = createRequire(import.meta.url)('@resvg/resvg-js')); } catch { Resvg = null; }
 
 const FONT = 'DejaVu Sans, Liberation Sans, Inter, Arial, sans-serif';
 const C = { navy: '#0b1f3a', teal: '#0fa3b1', orange: '#eb6834', grey: '#9aa5b4', grid: '#e2e7ee', ink: '#16212f', ink2: '#4a5768', blue: '#2a78d6' };
@@ -199,11 +201,17 @@ export function chartSvg(name, data, opts = {}) {
   return { ...out, ratio: m ? Number(m[2]) / Number(m[1]) : 0.45 };
 }
 
+// Rasterises with resvg on the server; the offline build supplies the browser's canvas instead.
+// Callers await the result, which is a promise when a rasteriser is set.
+let rasterise = null;
+export const setRasteriser = (fn) => { rasterise = fn; };
+
 export function svgToPng(svg, widthCm = 16) {
-  if (!Resvg) return null;
   const px = Math.round((widthCm / 2.54) * 200);
+  if (rasterise) return rasterise(svg, px);
+  if (!Resvg) return null;
   const r = new Resvg(svg, { fitTo: { mode: 'width', value: px }, font: { loadSystemFonts: true, defaultFontFamily: 'DejaVu Sans' }, background: '#ffffff' });
   return r.render().asPng();
 }
 
-export const chartsAvailable = () => Boolean(Resvg);
+export const chartsAvailable = () => Boolean(Resvg || rasterise);

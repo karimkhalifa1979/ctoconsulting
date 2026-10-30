@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Link, Route, Routes } from 'react-router-dom';
 import { useApi } from '../lib/hooks.js';
+import { offlineInfo } from '../lib/api.js';
 import { useLookups } from '../components/fields.jsx';
 import { PageHead, RouteTabs, Card, Async, Table, Empty, Tile, Rag, Badge } from '../components/ui.jsx';
 import { LineChart, BarChart, SERIES, RagStrip, monthLabel } from '../components/charts.jsx';
@@ -118,7 +119,7 @@ function Analytics() {
         {sets.map(([k, label, desc]) => (
           <li key={k}>
             <Icon name="link" size={16} />
-            <div className="grow"><div className="strong">{label}</div><div className="small muted">{desc}</div><div className="mono tiny">{`${window.location.origin}/api/analytics/${k}`}</div></div>
+            <div className="grow"><div className="strong">{label}</div><div className="small muted">{desc}</div>{!offlineInfo() && <div className="mono tiny">{`${window.location.origin}/api/analytics/${k}`}</div>}</div>
             <a className="btn btn-sm" href={`/api/analytics/${k}`} target="_blank" rel="noreferrer">Open</a>
           </li>
         ))}

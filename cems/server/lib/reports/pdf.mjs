@@ -42,7 +42,8 @@ export function docxToPdf(buffer, { bin = 'soffice', timeoutMs = 120_000 } = {})
 }
 
 export async function docxToHtml(buffer) {
-  const res = await mammoth.convertToHtml({ buffer }, {
+  const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+  const res = await mammoth.convertToHtml({ buffer, arrayBuffer }, {
     styleMap: ['p[style-name=\'Title\'] => h1.doc-title:fresh', 'p[style-name=\'Heading 1\'] => h2:fresh', 'p[style-name=\'Heading 2\'] => h3:fresh', 'table => table.doc-table'],
   });
   return { html: res.value, messages: res.messages.slice(0, 20).map((m) => m.message) };

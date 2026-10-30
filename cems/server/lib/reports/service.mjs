@@ -236,7 +236,7 @@ export function createReports(app) {
       if (!data) return null;
       const svg = chartSvg(name, data, { audience });
       if (!svg) return null;
-      const png = svgToPng(svg.svg, widthCm);
+      const png = await svgToPng(svg.svg, widthCm);
       return png ? { png, alt: svg.alt, heightCm: heightCm || widthCm * svg.ratio } : null;
     };
   }

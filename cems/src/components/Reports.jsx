@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useApi } from '../lib/hooks.js';
+import { get } from '../lib/api.js';
 import { Card, Table, Status, Badge, D, DT, ErrorBox, Loading } from './ui.jsx';
 import Icon from './Icon.jsx';
 
@@ -47,4 +48,30 @@ export function ReportList({ engagementId, projectId, title = 'Reports', sub, sh
       </div>
     </Card>
   );
+}
+
+const PRINT_CSS = `@page { size: A4; margin: 18mm 16mm; }
+body { font-family: Arial, Helvetica, sans-serif; font-size: 10.5pt; line-height: 1.4; color: #1b2430; }
+h1, .doc-title { font-size: 20pt; color: #0b1f3a; margin: 0 0 8pt; }
+h2 { font-size: 14pt; color: #0b1f3a; margin: 16pt 0 6pt; page-break-after: avoid; }
+h3 { font-size: 12pt; margin: 12pt 0 4pt; page-break-after: avoid; }
+table { border-collapse: collapse; width: 100%; margin: 6pt 0 10pt; font-size: 9pt; page-break-inside: auto; }
+tr { page-break-inside: avoid; }
+td, th { border: 1px solid #cfd6df; padding: 3pt 5pt; vertical-align: top; }
+img { max-width: 100%; height: auto; }`;
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// Prints a report from its Word rendering, so a PDF can be saved where LibreOffice is not
+// installed (always the case in the offline edition).
+export async function printReport(id, title) {
+  const { html } = await get(`/api/reports/${id}/html`);
+  const frame = document.createElement('iframe');
+  frame.setAttribute('aria-hidden', 'true');
+  Object.assign(frame.style, { position: 'fixed', right: '0', bottom: '0', width: '0', height: '0', border: '0' });
+  frame.srcdoc = `<!doctype html><html lang="en-AU"><head><meta charset="utf-8"><title>${esc(title)}</title><style>${PRINT_CSS}</style></head><body>${html}</body></html>`;
+  document.body.appendChild(frame);
+  await new Promise((resolve) => { frame.onload = resolve; });
+  frame.contentWindow.focus();
+  frame.contentWindow.print();
+  setTimeout(() => frame.remove(), 60_000);
 }

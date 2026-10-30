@@ -22,7 +22,7 @@ export default function GenerateReport() {
   const engagements = (lookups?.engagements || []).filter((e) => canOn(me, e.id, 'report', 'C') || Object.keys(me.access?.[e.id]?.projects || {}).some((pid) => canOn(me, e.id, 'report', 'C', pid)));
   const [f, setF] = useState({
     engagement_id: params.get('engagement') || '', report_type: 'Weekly status', audience: 'client', scope: params.get('project') ? [params.get('project')] : 'all',
-    period_end: weekEnding(todayIn(me.settings.firm?.timezone || 'Australia/Sydney'), me.settings.reporting?.weekEndDow ?? 5), template_id: '', pair: false, internal_template_id: '', formats: ['docx', 'pdf'], narrative: {},
+    period_end: weekEnding(todayIn(me.settings.firm?.timezone || 'Australia/Sydney'), me.settings.reporting?.weekEndDow ?? 5), template_id: '', pair: false, internal_template_id: '', formats: me.features?.pdf ? ['docx', 'pdf'] : ['docx'], narrative: {},
   });
   const set = (k, v) => setF((x) => ({ ...x, [k]: v }));
   useEffect(() => { if (!f.engagement_id && engagements.length === 1) set('engagement_id', engagements[0].id); }, [engagements.length]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -78,7 +78,7 @@ export default function GenerateReport() {
               <select value={f.audience} onChange={(e) => set('audience', e.target.value)}><option value="client">Client</option><option value="internal">Internal</option></select>
             </Field>
             <Field label="Week ending" hint="Financials are as at the last fully approved timesheet week (BR-02)."><input type="date" value={f.period_end} onChange={(e) => set('period_end', e.target.value)} /></Field>
-            <Field label="Output"><div className="flex">{['docx', 'pdf'].map((x) => <label key={x} className="check"><input type="checkbox" checked={f.formats.includes(x)} onChange={(e) => set('formats', e.target.checked ? [...f.formats, x] : f.formats.filter((y) => y !== x))} /> {x === 'docx' ? 'Word' : 'PDF'}</label>)}</div></Field>
+            <Field label="Output" hint={me.features?.pdf ? null : 'For a PDF, use Print or save as PDF on the generated report.'}><div className="flex">{(me.features?.pdf ? ['docx', 'pdf'] : ['docx']).map((x) => <label key={x} className="check"><input type="checkbox" checked={f.formats.includes(x)} onChange={(e) => set('formats', e.target.checked ? [...f.formats, x] : f.formats.filter((y) => y !== x))} /> {x === 'docx' ? 'Word' : 'PDF'}</label>)}</div></Field>
             <Field label="Template" required full hint={tpl ? `${tpl.scope} template · ${tpl.level}-level · version ${tpl.current?.version_no || ''}` : f.engagement_id ? 'No published template of this type and audience is available.' : ''}>
               <select value={f.template_id} onChange={(e) => set('template_id', e.target.value)} disabled={!options.length}>
                 {!options.length && <option value="">None available</option>}

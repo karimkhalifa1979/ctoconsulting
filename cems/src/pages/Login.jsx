@@ -1,7 +1,7 @@
 // Sign-in: Microsoft Entra ID single sign-on, or demo personas in non-production environments.
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { get } from '../lib/api.js';
+import { get, offlineInfo } from '../lib/api.js';
 import { useSession } from '../lib/session.jsx';
 import { initials } from '../lib/util.js';
 import { Alert } from '../components/ui.jsx';
@@ -42,7 +42,7 @@ export default function Login() {
           <li>Every change is recorded in an immutable audit trail</li>
           <li>Client-safe reporting: internal costs and margins never reach client outputs</li>
         </ul>
-        <div style={{ marginTop: 'auto' }} className="small">Data is hosted in Australia. Sessions end after {30} minutes of inactivity.</div>
+        <div style={{ marginTop: 'auto' }} className="small">{offlineInfo() ? 'Offline edition: the data stays in this browser on this computer.' : 'Data is hosted in Australia.'} Sessions end after {30} minutes of inactivity.</div>
       </aside>
       <main className="login-main">
         <h2 className="mb-2">Sign in</h2>

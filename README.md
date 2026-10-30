@@ -6,7 +6,8 @@ It ships pre-loaded with the complete *NDIA ICT Policy Requirements Register v0.
 
 > This repository also contains **CEMS**, CTO Consulting's Consulting Engagement Management System,
 > in [`cems/`](cems/README.md): engagements, projects, weekly status, RAID, change, time, resources,
-> financials and Word/PDF reporting, built from the CEMS Requirements Specification.
+> financials and Word/PDF reporting, built from the CEMS Requirements Specification. It also runs
+> offline from one file, [`cems/offline/CEMS_Offline.html`](cems/offline/CEMS_Offline.html).
 
 ## Features
 

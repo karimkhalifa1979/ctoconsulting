@@ -17,7 +17,8 @@ import { chartsAvailable } from '../lib/reports/charts.mjs';
 import { TRACEABILITY } from '../../shared/traceability.js';
 import { ROOT } from '../config.mjs';
 
-const REQUIREMENTS = JSON.parse(fs.readFileSync(path.join(ROOT, 'shared', 'requirements.json'), 'utf8'));
+let requirements = null;
+const REQUIREMENTS = () => (requirements ||= JSON.parse(fs.readFileSync(path.join(ROOT, 'shared', 'requirements.json'), 'utf8')));
 const started = Date.now();
 
 // Which Firm-wide roles may change each configuration area (NFR-030).
@@ -238,7 +239,7 @@ export function registerAdminRoutes(r, app) {
   });
 
   // ---------- Requirements traceability ----------
-  r.get('/api/requirements', () => REQUIREMENTS.map((q) => ({ ...q, ...(TRACEABILITY[q.id] || { status: 'Not started' }) })));
+  r.get('/api/requirements', () => REQUIREMENTS().map((q) => ({ ...q, ...(TRACEABILITY[q.id] || { status: 'Not started' }) })));
 
   // ---------- Analytics model with row-level security (DSH-006) ----------
   r.get('/api/analytics/:dataset', (ctx) => {

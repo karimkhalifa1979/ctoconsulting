@@ -1,11 +1,18 @@
 // Inputs for every field type in the entity schema (shared/schema.js), plus read-only renderers.
 import { useEffect, useMemo, useState } from 'react';
 import { get, upload, fileUrl } from '../lib/api.js';
+import { useApiImage } from '../lib/hooks.js';
 import { useSession } from '../lib/session.jsx';
 import { fmtDate, fmtMoney, fmtPct, fmtNum } from '../../shared/format.js';
 import { LISTS } from '../../shared/defaults.js';
 import { Level, Rich, Status, Money } from './ui.jsx';
 import Icon from './Icon.jsx';
+
+// An image served by the API (logos, receipts), also when running offline.
+function ApiImage({ path, style }) {
+  const src = useApiImage(path);
+  return src ? <img src={src} alt="" style={style} /> : null;
+}
 
 // ---------- Lookups (labels for reference fields) ----------
 const cache = new Map();
@@ -87,7 +94,7 @@ export function FieldValue({ field, value, rec, lookups }) {
     case 'onboarding': return Array.isArray(value) ? <div className="chips">{value.map((o, i) => <span className="chip" key={i}>{o.done ? '✓' : '○'} {o.item}</span>)}</div> : <div className="chips">{Object.entries(value).map(([k, v]) => <span className="chip" key={k}>{v ? '✓' : '○'} {k}</span>)}</div>;
     case 'objectives': return <div className="chips">{(value || []).map((o, i) => <span className="chip" key={i}>{o}</span>)}</div>;
     case 'versions': return <ul className="list">{value.map((v, i) => <li key={i}><span className="grow">v{v.version}</span><span className="small muted">{fmtDate(v.at)}</span>{v.file_id && <a href={fileUrl(v.file_id)}>file</a>}</li>)}</ul>;
-    case 'image': return <img src={fileUrl(value, true)} alt="" style={{ maxHeight: 60, maxWidth: 200 }} />;
+    case 'image': return <ApiImage path={fileUrl(value, true)} style={{ maxHeight: 60, maxWidth: 200 }} />;
     case 'file': return <a href={fileUrl(value)}><Icon name="download" size={14} /> Download</a>;
     case 'fylimits': return Object.entries(value || {}).map(([fy, v]) => `${fy}: ${fmtMoney(Number(v))}`).join(', ');
     case 'user': case 'users': case 'person': case 'contact': case 'ref': case 'refs': case 'profile': return labelFor(field, value, lookups, rec) || value;
@@ -280,7 +287,7 @@ function FileInput({ value, onChange, disabled, image, purpose, engagementId }) 
   };
   return (
     <div className="stack-sm">
-      {value && (image ? <img src={fileUrl(value, true)} alt="" style={{ maxHeight: 70, maxWidth: 220, border: '1px solid var(--line)', borderRadius: 6 }} /> : <a href={fileUrl(value)}>Current file</a>)}
+      {value && (image ? <ApiImage path={fileUrl(value, true)} style={{ maxHeight: 70, maxWidth: 220, border: '1px solid var(--line)', borderRadius: 6 }} /> : <a href={fileUrl(value)}>Current file</a>)}
       {!disabled && <input type="file" accept={image ? 'image/png,image/jpeg,image/gif' + (purpose === 'receipt' ? ',application/pdf' : '') : undefined} onChange={(e) => onFile(e.target.files?.[0])} disabled={busy} />}
       {busy && <span className="small muted">Uploading and scanning…</span>}
       {err && <span className="err small">{err}</span>}

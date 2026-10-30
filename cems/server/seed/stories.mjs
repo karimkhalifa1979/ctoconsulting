@@ -506,9 +506,9 @@ export async function buildStories(app, kit, S) {
     const x = create('liam', 'expense', { project_id: P.p02, date: addDays(T, -3), category: 'Accommodation', description: 'Dubbo regional office demonstration (one night)', amount: 189.09, tax_code: 'GST', billable: true, receipt_file_id: R.receipt });
     act('liam', 'expense', x.id, 'submit');
   });
-  on(addDays(e1s, -20), '09:00', 'Receipt image', () => {
+  on(addDays(e1s, -20), '09:00', 'Receipt image', async () => {
     const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="420"><rect width="300" height="420" fill="#fff"/><text x="20" y="40" font-family="DejaVu Sans" font-size="18" font-weight="bold">TAX INVOICE</text><text x="20" y="70" font-family="DejaVu Sans" font-size="12">Qantas Airways Ltd ABN 16 009 661 901</text><text x="20" y="110" font-family="DejaVu Sans" font-size="12">CBR-SYD return, economy</text><text x="20" y="140" font-family="DejaVu Sans" font-size="12">Fare $412.73  GST $41.27</text><text x="20" y="170" font-family="DejaVu Sans" font-size="14" font-weight="bold">Total $454.00</text></svg>';
-    const png = svgToPng(svg, 8);
+    const png = await svgToPng(svg, 8);
     R.receipt = png ? app.files.save(png, { name: 'receipt.png', mime: 'image/png', purpose: 'receipt', scan: 'generated' }).id : null;
   });
   on(D2(30), '10:00', 'Supplier cost', () => create('daniel', 'supplier_cost', { project_id: P.p02, supplier: 'Accessibility Partners Pty Ltd', invoice_ref: 'AP-2291', date: D2(30), cost_type: 'third-party', description: 'WCAG 2.2 accessibility audit of Release 1 designs', amount: 8400, billable: true }));

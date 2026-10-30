@@ -72,7 +72,7 @@ function logoPng(text, bg) {
 }
 
 export async function seed(app, opts = {}) {
-  const { pdf = true, reports = true, quiet = false } = opts;
+  const { pdf = true, reports = true, quiet = false, onProgress = null } = opts;
   const log = (...a) => { if (!quiet) console.log('[seed]', ...a); };
   const started = Date.now();
   const { db, entities, settings } = app;
@@ -80,7 +80,7 @@ export async function seed(app, opts = {}) {
   const T = todayIn(tz);
   const users = {};
   const people = {};
-  const kit = createKit(app, { T, users, people, log });
+  const kit = createKit(app, { T, users, people, log, onProgress });
   const { as } = kit;
   const origin = addDays(weekStart(T), -7 * 60); // reference data predates the oldest engagement
   log(`Seeding demo data relative to ${T}…`);
@@ -115,8 +115,8 @@ export async function seed(app, opts = {}) {
     }
 
     // ---------- Clients, contacts and agreements (CLI-001..005) ----------
-    const logo = (text, color) => {
-      const png = logoPng(text, color);
+    const logo = async (text, color) => {
+      const png = await logoPng(text, color);
       return png ? app.files.save(png, { name: `${text}-logo.png`, mime: 'image/png', purpose: 'logo', scan: 'generated' }).id : null;
     };
     const C = {};
@@ -124,17 +124,17 @@ export async function seed(app, opts = {}) {
     client('drs', {
       code: 'DRS', legal_name: 'Department of Regional Services', trading_name: 'Department of Regional Services', abn: abn(381024556), sector: 'Federal government', sector_type: 'Government', status: 'Active',
       relationship_owner: users.olivia, addresses: '1 Constitution Avenue, Canberra ACT 2600', billing_entity: 'Department of Regional Services, Accounts Payable', payment_terms_days: 20,
-      logo_file_id: logo('DRS', '#1f4e79'), clearance_requirements: 'Baseline clearance for all personnel; NV1 for work on the payments system', data_classification: 'OFFICIAL: Sensitive',
+      logo_file_id: await logo('DRS', '#1f4e79'), clearance_requirements: 'Baseline clearance for all personnel; NV1 for work on the payments system', data_classification: 'OFFICIAL: Sensitive',
       reporting_frequency: 'Weekly', reporting_requirements: 'Weekly status report to the Deputy Secretary and the PMO; monthly steering committee pack', invoicing_rules: 'PO number on every invoice; lodge through the e-invoicing (Peppol) network; payment within 20 days',
       internal_notes: 'Strategic account: target three new engagements this financial year. Panel rates apply.',
     });
     client('rga', { code: 'RGA', legal_name: 'Regional Grants Agency', abn: abn(552190334), sector: 'Federal government', sector_type: 'Government', parent_id: C.drs.id, status: 'Active', payment_terms_days: 20 });
     client('hhg', {
       code: 'HHG', legal_name: 'Harbour Health Group Ltd', trading_name: 'Harbour Health', abn: abn(640118227), sector: 'Health', sector_type: 'Private', status: 'Active', relationship_owner: users.olivia,
-      payment_terms_days: 30, logo_file_id: logo('Harbour', '#0f766e'), reporting_frequency: 'Weekly', data_classification: 'Confidential', invoicing_rules: 'Milestone invoices on written acceptance; retainer monthly in advance',
+      payment_terms_days: 30, logo_file_id: await logo('Harbour', '#0f766e'), reporting_frequency: 'Weekly', data_classification: 'Confidential', invoicing_rules: 'Milestone invoices on written acceptance; retainer monthly in advance',
     });
     client('mcp', { code: 'MCP', legal_name: 'Meridian Capital Partners Pty Ltd', trading_name: 'Meridian Capital', abn: abn(773512098), sector: 'Financial services', sector_type: 'Private', status: 'Active', payment_terms_days: 14, data_classification: 'Highly confidential', internal_notes: 'Insider list maintained for Project Falcon.' });
-    client('cca', { code: 'CCA', legal_name: 'Coastal Councils Alliance', abn: abn(218906543), sector: 'Local government', sector_type: 'Government', status: 'Active', payment_terms_days: 30, logo_file_id: logo('Coastal', '#9a3412') });
+    client('cca', { code: 'CCA', legal_name: 'Coastal Councils Alliance', abn: abn(218906543), sector: 'Local government', sector_type: 'Government', status: 'Active', payment_terms_days: 30, logo_file_id: await logo('Coastal', '#9a3412') });
     const contact = (c, name, title, role, approver = false, domain = 'example.gov.au') => entities.create(as('olivia'), 'contact', {
       client_id: c.id, name, title, role, email: `${name.toLowerCase().replace(/^dr /, '').replace(/[^a-z ]/g, '').replace(/ /g, '.')}@${c.code.toLowerCase()}.${domain}`, is_approver: approver, relationship_owner: users.olivia,
     });
